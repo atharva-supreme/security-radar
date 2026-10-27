@@ -1,0 +1,558 @@
+{
+  "schema": 1,
+  "generatedAt": "2026-10-27T13:46:16.511Z",
+  "status": "RED",
+  "summary": {
+    "open": 27,
+    "critical": 5,
+    "high": 10,
+    "moderate": 10,
+    "low": 2,
+    "newOpen": 2,
+    "newNotAffecting": 2
+  },
+  "apps": [
+    {
+      "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
+      "lockfile": "web/pnpm-lock.yaml",
+      "label": "web (storefront)",
+      "ok": true,
+      "installed": {
+        "next": [
+          "16.2.12"
+        ],
+        "react": [
+          "19.2.7"
+        ],
+        "react-dom": [
+          "19.2.7"
+        ],
+        "sharp": [
+          "0.33.5",
+          "0.34.5"
+        ],
+        "next-sanity": [
+          "13.1.4"
+        ],
+        "sanity": [
+          "6.5.0"
+        ],
+        "@sanity/client": [
+          "7.24.0"
+        ],
+        "next-auth": [
+          "5.0.0-beta.30"
+        ],
+        "jose": [
+          "5.10.0",
+          "6.1.3"
+        ],
+        "sanitize-html": [
+          "2.17.2"
+        ]
+      },
+      "node": null,
+      "open": [
+        {
+          "id": "GHSA-673q-mjm6-r5xr",
+          "severity": "critical",
+          "cve": null,
+          "summary": "Unauthenticated Remote Code Execution in `use cache` functions returning typed arrays",
+          "url": "https://github.com/vercel/next.js/security/advisories/GHSA-673q-mjm6-r5xr",
+          "published_at": "2026-10-14T17:47:07Z",
+          "firstSeen": "2026-10-14T17:47:07Z",
+          "isNew": false,
+          "package": "next",
+          "installed": "16.2.12",
+          "fixed": "16.4.1",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-2464-fhr4-w9xw",
+          "severity": "critical",
+          "cve": "CVE-2026-96889",
+          "summary": "Unauthenticated Remote Code Execution in Image Optimization API when SVG files are used",
+          "url": "https://github.com/vercel/next.js/security/advisories/GHSA-2464-fhr4-w9xw",
+          "published_at": "2026-10-14T17:46:48Z",
+          "firstSeen": "2026-10-14T17:46:48Z",
+          "isNew": false,
+          "package": "next",
+          "installed": "16.2.12",
+          "fixed": "16.4.1",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-vcvr-r3jv-pc5j",
+          "severity": "critical",
+          "cve": "CVE-2026-94545",
+          "summary": "Remote Code Execution in next/og ImageResponse",
+          "url": "https://github.com/vercel/next.js/security/advisories/GHSA-vcvr-r3jv-pc5j",
+          "published_at": "2026-09-22T17:03:51Z",
+          "firstSeen": "2026-09-22T17:03:51Z",
+          "isNew": false,
+          "package": "next",
+          "installed": "16.2.12",
+          "fixed": "16.3.6",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-2xp9-vwfh-vxw4",
+          "severity": "critical",
+          "cve": null,
+          "summary": "Unauthenticated Remote Code Execution in Image Optimization API when AVIF files are used",
+          "url": "https://github.com/vercel/next.js/security/advisories/GHSA-2xp9-vwfh-vxw4",
+          "published_at": "2026-08-25T16:16:28Z",
+          "firstSeen": "2026-08-25T16:16:28Z",
+          "isNew": false,
+          "package": "next",
+          "installed": "16.2.12",
+          "fixed": "16.3.3",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-p293-qw3h-jr36",
+          "severity": "critical",
+          "cve": "CVE-2026-75604",
+          "summary": "Unauthenticated Remote Code Execution on windows-hosted servers",
+          "url": "https://github.com/vercel/next.js/security/advisories/GHSA-p293-qw3h-jr36",
+          "published_at": "2026-08-25T16:15:42Z",
+          "firstSeen": "2026-08-25T16:15:42Z",
+          "isNew": false,
+          "package": "next",
+          "installed": "16.2.12",
+          "fixed": "16.3.3",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-p3m5-59mp-jv5r",
+          "severity": "high",
+          "cve": "CVE-2026-94482",
+          "summary": "Denial of Service in App Router using Server Actions",
+          "url": "https://github.com/vercel/next.js/security/advisories/GHSA-p3m5-59mp-jv5r",
+          "published_at": "2026-10-14T17:47:43Z",
+          "firstSeen": "2026-10-14T17:47:43Z",
+          "isNew": false,
+          "package": "next",
+          "installed": "16.2.12",
+          "fixed": "16.4.1",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-wq5f-xc86-pv6w",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerability in librsvg dependency CVE-2026-96889",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w",
+          "published_at": "2026-09-30T19:22:51Z",
+          "firstSeen": "2026-09-30T19:22:51Z",
+          "isNew": false,
+          "package": "sharp",
+          "installed": "0.33.5",
+          "fixed": "0.35.5",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-wq5f-xc86-pv6w",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerability in librsvg dependency CVE-2026-96889",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w",
+          "published_at": "2026-09-30T19:22:51Z",
+          "firstSeen": "2026-09-30T19:22:51Z",
+          "isNew": false,
+          "package": "sharp",
+          "installed": "0.34.5",
+          "fixed": "0.35.5",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-cjq9-62q9-8jv4",
+          "severity": "high",
+          "cve": "CVE-2026-94483",
+          "summary": "Server-Side Request Forgery in Image Optimization",
+          "url": "https://github.com/vercel/next.js/security/advisories/GHSA-cjq9-62q9-8jv4",
+          "published_at": "2026-09-30T16:15:36Z",
+          "firstSeen": "2026-09-30T16:15:36Z",
+          "isNew": false,
+          "package": "next",
+          "installed": "16.2.12",
+          "fixed": "16.3.8",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-rgj7-g3m4-5g8c",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerabilities in libheif: CVE-2026-84383 and GHSA-2jg2-4ch7-h545",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-rgj7-g3m4-5g8c",
+          "published_at": "2026-08-27T09:33:22Z",
+          "firstSeen": "2026-08-27T09:33:22Z",
+          "isNew": false,
+          "package": "sharp",
+          "installed": "0.33.5",
+          "fixed": "0.35.4",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-rgj7-g3m4-5g8c",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerabilities in libheif: CVE-2026-84383 and GHSA-2jg2-4ch7-h545",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-rgj7-g3m4-5g8c",
+          "published_at": "2026-08-27T09:33:22Z",
+          "firstSeen": "2026-08-27T09:33:22Z",
+          "isNew": false,
+          "package": "sharp",
+          "installed": "0.34.5",
+          "fixed": "0.35.4",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-7rqj-j65f-68wh",
+          "severity": "high",
+          "cve": "CVE-2026-73420",
+          "summary": "Email normalizer validates the address before Unicode normalization, allowing a homoglyph @ bypass",
+          "url": "https://github.com/nextauthjs/next-auth/security/advisories/GHSA-7rqj-j65f-68wh",
+          "published_at": "2026-07-20T23:36:12Z",
+          "firstSeen": "2026-07-20T23:36:12Z",
+          "isNew": false,
+          "package": "next-auth",
+          "installed": "5.0.0-beta.30",
+          "fixed": "5.0.0-beta.32",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-xmf8-cvqr-rfgj",
+          "severity": "high",
+          "cve": "CVE-2026-73418",
+          "summary": "getToken() throws an uncaught exception on malformed Bearer authorization headers",
+          "url": "https://github.com/nextauthjs/next-auth/security/advisories/GHSA-xmf8-cvqr-rfgj",
+          "published_at": "2026-07-20T23:35:56Z",
+          "firstSeen": "2026-07-20T23:35:56Z",
+          "isNew": false,
+          "package": "next-auth",
+          "installed": "5.0.0-beta.30",
+          "fixed": "5.0.0-beta.32",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-f88m-g3jw-g9cj",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591, CVE-2026-69242",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-f88m-g3jw-g9cj",
+          "published_at": "2026-07-17T10:48:23Z",
+          "firstSeen": "2026-07-17T10:48:23Z",
+          "isNew": false,
+          "package": "sharp",
+          "installed": "0.33.5",
+          "fixed": "0.35.0",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-f88m-g3jw-g9cj",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591, CVE-2026-69242",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-f88m-g3jw-g9cj",
+          "published_at": "2026-07-17T10:48:23Z",
+          "firstSeen": "2026-07-17T10:48:23Z",
+          "isNew": false,
+          "package": "sharp",
+          "installed": "0.34.5",
+          "fixed": "0.35.0",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-cv27-6wvh-8x7j",
+          "severity": "medium",
+          "cve": "CVE-2026-113661",
+          "summary": "ApostropheCMS: Incomplete CVE-2026-53606: `meta http-equiv=refresh` `content` still ships `javascript:` / `data:` URLs",
+          "url": "https://github.com/advisories/GHSA-cv27-6wvh-8x7j",
+          "published_at": "2026-10-20T18:15:33Z",
+          "firstSeen": "2026-10-27T13:44:54.617Z",
+          "isNew": true,
+          "package": "sanitize-html",
+          "installed": "2.17.2",
+          "fixed": "2.18.0",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-x3q4-9hxx-gx8m",
+          "severity": "medium",
+          "cve": "CVE-2026-113654",
+          "summary": "ApostropheCMS sanitize-html: nonTextTags discard region ends early on an implied close, letting <noscript> content render",
+          "url": "https://github.com/advisories/GHSA-x3q4-9hxx-gx8m",
+          "published_at": "2026-10-20T18:03:22Z",
+          "firstSeen": "2026-10-27T13:44:54.617Z",
+          "isNew": true,
+          "package": "sanitize-html",
+          "installed": "2.17.2",
+          "fixed": "2.18.0",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-f87g-xv8r-7p7x",
+          "severity": "medium",
+          "cve": "CVE-2026-94485",
+          "summary": "Information disclosure in Next.js App Router metadata image routes via dynamicParams bypass",
+          "url": "https://github.com/vercel/next.js/security/advisories/GHSA-f87g-xv8r-7p7x",
+          "published_at": "2026-09-30T16:14:44Z",
+          "firstSeen": "2026-09-30T16:14:44Z",
+          "isNew": false,
+          "package": "next",
+          "installed": "16.2.12",
+          "fixed": "16.3.8",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-4jqv-mc3x-m676",
+          "severity": "medium",
+          "cve": "CVE-2026-94543",
+          "summary": "Cache poisoning of SSG and ISR pages in self-hosted Next.js applications",
+          "url": "https://github.com/vercel/next.js/security/advisories/GHSA-4jqv-mc3x-m676",
+          "published_at": "2026-09-30T16:14:22Z",
+          "firstSeen": "2026-09-30T16:14:22Z",
+          "isNew": false,
+          "package": "next",
+          "installed": "16.2.12",
+          "fixed": "16.3.8",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-mcj8-r9mp-w47p",
+          "severity": "medium",
+          "cve": "CVE-2026-94484",
+          "summary": "Cache poisoning in Next.js SSG/ISR rendering leads to cross-user content substitution and persistent denial of service",
+          "url": "https://github.com/vercel/next.js/security/advisories/GHSA-mcj8-r9mp-w47p",
+          "published_at": "2026-09-30T16:14:19Z",
+          "firstSeen": "2026-09-30T16:14:19Z",
+          "isNew": false,
+          "package": "next",
+          "installed": "16.2.12",
+          "fixed": "16.3.8",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-jxwj-j7wr-gfrw",
+          "severity": "medium",
+          "cve": "CVE-2026-63670",
+          "summary": "ApostropheCMS: Mutation-XSS / allowedTags bypass via literal `</textarea/>` solidus close",
+          "url": "https://github.com/advisories/GHSA-jxwj-j7wr-gfrw",
+          "published_at": "2026-09-03T20:07:16Z",
+          "firstSeen": "2026-09-03T20:07:16Z",
+          "isNew": false,
+          "package": "sanitize-html",
+          "installed": "2.17.2",
+          "fixed": "2.17.6",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-g8qq-57p8-ggw5",
+          "severity": "medium",
+          "cve": "CVE-2026-84371",
+          "summary": "ApostropheCMS: Stored XSS via SVG SMIL URI-list scheme-policy bypass",
+          "url": "https://github.com/advisories/GHSA-g8qq-57p8-ggw5",
+          "published_at": "2026-09-01T21:20:01Z",
+          "firstSeen": "2026-09-01T21:20:01Z",
+          "isNew": false,
+          "package": "sanitize-html",
+          "installed": "2.17.2",
+          "fixed": "2.17.7",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-vccv-cmxp-4j9h",
+          "severity": "medium",
+          "cve": "CVE-2026-53606",
+          "summary": "sanitize-html has incomplete URI scheme validation in that allows javascript: URIs through action, formaction, data, poster, and background attributes",
+          "url": "https://github.com/advisories/GHSA-vccv-cmxp-4j9h",
+          "published_at": "2026-07-31T21:43:51Z",
+          "firstSeen": "2026-07-31T21:43:51Z",
+          "isNew": false,
+          "package": "sanitize-html",
+          "installed": "2.17.2",
+          "fixed": "2.17.5",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-x445-f3h2-j279",
+          "severity": "medium",
+          "cve": "CVE-2026-73419",
+          "summary": "OAuth state, nonce, and PKCE check cookies are not bound to the provider that created them",
+          "url": "https://github.com/nextauthjs/next-auth/security/advisories/GHSA-x445-f3h2-j279",
+          "published_at": "2026-07-20T23:36:15Z",
+          "firstSeen": "2026-07-20T23:36:15Z",
+          "isNew": false,
+          "package": "next-auth",
+          "installed": "5.0.0-beta.30",
+          "fixed": "5.0.0-beta.32",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-9mrh-v2v3-xpfm",
+          "severity": "medium",
+          "cve": "CVE-2026-40186",
+          "summary": "sanitize-html allowedTags Bypass via Entity-Decoded Text in nonTextTags Elements",
+          "url": "https://github.com/advisories/GHSA-9mrh-v2v3-xpfm",
+          "published_at": "2026-04-16T21:08:29Z",
+          "firstSeen": "2026-04-16T21:08:29Z",
+          "isNew": false,
+          "package": "sanitize-html",
+          "installed": "2.17.2",
+          "fixed": "2.17.3",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-39w2-rjm5-chcv",
+          "severity": "low",
+          "cve": "CVE-2026-94486",
+          "summary": "Information disclosure in the Next.js development server's Model Context Protocol endpoint",
+          "url": "https://github.com/vercel/next.js/security/advisories/GHSA-39w2-rjm5-chcv",
+          "published_at": "2026-09-30T16:14:15Z",
+          "firstSeen": "2026-09-30T16:14:15Z",
+          "isNew": false,
+          "package": "next",
+          "installed": "16.2.12",
+          "fixed": "16.3.8",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-8fpg-xm3f-6cx3",
+          "severity": "low",
+          "cve": "CVE-2026-73421",
+          "summary": "Configuration errors can cause existence-based auth checks to fail open (auth object populated with an error)",
+          "url": "https://github.com/nextauthjs/next-auth/security/advisories/GHSA-8fpg-xm3f-6cx3",
+          "published_at": "2026-07-20T23:36:13Z",
+          "firstSeen": "2026-07-20T23:36:13Z",
+          "isNew": false,
+          "package": "next-auth",
+          "installed": "5.0.0-beta.30",
+          "fixed": "5.0.0-beta.32",
+          "fixedOnNpm": true
+        }
+      ],
+      "counts": {
+        "critical": 5,
+        "high": 10,
+        "moderate": 10,
+        "low": 2,
+        "unknown": 0
+      },
+      "upgrades": [
+        {
+          "package": "next",
+          "from": [
+            "16.2.12"
+          ],
+          "to": "16.4.1",
+          "closes": 11
+        },
+        {
+          "package": "sharp",
+          "from": [
+            "0.33.5",
+            "0.34.5"
+          ],
+          "to": "0.35.5",
+          "closes": 6
+        },
+        {
+          "package": "next-auth",
+          "from": [
+            "5.0.0-beta.30"
+          ],
+          "to": "5.0.0-beta.32",
+          "closes": 4
+        },
+        {
+          "package": "sanitize-html",
+          "from": [
+            "2.17.2"
+          ],
+          "to": "2.18.1",
+          "closes": 6
+        }
+      ],
+      "command": "cd web && pnpm up next@16.4.1 sharp@0.35.5 next-auth@5.0.0-beta.32 sanitize-html@2.18.1"
+    },
+    {
+      "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
+      "lockfile": "sanity/pnpm-lock.yaml",
+      "label": "sanity (Studio)",
+      "ok": true,
+      "installed": {
+        "react": [
+          "19.2.8"
+        ],
+        "react-dom": [
+          "19.2.8"
+        ],
+        "sanity": [
+          "6.9.0"
+        ],
+        "@sanity/client": [
+          "7.26.2"
+        ]
+      },
+      "node": null,
+      "open": [],
+      "counts": {
+        "critical": 0,
+        "high": 0,
+        "moderate": 0,
+        "low": 0,
+        "unknown": 0
+      },
+      "upgrades": [],
+      "command": null
+    }
+  ],
+  "newNotAffecting": [
+    {
+      "id": "GHSA-c9rx-x947-fp3h",
+      "severity": "medium",
+      "packages": [
+        "sanitize-html"
+      ],
+      "summary": "ApostropheCMS sanitize-html: unbounded recursion when re-sanitizing the fallback of a discarded iframe (stack overflow, nestingLimit not enforced)",
+      "url": "https://github.com/advisories/GHSA-c9rx-x947-fp3h",
+      "published_at": "2026-10-21T17:05:01Z",
+      "fixed": "2.18.1"
+    },
+    {
+      "id": "GHSA-374f-7chj-9948",
+      "severity": "low",
+      "packages": [
+        "sanitize-html"
+      ],
+      "summary": "ApostropheCMS sanitize-html: SMIL animation namespace-prefix bypass allows javascript: URI injection (XSS)",
+      "url": "https://github.com/advisories/GHSA-374f-7chj-9948",
+      "published_at": "2026-10-20T18:21:19Z",
+      "fixed": "2.18.0"
+    }
+  ],
+  "feedItemsNew": [],
+  "checked": {
+    "packages": [
+      "next",
+      "react",
+      "react-dom",
+      "sharp",
+      "next-sanity",
+      "sanity",
+      "@sanity/client",
+      "next-auth",
+      "jose",
+      "sanitize-html"
+    ],
+    "apps": 2,
+    "advisoriesKnown": 119,
+    "sources": [
+      "GitHub repository advisories (maintainer, same minute as release)",
+      "GitHub Advisory Database (reviewed, about a week later)"
+    ]
+  },
+  "errors": [],
+  "warnings": []
+}
