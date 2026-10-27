@@ -1,0 +1,14 @@
+{
+  "name": "security-watch",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Watches vendor security advisories for the packages and runtimes our projects depend on and posts one alert per advisory.",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "watch": "node watch.mjs",
+    "watch:dry": "node watch.mjs --dry-run",
+    "baseline": "node watch.mjs --baseline",
+    "test": "node --test test/semver.test.mjs test/advisories.test.mjs test/lockfile.test.mjs test/feeds.test.mjs"
+  }
+}

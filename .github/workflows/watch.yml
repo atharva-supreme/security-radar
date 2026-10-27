@@ -1,0 +1,65 @@
+name: watch
+
+on:
+  schedule:
+    # Every 6 hours UTC: 05:30, 11:30, 17:30, 23:30 IST.
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Print what would be posted, post nothing, write nothing'
+        type: boolean
+        default: false
+      forget:
+        description: 'Comma-separated GHSA ids to drop from state so they alert again'
+        required: false
+        default: ''
+      quiet_summary:
+        description: 'Post the quiet-day summary now'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Run the watcher
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_READ_TOKEN: ${{ secrets.REPO_READ_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          QUIET_HOUR_UTC: '0'
+        run: |
+          ARGS=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ -n "${{ inputs.forget }}" ]; then ARGS="$ARGS --forget ${{ inputs.forget }}"; fi
+          if [ "${{ inputs.quiet_summary }}" = "true" ]; then ARGS="$ARGS --quiet-summary"; fi
+          node watch.mjs $ARGS
+
+      - name: Commit state
+        if: always() && inputs.dry_run != true
+        run: |
+          git config user.name 'security-watch'
+          git config user.email 'security-watch@users.noreply.github.com'
+          git add state.json
+          if git diff --cached --quiet; then
+            echo "state unchanged"
+          else
+            git commit -m "state: run $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi

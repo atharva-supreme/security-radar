@@ -1,0 +1,2530 @@
+{
+  "advisories": {
+    "GHSA-p3m5-59mp-jv5r": {
+      "severity": "high",
+      "summary": "Denial of Service in App Router using Server Actions",
+      "cve": "CVE-2026-94482",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-p3m5-59mp-jv5r",
+      "published_at": "2026-10-14T17:47:43Z",
+      "updated_at": "2026-10-14T17:47:43Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.0.0, <= 15.5.27",
+          "fixed": "15.5.28"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, <= 16.4.0",
+          "fixed": "16.4.1"
+        }
+      ],
+      "fixedKey": "next:15.5.28|next:16.4.1",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-673q-mjm6-r5xr": {
+      "severity": "critical",
+      "summary": "Unauthenticated Remote Code Execution in `use cache` functions returning typed arrays",
+      "cve": null,
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-673q-mjm6-r5xr",
+      "published_at": "2026-10-14T17:47:07Z",
+      "updated_at": "2026-10-14T17:47:07Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.0.0, <= 16.4.0",
+          "fixed": "16.4.1"
+        }
+      ],
+      "fixedKey": "next:16.4.1",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-2464-fhr4-w9xw": {
+      "severity": "critical",
+      "summary": "Unauthenticated Remote Code Execution in Image Optimization API when SVG files are used",
+      "cve": "CVE-2026-96889",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-2464-fhr4-w9xw",
+      "published_at": "2026-10-14T17:46:48Z",
+      "updated_at": "2026-10-14T17:46:48Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 10.0.0, <= 15.5.27",
+          "fixed": "15.5.28"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, <= 16.4.0",
+          "fixed": "16.4.1"
+        }
+      ],
+      "fixedKey": "next:15.5.28|next:16.4.1",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-cjq9-62q9-8jv4": {
+      "severity": "high",
+      "summary": "Server-Side Request Forgery in Image Optimization",
+      "cve": "CVE-2026-94483",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-cjq9-62q9-8jv4",
+      "published_at": "2026-09-30T16:15:36Z",
+      "updated_at": "2026-09-30T16:15:36Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.3.8",
+          "fixed": "16.3.8"
+        }
+      ],
+      "fixedKey": "next:16.3.8",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-f87g-xv8r-7p7x": {
+      "severity": "medium",
+      "summary": "Information disclosure in Next.js App Router metadata image routes via dynamicParams bypass",
+      "cve": "CVE-2026-94485",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-f87g-xv8r-7p7x",
+      "published_at": "2026-09-30T16:14:44Z",
+      "updated_at": "2026-09-30T16:14:44Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.3.8",
+          "fixed": "16.3.8"
+        }
+      ],
+      "fixedKey": "next:16.3.8",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-3w37-wq28-93x7": {
+      "severity": "medium",
+      "summary": "Pending `use cache` fill can leak Draft Mode content into regular responses and persisted pages",
+      "cve": "CVE-2026-94544",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-3w37-wq28-93x7",
+      "published_at": "2026-09-30T16:14:35Z",
+      "updated_at": "2026-09-30T16:14:35Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.3.0, < 16.3.8",
+          "fixed": "16.3.8"
+        }
+      ],
+      "fixedKey": "next:16.3.8",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-h694-7cp9-m8p3": {
+      "severity": "medium",
+      "summary": "Cache leak across root param values in nested 'use cache' functions",
+      "cve": "CVE-2026-103004",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-h694-7cp9-m8p3",
+      "published_at": "2026-09-30T16:14:26Z",
+      "updated_at": "2026-10-01T14:42:54Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.3.0, < 16.3.8",
+          "fixed": "16.3.8"
+        }
+      ],
+      "fixedKey": "next:16.3.8",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-4jqv-mc3x-m676": {
+      "severity": "medium",
+      "summary": "Cache poisoning of SSG and ISR pages in self-hosted Next.js applications",
+      "cve": "CVE-2026-94543",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-4jqv-mc3x-m676",
+      "published_at": "2026-09-30T16:14:22Z",
+      "updated_at": "2026-09-30T16:14:22Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.0.0, < 15.5.27",
+          "fixed": "15.5.27"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.3.8",
+          "fixed": "16.3.8"
+        }
+      ],
+      "fixedKey": "next:15.5.27|next:16.3.8",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-mcj8-r9mp-w47p": {
+      "severity": "medium",
+      "summary": "Cache poisoning in Next.js SSG/ISR rendering leads to cross-user content substitution and persistent denial of service",
+      "cve": "CVE-2026-94484",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-mcj8-r9mp-w47p",
+      "published_at": "2026-09-30T16:14:19Z",
+      "updated_at": "2026-09-30T16:14:19Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.3.8",
+          "fixed": "16.3.8"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.0.0, < 15.5.27",
+          "fixed": "15.5.27"
+        }
+      ],
+      "fixedKey": "next:15.5.27|next:16.3.8",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-39w2-rjm5-chcv": {
+      "severity": "low",
+      "summary": "Information disclosure in the Next.js development server's Model Context Protocol endpoint",
+      "cve": "CVE-2026-94486",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-39w2-rjm5-chcv",
+      "published_at": "2026-09-30T16:14:15Z",
+      "updated_at": "2026-09-30T16:14:15Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.3.8",
+          "fixed": "16.3.8"
+        }
+      ],
+      "fixedKey": "next:16.3.8",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-vcvr-r3jv-pc5j": {
+      "severity": "critical",
+      "summary": "Remote Code Execution in next/og ImageResponse",
+      "cve": "CVE-2026-94545",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-vcvr-r3jv-pc5j",
+      "published_at": "2026-09-22T17:03:51Z",
+      "updated_at": "2026-09-22T17:03:51Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.2.0, < 16.3.6",
+          "fixed": "16.3.6"
+        }
+      ],
+      "fixedKey": "next:16.3.6",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-2xp9-vwfh-vxw4": {
+      "severity": "critical",
+      "summary": "Unauthenticated Remote Code Execution in Image Optimization API when AVIF files are used",
+      "cve": null,
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-2xp9-vwfh-vxw4",
+      "published_at": "2026-08-25T16:16:28Z",
+      "updated_at": "2026-08-25T16:16:29Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 10.0.0, < 15.5.24",
+          "fixed": "15.5.24"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.3.3",
+          "fixed": "16.3.3"
+        }
+      ],
+      "fixedKey": "next:15.5.24|next:16.3.3",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-p293-qw3h-jr36": {
+      "severity": "critical",
+      "summary": "Unauthenticated Remote Code Execution on windows-hosted servers",
+      "cve": "CVE-2026-75604",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-p293-qw3h-jr36",
+      "published_at": "2026-08-25T16:15:42Z",
+      "updated_at": "2026-08-25T16:15:42Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.4.0, < 15.5.24",
+          "fixed": "15.5.24"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.3.3",
+          "fixed": "16.3.3"
+        }
+      ],
+      "fixedKey": "next:15.5.24|next:16.3.3",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-89xv-2m56-2m9x": {
+      "severity": "high",
+      "summary": "Server-Side Request Forgery in Server Actions on custom servers",
+      "cve": "CVE-2026-64649",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-89xv-2m56-2m9x",
+      "published_at": "2026-07-21T16:03:06Z",
+      "updated_at": "2026-07-21T16:03:07Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 14.1.1, < 15.5.21",
+          "fixed": "15.5.21"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.11",
+          "fixed": "16.2.11"
+        }
+      ],
+      "fixedKey": "next:15.5.21|next:16.2.11",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-4633-3j49-mh5q": {
+      "severity": "medium",
+      "summary": "Cache confusion of response bodies for requests with bodies containing invalid UTF-8 byte sequences",
+      "cve": "CVE-2026-64647",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-4633-3j49-mh5q",
+      "published_at": "2026-07-21T16:03:04Z",
+      "updated_at": "2026-07-21T16:03:04Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.0.0, < 15.5.21",
+          "fixed": "15.5.21"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.11",
+          "fixed": "16.2.11"
+        }
+      ],
+      "fixedKey": "next:15.5.21|next:16.2.11",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-68g3-v927-f742": {
+      "severity": "medium",
+      "summary": "Cache confusion of response bodies for requests with bodies",
+      "cve": "CVE-2026-64648",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-68g3-v927-f742",
+      "published_at": "2026-07-21T16:03:02Z",
+      "updated_at": "2026-07-21T16:03:02Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.0.0, < 15.5.21",
+          "fixed": "15.5.21"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.11",
+          "fixed": "16.2.11"
+        }
+      ],
+      "fixedKey": "next:15.5.21|next:16.2.11",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-4c39-4ccg-62r3": {
+      "severity": "medium",
+      "summary": "Unbounded Server Action payload in Edge runtime",
+      "cve": "CVE-2026-64646",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-4c39-4ccg-62r3",
+      "published_at": "2026-07-21T16:02:59Z",
+      "updated_at": "2026-07-21T16:02:59Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.0.0, < 15.5.21",
+          "fixed": "15.5.21"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.11",
+          "fixed": "16.2.11"
+        }
+      ],
+      "fixedKey": "next:15.5.21|next:16.2.11",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-q8wf-6r8g-63ch": {
+      "severity": "medium",
+      "summary": "Denial of Service in the Image Optimization API using SVGs",
+      "cve": "CVE-2026-64644",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-q8wf-6r8g-63ch",
+      "published_at": "2026-07-21T16:02:56Z",
+      "updated_at": "2026-07-21T16:02:56Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.5.0, < 15.5.21",
+          "fixed": "15.5.21"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.11",
+          "fixed": "16.2.11"
+        }
+      ],
+      "fixedKey": "next:15.5.21|next:16.2.11",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-p9j2-gv94-2wf4": {
+      "severity": "high",
+      "summary": "Server-Side Request Forgery in rewrites via attacker-controlled destination hostname",
+      "cve": "CVE-2026-64645",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-p9j2-gv94-2wf4",
+      "published_at": "2026-07-21T16:02:54Z",
+      "updated_at": "2026-09-20T04:36:42Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 12.0.0, < 15.5.21",
+          "fixed": "15.5.21"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.11",
+          "fixed": "16.2.11"
+        }
+      ],
+      "fixedKey": "next:15.5.21|next:16.2.11",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-955p-x3mx-jcvp": {
+      "severity": "medium",
+      "summary": "Unauthenticated disclosure of internal Server Function endpoints",
+      "cve": "CVE-2026-64643",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-955p-x3mx-jcvp",
+      "published_at": "2026-07-21T16:02:51Z",
+      "updated_at": "2026-07-22T09:43:55Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.0.0, < 15.5.21",
+          "fixed": "15.5.21"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.11",
+          "fixed": "16.2.11"
+        }
+      ],
+      "fixedKey": "next:15.5.21|next:16.2.11",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-6gpp-xcg3-4w24": {
+      "severity": "high",
+      "summary": "Middleware / Proxy bypass in App Router applications using Turbopack and single locale",
+      "cve": "CVE-2026-64642",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-6gpp-xcg3-4w24",
+      "published_at": "2026-07-21T16:02:47Z",
+      "updated_at": "2026-07-21T16:02:47Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.11",
+          "fixed": "16.2.11"
+        }
+      ],
+      "fixedKey": "next:16.2.11",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-m99w-x7hq-7vfj": {
+      "severity": "high",
+      "summary": "Denial of Service in App Router using Server Actions",
+      "cve": "CVE-2026-64641",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-m99w-x7hq-7vfj",
+      "published_at": "2026-07-21T16:02:35Z",
+      "updated_at": "2026-07-21T16:02:35Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.0.0, < 15.5.21",
+          "fixed": "15.5.21"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.11",
+          "fixed": "16.2.11"
+        }
+      ],
+      "fixedKey": "next:15.5.21|next:16.2.11",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-26hh-7cqf-hhc6": {
+      "severity": "high",
+      "summary": "Middleware / Proxy bypass in App Router applications via segment-prefetch routes - Incomplete Fix Follow-Up",
+      "cve": "CVE-2026-45109",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-26hh-7cqf-hhc6",
+      "published_at": "2026-05-07T19:42:05Z",
+      "updated_at": "2026-05-08T20:42:58Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.2.0, < 15.5.18",
+          "fixed": "15.5.18"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.6",
+          "fixed": "16.2.6"
+        }
+      ],
+      "fixedKey": "next:15.5.18|next:16.2.6",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-ffhc-5mcf-pf4q": {
+      "severity": "medium",
+      "summary": "Cross-site scripting in App Router applications using CSP nonces",
+      "cve": "CVE-2026-44581",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-ffhc-5mcf-pf4q",
+      "published_at": "2026-05-06T18:44:34Z",
+      "updated_at": "2026-05-07T15:42:03Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.4.0, < 15.5.16",
+          "fixed": "15.5.16"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.5",
+          "fixed": "16.2.5"
+        }
+      ],
+      "fixedKey": "next:15.5.16|next:16.2.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-vfv6-92ff-j949": {
+      "severity": "low",
+      "summary": "Cache poisoning via collisions in React Server Component cache-busting",
+      "cve": "CVE-2026-44582",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-vfv6-92ff-j949",
+      "published_at": "2026-05-06T18:44:23Z",
+      "updated_at": "2026-05-07T15:42:49Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.4.6, < 15.5.16",
+          "fixed": "15.5.16"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.5",
+          "fixed": "16.2.5"
+        }
+      ],
+      "fixedKey": "next:15.5.16|next:16.2.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-gx5p-jg67-6x7h": {
+      "severity": "medium",
+      "summary": "Cross-site scripting in beforeInteractive scripts with untrusted input",
+      "cve": "CVE-2026-44580",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-gx5p-jg67-6x7h",
+      "published_at": "2026-05-06T18:44:07Z",
+      "updated_at": "2026-05-07T15:41:25Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.0.0, < 15.5.16",
+          "fixed": "15.5.16"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.5",
+          "fixed": "16.2.5"
+        }
+      ],
+      "fixedKey": "next:15.5.16|next:16.2.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-mg66-mrh9-m8jx": {
+      "severity": "high",
+      "summary": "Denial of Service via connection exhaustion in applications using Cache Components",
+      "cve": "CVE-2026-44579",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-mg66-mrh9-m8jx",
+      "published_at": "2026-05-06T18:43:50Z",
+      "updated_at": "2026-05-07T15:40:59Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.0.0, < 15.5.16",
+          "fixed": "15.5.16"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.5",
+          "fixed": "16.2.5"
+        }
+      ],
+      "fixedKey": "next:15.5.16|next:16.2.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-h64f-5h5j-jqjh": {
+      "severity": "medium",
+      "summary": "Denial of Service in the Image Optimization API",
+      "cve": "CVE-2026-44577",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-h64f-5h5j-jqjh",
+      "published_at": "2026-05-06T18:43:34Z",
+      "updated_at": "2026-05-07T15:38:43Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 10.0.0, < 15.5.16",
+          "fixed": "15.5.16"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.5",
+          "fixed": "16.2.5"
+        }
+      ],
+      "fixedKey": "next:15.5.16|next:16.2.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-c4j6-fc7j-m34r": {
+      "severity": "high",
+      "summary": "Server-side request forgery in applications using WebSocket upgrades",
+      "cve": "CVE-2026-44578",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-c4j6-fc7j-m34r",
+      "published_at": "2026-05-06T18:43:19Z",
+      "updated_at": "2026-05-07T15:39:23Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.4.13, < 15.5.16",
+          "fixed": "15.5.16"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.5",
+          "fixed": "16.2.5"
+        }
+      ],
+      "fixedKey": "next:15.5.16|next:16.2.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-wfc6-r584-vfw7": {
+      "severity": "medium",
+      "summary": "Cache poisoning in React Server Component responses",
+      "cve": "CVE-2026-44576",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-wfc6-r584-vfw7",
+      "published_at": "2026-05-06T18:43:05Z",
+      "updated_at": "2026-05-07T15:36:51Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 14.2.0, < 15.5.16",
+          "fixed": "15.5.16"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.5",
+          "fixed": "16.2.5"
+        }
+      ],
+      "fixedKey": "next:15.5.16|next:16.2.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-267c-6grr-h53f": {
+      "severity": "high",
+      "summary": "Middleware / Proxy bypass in App Router applications via segment-prefetch routes",
+      "cve": "CVE-2026-44575",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-267c-6grr-h53f",
+      "published_at": "2026-05-06T18:42:50Z",
+      "updated_at": "2026-05-07T15:36:00Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.2.0, < 15.5.16",
+          "fixed": "15.5.16"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.5",
+          "fixed": "16.2.5"
+        }
+      ],
+      "fixedKey": "next:15.5.16|next:16.2.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-492v-c6pp-mqqv": {
+      "severity": "high",
+      "summary": "Middleware / Proxy bypass through dynamic route parameter injection",
+      "cve": "CVE-2026-44574",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-492v-c6pp-mqqv",
+      "published_at": "2026-05-06T18:42:36Z",
+      "updated_at": "2026-05-07T15:35:32Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.4.0, < 15.5.16",
+          "fixed": "15.5.16"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.5",
+          "fixed": "16.2.5"
+        }
+      ],
+      "fixedKey": "next:15.5.16|next:16.2.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-36qx-fr4f-26g5": {
+      "severity": "high",
+      "summary": "Middleware / Proxy bypass in Pages Router applications using i18n",
+      "cve": "CVE-2026-44573",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-36qx-fr4f-26g5",
+      "published_at": "2026-05-06T18:42:18Z",
+      "updated_at": "2026-05-07T15:34:50Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 12.2.0, < 15.5.16",
+          "fixed": "15.5.16"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.5",
+          "fixed": "16.2.5"
+        }
+      ],
+      "fixedKey": "next:15.5.16|next:16.2.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-3g8h-86w9-wvmq": {
+      "severity": "low",
+      "summary": "Middleware / Proxy redirects can be cache-poisoned",
+      "cve": "CVE-2026-44572",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-3g8h-86w9-wvmq",
+      "published_at": "2026-05-06T18:41:26Z",
+      "updated_at": "2026-05-07T15:34:06Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 12.2.0, < 15.5.16",
+          "fixed": "15.5.16"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.5",
+          "fixed": "16.2.5"
+        }
+      ],
+      "fixedKey": "next:15.5.16|next:16.2.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-8h8q-6873-q5fj": {
+      "severity": "high",
+      "summary": "Denial of Service with Server Components",
+      "cve": "CVE-2026-23870",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-8h8q-6873-q5fj",
+      "published_at": "2026-05-06T18:40:57Z",
+      "updated_at": "2026-05-06T18:40:57Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.0.0, < 15.5.16",
+          "fixed": "15.5.16"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0, < 16.2.5",
+          "fixed": "16.2.5"
+        }
+      ],
+      "fixedKey": "next:15.5.16|next:16.2.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-q4gf-8mx6-v5v3": {
+      "severity": "high",
+      "summary": "Denial of Service with Server Components",
+      "cve": "CVE-2026-23869",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-q4gf-8mx6-v5v3",
+      "published_at": "2026-04-08T19:09:37Z",
+      "updated_at": "2026-04-08T19:09:37Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.0.0, < 15.5.15",
+          "fixed": "15.5.15"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0-beta.0, < 16.2.3",
+          "fixed": "16.2.3"
+        }
+      ],
+      "fixedKey": "next:15.5.15|next:16.2.3",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-3x4c-7xq6-9pq8": {
+      "severity": "medium",
+      "summary": "Unbounded next/image disk cache growth can exhaust storage",
+      "cve": "CVE-2026-27980",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-3x4c-7xq6-9pq8",
+      "published_at": "2026-03-16T23:18:02Z",
+      "updated_at": "2026-03-19T18:16:54Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.0.0-beta.0, < 16.1.7",
+          "fixed": "16.1.7"
+        },
+        {
+          "name": "next",
+          "range": ">= 10.0.0, < 15.5.14",
+          "fixed": "15.5.14"
+        }
+      ],
+      "fixedKey": "next:15.5.14|next:16.1.7",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-mq59-m269-xvcx": {
+      "severity": "medium",
+      "summary": "null origin can bypass Server Actions CSRF checks",
+      "cve": "CVE-2026-27978",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-mq59-m269-xvcx",
+      "published_at": "2026-03-16T23:17:47Z",
+      "updated_at": "2026-03-16T23:17:47Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.0.1, < 16.1.7",
+          "fixed": "16.1.7"
+        }
+      ],
+      "fixedKey": "next:16.1.7",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-jcc7-9wpm-mj36": {
+      "severity": "medium",
+      "summary": "Origin: null can bypass allowedDevOrigins protections for internal dev endpoints",
+      "cve": "CVE-2026-27977",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-jcc7-9wpm-mj36",
+      "published_at": "2026-03-16T23:17:28Z",
+      "updated_at": "2026-03-23T15:33:12Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.0.1, < 16.1.7",
+          "fixed": "16.1.7"
+        }
+      ],
+      "fixedKey": "next:16.1.7",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-h27x-g6w4-24gq": {
+      "severity": "medium",
+      "summary": "Unbounded postponed resume buffering can lead to DoS",
+      "cve": "CVE-2026-27979",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-h27x-g6w4-24gq",
+      "published_at": "2026-03-16T23:16:46Z",
+      "updated_at": "2026-03-16T23:16:46Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.0.1, < 16.1.7",
+          "fixed": "16.1.7"
+        }
+      ],
+      "fixedKey": "next:16.1.7",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-ggv3-7p47-pfv8": {
+      "severity": "medium",
+      "summary": "HTTP request smuggling in rewrites",
+      "cve": "CVE-2026-29057",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-ggv3-7p47-pfv8",
+      "published_at": "2026-03-16T23:16:21Z",
+      "updated_at": "2026-03-16T23:16:21Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.0.0-beta.0, < 16.1.7",
+          "fixed": "16.1.7"
+        },
+        {
+          "name": "next",
+          "range": ">= 9.5.0, < 15.5.13",
+          "fixed": "15.5.13"
+        }
+      ],
+      "fixedKey": "next:15.5.13|next:16.1.7",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-h25m-26qc-wcjf": {
+      "severity": "high",
+      "summary": "Denial of Service with Server Components",
+      "cve": "CVE-2026-23864",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-h25m-26qc-wcjf",
+      "published_at": "2026-01-26T19:17:26Z",
+      "updated_at": "2026-01-27T12:49:14Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.0.0, < 15.0.8",
+          "fixed": "15.0.8"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.1.1-canary.0, < 15.1.12",
+          "fixed": "15.1.12"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.2.0-canary.0, < 15.2.9",
+          "fixed": "15.2.9"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.3.0-canary.0, < 15.3.9",
+          "fixed": "15.3.9"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.4.0-canary.0, < 15.4.11",
+          "fixed": "15.4.11"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.5.1-canary.0, < 15.5.10",
+          "fixed": "15.5.10"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.6.0-canary.0, < 15.6.0-canary.61",
+          "fixed": "15.6.0-canary.61"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0-beta.0, < 16.0.11",
+          "fixed": "16.0.11"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.1.0-canary.0, < 16.1.5",
+          "fixed": "16.1.5"
+        }
+      ],
+      "fixedKey": "next:15.0.8|next:15.1.12|next:15.2.9|next:15.3.9|next:15.4.11|next:15.5.10|next:15.6.0-canary.61|next:16.0.11|next:16.1.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-5f7q-jpqc-wp7h": {
+      "severity": "medium",
+      "summary": "Denial of Service in Partial Pre Rendering",
+      "cve": "CVE-2025-59472",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-5f7q-jpqc-wp7h",
+      "published_at": "2026-01-26T19:13:06Z",
+      "updated_at": "2026-01-26T19:13:06Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 16.0.0-beta.0, < 16.1.5",
+          "fixed": "16.1.5"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.6.0-canary.0, < 15.6.0-canary.61",
+          "fixed": "15.6.0-canary.61"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.0.0-canary.0, <= 15.0.0-canary.205",
+          "fixed": "15.0.0"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.0.1-canary.0, <= 15.0.1-canary.3",
+          "fixed": "15.0.1"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.0.2-canary.0, <= 15.0.2-canary.11",
+          "fixed": "15.0.2"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.0.3-canary.0, <= 15.0.3-canary.9",
+          "fixed": "15.0.3"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.0.4-canary.0, <= 15.0.4-canary.52",
+          "fixed": "15.0.4"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.1.1-canary.0, <= 15.1.1-canary.27",
+          "fixed": "15.1.1"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.2.0-canary.0, <= 15.2.0-canary.77",
+          "fixed": "15.2.0"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.2.1-canary.0, <= 15.2.1-canary.6",
+          "fixed": "15.2.1"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.2.2-canary.0, <= 15.2.2-canary.7",
+          "fixed": "15.2.2"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.3.0-canary.0, <= 15.3.0-canary.46",
+          "fixed": "15.3.0"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.3.1-canary.0, <= 15.3.1-canary.15",
+          "fixed": "15.3.1"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.4.0-canary.0, <= 15.4.0-canary.130",
+          "fixed": "15.4.0"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.4.2-canary.0, <= 15.4.2-canary.56",
+          "fixed": "15.4.2"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.5.1-canary.0, <= 15.5.1-canary.39",
+          "fixed": "15.5.1"
+        }
+      ],
+      "fixedKey": "next:15.0.0|next:15.0.1|next:15.0.2|next:15.0.3|next:15.0.4|next:15.1.1|next:15.2.0|next:15.2.1|next:15.2.2|next:15.3.0|next:15.3.1|next:15.4.0|next:15.4.2|next:15.5.1|next:15.6.0-canary.61|next:16.1.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-9g9p-9gw9-jx7f": {
+      "severity": "medium",
+      "summary": "Denial of Service in Image Optimizer",
+      "cve": "CVE-2025-59471",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-9g9p-9gw9-jx7f",
+      "published_at": "2026-01-26T19:13:02Z",
+      "updated_at": "2026-01-26T19:13:02Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 10.0.0, < 15.5.10",
+          "fixed": "15.5.10"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.6.0-canary.0, < 16.1.5",
+          "fixed": "16.1.5"
+        }
+      ],
+      "fixedKey": "next:15.5.10|next:16.1.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-5j59-xgg2-r9c4": {
+      "severity": "high",
+      "summary": "Denial of Service with Server Components - Incomplete Fix Follow-Up",
+      "cve": "CVE-2025-67779",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-5j59-xgg2-r9c4",
+      "published_at": "2025-12-11T23:51:32Z",
+      "updated_at": "2025-12-12T00:05:07Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.3.1-canary.0, < 14.2.35",
+          "fixed": "14.2.35"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.0.6, < 15.0.7",
+          "fixed": "15.0.7"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.1.10, < 15.1.11",
+          "fixed": "15.1.11"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.2.7, < 15.2.8",
+          "fixed": "15.2.8"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.3.7, < 15.3.8",
+          "fixed": "15.3.8"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.4.9, < 15.4.10",
+          "fixed": "15.4.10"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.5.8, < 15.5.9",
+          "fixed": "15.5.9"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.6.0-canary.59, < 15.6.0-canary.60",
+          "fixed": "15.6.0-canary.60"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.9, < 16.0.10",
+          "fixed": "16.0.10"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.1.0-canary.17, < 16.1.0-canary.19",
+          "fixed": "16.1.0-canary.19"
+        }
+      ],
+      "fixedKey": "next:14.2.35|next:15.0.7|next:15.1.11|next:15.2.8|next:15.3.8|next:15.4.10|next:15.5.9|next:15.6.0-canary.60|next:16.0.10|next:16.1.0-canary.19",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-w37m-7fhw-fmv9": {
+      "severity": "medium",
+      "summary": "Server Actions Source Code Exposure ",
+      "cve": "CVE-2025-55183",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-w37m-7fhw-fmv9",
+      "published_at": "2025-12-11T21:05:54Z",
+      "updated_at": "2025-12-11T21:39:50Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.0.0-canary.0, < 15.0.6",
+          "fixed": "15.0.6"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.1.1-canary.0, < 15.1.10",
+          "fixed": "15.1.10"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.2.0-canary.0, < 15.2.7",
+          "fixed": "15.2.7"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.3.0-canary.0, < 15.3.7",
+          "fixed": "15.3.7"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.4.0-canary.0, < 15.4.9",
+          "fixed": "15.4.9"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.5.1-canary.0, < 15.5.8",
+          "fixed": "15.5.8"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.6.0-canary.0, < 15.6.0-canary.59",
+          "fixed": "15.6.0-canary.59"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0-beta.0, < 16.0.9",
+          "fixed": "16.0.9"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.1.0-canary.0, < 16.1.0-canary.17",
+          "fixed": "16.1.0-canary.17"
+        }
+      ],
+      "fixedKey": "next:15.0.6|next:15.1.10|next:15.2.7|next:15.3.7|next:15.4.9|next:15.5.8|next:15.6.0-canary.59|next:16.0.9|next:16.1.0-canary.17",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-mwv6-3258-q52c": {
+      "severity": "high",
+      "summary": "Denial of Service with Server Components",
+      "cve": "CVE-2025-55184",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-mwv6-3258-q52c",
+      "published_at": "2025-12-11T21:05:41Z",
+      "updated_at": "2025-12-11T21:39:31Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.3.0, < 14.2.34",
+          "fixed": "14.2.34"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.0.0-canary.0, < 15.0.6",
+          "fixed": "15.0.6"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.1.1-canary.0, < 15.1.10",
+          "fixed": "15.1.10"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.2.0-canary.0, < 15.2.7",
+          "fixed": "15.2.7"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.3.0-canary.0, < 15.3.7",
+          "fixed": "15.3.7"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.4.0-canary.0, < 15.4.9",
+          "fixed": "15.4.9"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.5.1-canary.0, < 15.5.8",
+          "fixed": "15.5.8"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.6.0-canary.0, < 15.6.0-canary.59",
+          "fixed": "15.6.0-canary.59"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0-beta.0, < 16.0.9",
+          "fixed": "16.0.9"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.1.0-canary.0, < 16.1.0-canary.17",
+          "fixed": "16.1.0-canary.17"
+        }
+      ],
+      "fixedKey": "next:14.2.34|next:15.0.6|next:15.1.10|next:15.2.7|next:15.3.7|next:15.4.9|next:15.5.8|next:15.6.0-canary.59|next:16.0.9|next:16.1.0-canary.17",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-9qr9-h5gf-34mp": {
+      "severity": "critical",
+      "summary": "RCE in React Server Components",
+      "cve": "CVE-2025-55182",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-9qr9-h5gf-34mp",
+      "published_at": "2025-12-03T15:43:12Z",
+      "updated_at": "2025-12-17T16:42:23Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 14.3.0-canary.77, < 15.0.5",
+          "fixed": "15.0.5"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.2.0-canary.0, < 15.2.6",
+          "fixed": "15.2.6"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.3.0-canary.0, < 15.3.6",
+          "fixed": "15.3.6"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.4.0-canary.0, < 15.4.8",
+          "fixed": "15.4.8"
+        },
+        {
+          "name": "next",
+          "range": ">= 16.0.0-canary.0, < 16.0.7",
+          "fixed": "16.0.7"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.1.0-canary.0, < 15.1.9",
+          "fixed": "15.1.9"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.5.0-canary.0, < 15.5.7",
+          "fixed": "15.5.7"
+        }
+      ],
+      "fixedKey": "next:15.0.5|next:15.1.9|next:15.2.6|next:15.3.6|next:15.4.8|next:15.5.7|next:16.0.7",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-g5qg-72qw-gw5v": {
+      "severity": "medium",
+      "summary": "Cache Key Confusion for Image Optimization API Routes",
+      "cve": "CVE-2025-57752",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-g5qg-72qw-gw5v",
+      "published_at": "2025-08-29T21:36:23Z",
+      "updated_at": "2025-08-29T21:36:23Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.0.0, <= 15.4.4",
+          "fixed": "15.4.5"
+        },
+        {
+          "name": "next",
+          "range": ">= 0.9.9, < 14.2.31",
+          "fixed": "14.2.31"
+        }
+      ],
+      "fixedKey": "next:14.2.31|next:15.4.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-r2fc-ccr8-96c4": {
+      "severity": "low",
+      "summary": "Cache poisoning due to omission of Vary header",
+      "cve": "CVE-2025-49005",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-r2fc-ccr8-96c4",
+      "published_at": "2025-07-03T19:37:40Z",
+      "updated_at": "2025-07-03T19:37:40Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.3.0, < 15.3.3",
+          "fixed": "15.3.3"
+        }
+      ],
+      "fixedKey": "next:15.3.3",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-67rr-84xm-4c7r": {
+      "severity": "high",
+      "summary": "DoS via cache poisoning ",
+      "cve": "CVE-2025-49826",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-67rr-84xm-4c7r",
+      "published_at": "2025-07-03T19:25:20Z",
+      "updated_at": "2025-07-03T19:25:20Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.0.4-canary.51, < 15.1.8",
+          "fixed": "15.1.8"
+        }
+      ],
+      "fixedKey": "next:15.1.8",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-3h52-269p-cp9r": {
+      "severity": "low",
+      "summary": "Information exposure in Next.js dev server due to lack of origin verification",
+      "cve": "CVE-2025-48068",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-3h52-269p-cp9r",
+      "published_at": "2025-05-28T21:42:07Z",
+      "updated_at": "2025-06-12T09:56:28Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.0.0, < 15.2.2",
+          "fixed": "15.2.2"
+        },
+        {
+          "name": "next",
+          "range": ">= 13.0.0, < 14.2.30",
+          "fixed": "14.2.30"
+        }
+      ],
+      "fixedKey": "next:14.2.30|next:15.2.2",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-qpjv-v59x-3qc4": {
+      "severity": "low",
+      "summary": "Race condition to Cache Poisoning ",
+      "cve": "CVE-2025-32421",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-qpjv-v59x-3qc4",
+      "published_at": "2025-05-14T21:54:58Z",
+      "updated_at": "2025-05-14T21:54:58Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.0.0, < 15.1.6",
+          "fixed": "15.1.6"
+        },
+        {
+          "name": "next",
+          "range": ">= 0.9.9, < 14.2.24",
+          "fixed": "14.2.24"
+        }
+      ],
+      "fixedKey": "next:14.2.24|next:15.1.6",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-223j-4rm8-mrmf": {
+      "severity": "low",
+      "summary": "x-middleware-subrequest-id may be leaked to external hosts",
+      "cve": "CVE-2025-30218",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-223j-4rm8-mrmf",
+      "published_at": "2025-04-02T17:25:20Z",
+      "updated_at": "2025-04-03T02:01:07Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": "= 12.3.5",
+          "fixed": "12.3.6"
+        },
+        {
+          "name": "next",
+          "range": "= 13.5.9",
+          "fixed": "13.5.10"
+        },
+        {
+          "name": "next",
+          "range": "= 14.2.25",
+          "fixed": "14.2.26"
+        },
+        {
+          "name": "next",
+          "range": "= 15.2.3",
+          "fixed": "15.2.4"
+        }
+      ],
+      "fixedKey": "next:12.3.6|next:13.5.10|next:14.2.26|next:15.2.4",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-f82v-jwr5-mffw": {
+      "severity": "critical",
+      "summary": "Authorization Bypass in Next.js Middleware",
+      "cve": "CVE-2025-29927",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-f82v-jwr5-mffw",
+      "published_at": "2025-03-21T10:17:21Z",
+      "updated_at": "2025-03-24T14:47:42Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.0.0, < 13.5.9",
+          "fixed": "13.5.9"
+        },
+        {
+          "name": "next",
+          "range": ">= 14.0.0, < 14.2.25",
+          "fixed": "14.2.25"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.0.0, < 15.2.3",
+          "fixed": "15.2.3"
+        },
+        {
+          "name": "next",
+          "range": ">= 12.0.0, < 12.3.5",
+          "fixed": "12.3.5"
+        }
+      ],
+      "fixedKey": "next:12.3.5|next:13.5.9|next:14.2.25|next:15.2.3",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-7m27-7ghc-44w9": {
+      "severity": "medium",
+      "summary": "Denial of Service (DoS) with Server Actions",
+      "cve": "CVE-2024-56332",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-7m27-7ghc-44w9",
+      "published_at": "2025-01-03T20:07:18Z",
+      "updated_at": "2025-01-03T20:07:18Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.0.0, < 13.5.8",
+          "fixed": "13.5.8"
+        },
+        {
+          "name": "next",
+          "range": ">= 14.0.0, < 14.2.21",
+          "fixed": "14.2.21"
+        },
+        {
+          "name": "next",
+          "range": ">= 15.0.0, < 15.1.2",
+          "fixed": "15.1.2"
+        }
+      ],
+      "fixedKey": "next:13.5.8|next:14.2.21|next:15.1.2",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-7gfc-8cq8-jh5f": {
+      "severity": "high",
+      "summary": "Authorization bypass in Next.js",
+      "cve": "CVE-2024-51479",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-7gfc-8cq8-jh5f",
+      "published_at": "2024-12-17T14:18:11Z",
+      "updated_at": "2024-12-19T14:16:37Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 9.5.5, < 14.2.15",
+          "fixed": "14.2.15"
+        }
+      ],
+      "fixedKey": "next:14.2.15",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-g77x-44xx-532m": {
+      "severity": "medium",
+      "summary": "Denial of Service condition in Next.js image optimization",
+      "cve": "CVE-2024-47831",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-g77x-44xx-532m",
+      "published_at": "2024-10-14T08:46:56Z",
+      "updated_at": "2024-10-14T08:46:56Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 10.0.0, < 14.2.7",
+          "fixed": "14.2.7"
+        }
+      ],
+      "fixedKey": "next:14.2.7",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-gp8f-8m3g-qvj9": {
+      "severity": "high",
+      "summary": "Cache Poisoning",
+      "cve": "CVE-2024-46982",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-gp8f-8m3g-qvj9",
+      "published_at": "2024-09-17T20:37:13Z",
+      "updated_at": "2024-09-17T20:37:13Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.5.1, < 13.5.7",
+          "fixed": "13.5.7"
+        },
+        {
+          "name": "next",
+          "range": ">= 14.0.0, < 14.2.10",
+          "fixed": "14.2.10"
+        }
+      ],
+      "fixedKey": "next:13.5.7|next:14.2.10",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-fq54-2j52-jc42": {
+      "severity": "high",
+      "summary": "Denial of Service (DoS) condition",
+      "cve": "CVE-2024-39693",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-fq54-2j52-jc42",
+      "published_at": "2024-07-10T09:29:38Z",
+      "updated_at": "2024-11-06T08:41:00Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.3.1, < 13.5.0",
+          "fixed": "13.5.0"
+        }
+      ],
+      "fixedKey": "next:13.5.0",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-77r5-gw3j-2mpf": {
+      "severity": "high",
+      "summary": "HTTP Request Smuggling",
+      "cve": "CVE-2024-34350",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-77r5-gw3j-2mpf",
+      "published_at": "2024-05-09T15:50:30Z",
+      "updated_at": "2024-05-09T15:50:30Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.4.0, < 13.5.1",
+          "fixed": "13.5.1"
+        }
+      ],
+      "fixedKey": "next:13.5.1",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-fr5h-rqp8-mj6g": {
+      "severity": "high",
+      "summary": "Server-Side Request Forgery in Server Actions",
+      "cve": "CVE-2024-34351",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-fr5h-rqp8-mj6g",
+      "published_at": "2024-05-09T15:47:01Z",
+      "updated_at": "2024-05-09T15:47:01Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 13.4.0, < 14.1.1",
+          "fixed": "14.1.1"
+        }
+      ],
+      "fixedKey": "next:14.1.1",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-wff4-fpwg-qqv3": {
+      "severity": "medium",
+      "summary": "Unexpected server crash in Next.js version 12.2.3",
+      "cve": "CVE-2022-36046",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-wff4-fpwg-qqv3",
+      "published_at": "2022-08-24T17:10:11Z",
+      "updated_at": "2022-08-24T17:14:49Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": "= 12.2.3",
+          "fixed": "12.2.4"
+        }
+      ],
+      "fixedKey": "next:12.2.4",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-fmvm-x8mv-47mj": {
+      "severity": "medium",
+      "summary": "Improper CSP in Image Optimization API for Next.js versions between 10.0.0 and 12.0.10",
+      "cve": "CVE-2022-23646",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-fmvm-x8mv-47mj",
+      "published_at": "2022-02-17T17:08:06Z",
+      "updated_at": "2022-02-17T17:08:06Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 10.0.0, < 12.1.0",
+          "fixed": "12.1.0"
+        }
+      ],
+      "fixedKey": "next:12.1.0",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-wr66-vrwm-5g5x": {
+      "severity": "medium",
+      "summary": "DOS Vulnerability for self-hosted next.js apps using i18n",
+      "cve": "CVE-2022-21721",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-wr66-vrwm-5g5x",
+      "published_at": "2022-01-28T15:30:16Z",
+      "updated_at": "2022-01-28T15:30:16Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 12.0.0, < 12.0.9",
+          "fixed": "12.0.9"
+        }
+      ],
+      "fixedKey": "next:12.0.9",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-25mp-g6fv-mqxx": {
+      "severity": "high",
+      "summary": "Unexpected server crash in Next.js versions above 11.1.0 and below 12.0.5",
+      "cve": "CVE-2021-43803",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-25mp-g6fv-mqxx",
+      "published_at": "2021-12-06T10:53:03Z",
+      "updated_at": "2021-12-06T18:03:48Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 12.0.0, < 12.0.5",
+          "fixed": "12.0.5"
+        },
+        {
+          "name": "next",
+          "range": ">= 0.9.9, < 11.1.3",
+          "fixed": "11.1.3"
+        }
+      ],
+      "fixedKey": "next:11.1.3|next:12.0.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-9gr3-7897-pp7m": {
+      "severity": "medium",
+      "summary": "XSS in Image Optimization API for Next.js versions between 10.0.0 and 11.1.0",
+      "cve": "CVE-2021-39178",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-9gr3-7897-pp7m",
+      "published_at": "2021-08-30T22:14:41Z",
+      "updated_at": "2021-08-30T22:14:41Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 10.0.0, < 11.1.1",
+          "fixed": "11.1.1"
+        }
+      ],
+      "fixedKey": "next:11.1.1",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-vxf5-wxwp-m7g9": {
+      "severity": "medium",
+      "summary": "Open Redirect in Next.js versions below 11.1.0",
+      "cve": "CVE-2021-37699",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-vxf5-wxwp-m7g9",
+      "published_at": "2021-08-11T16:11:59Z",
+      "updated_at": "2021-08-11T17:36:09Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 0.9.9, < 11.1.0",
+          "fixed": "11.1.0"
+        }
+      ],
+      "fixedKey": "next:11.1.0",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-x56p-c8cg-q435": {
+      "severity": "medium",
+      "summary": "Open Redirect in Next.js versions between 9.5.0 and 9.5.3",
+      "cve": "CVE-2020-15242",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-x56p-c8cg-q435",
+      "published_at": "2020-10-08T09:04:06Z",
+      "updated_at": "2020-10-08T20:40:55Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 9.5.0, < 9.5.4",
+          "fixed": "9.5.4"
+        }
+      ],
+      "fixedKey": "next:9.5.4",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-fq77-7p7r-83rj": {
+      "severity": "medium",
+      "summary": "Directory Traversal in Next.js versions below 9.3.2",
+      "cve": "CVE-2020-5284",
+      "url": "https://github.com/vercel/next.js/security/advisories/GHSA-fq77-7p7r-83rj",
+      "published_at": "2020-03-30T08:36:57Z",
+      "updated_at": "2020-03-30T08:36:57Z",
+      "source": "repo:vercel/next.js",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 0.9.9, < 9.3.2",
+          "fixed": "9.3.2"
+        }
+      ],
+      "fixedKey": "next:9.3.2",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-wq5f-xc86-pv6w": {
+      "severity": "high",
+      "summary": "Vulnerability in librsvg dependency CVE-2026-96889",
+      "cve": null,
+      "url": "https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w",
+      "published_at": "2026-09-30T19:22:51Z",
+      "updated_at": "2026-09-30T19:22:51Z",
+      "source": "repo:lovell/sharp",
+      "packages": [
+        {
+          "name": "sharp",
+          "range": "< 0.35.5",
+          "fixed": "0.35.5"
+        }
+      ],
+      "fixedKey": "sharp:0.35.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-rgj7-g3m4-5g8c": {
+      "severity": "high",
+      "summary": "Vulnerabilities in libheif: CVE-2026-84383 and GHSA-2jg2-4ch7-h545",
+      "cve": null,
+      "url": "https://github.com/lovell/sharp/security/advisories/GHSA-rgj7-g3m4-5g8c",
+      "published_at": "2026-08-27T09:33:22Z",
+      "updated_at": "2026-09-02T22:17:11Z",
+      "source": "repo:lovell/sharp",
+      "packages": [
+        {
+          "name": "sharp",
+          "range": "< 0.35.4",
+          "fixed": "0.35.4"
+        }
+      ],
+      "fixedKey": "sharp:0.35.4",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-f88m-g3jw-g9cj": {
+      "severity": "high",
+      "summary": "Vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591, CVE-2026-69242",
+      "cve": null,
+      "url": "https://github.com/lovell/sharp/security/advisories/GHSA-f88m-g3jw-g9cj",
+      "published_at": "2026-07-17T10:48:23Z",
+      "updated_at": "2026-08-14T15:18:17Z",
+      "source": "repo:lovell/sharp",
+      "packages": [
+        {
+          "name": "sharp",
+          "range": "< 0.35.0",
+          "fixed": "0.35.0"
+        }
+      ],
+      "fixedKey": "sharp:0.35.0",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-54xq-cgqr-rpm3": {
+      "severity": "high",
+      "summary": "Vulnerability in libwebp dependency CVE-2023-4863",
+      "cve": "CVE-2023-4863",
+      "url": "https://github.com/lovell/sharp/security/advisories/GHSA-54xq-cgqr-rpm3",
+      "published_at": "2023-11-16T13:48:39Z",
+      "updated_at": "2023-11-16T13:48:39Z",
+      "source": "repo:lovell/sharp",
+      "packages": [
+        {
+          "name": "sharp",
+          "range": "< 0.32.6",
+          "fixed": "0.32.6"
+        }
+      ],
+      "fixedKey": "sharp:0.32.6",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-gp95-ppv5-3jc5": {
+      "severity": "medium",
+      "summary": "Possible vulnerability at 'npm install' time if an attacker has control over build environment",
+      "cve": "CVE-2022-29256",
+      "url": "https://github.com/lovell/sharp/security/advisories/GHSA-gp95-ppv5-3jc5",
+      "published_at": "2022-05-25T08:42:48Z",
+      "updated_at": "2022-05-25T08:42:48Z",
+      "source": "repo:lovell/sharp",
+      "packages": [
+        {
+          "name": "sharp",
+          "range": "< 0.30.5",
+          "fixed": "0.30.5"
+        }
+      ],
+      "fixedKey": "sharp:0.30.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-xv57-4mr9-wg8v": {
+      "severity": "medium",
+      "summary": "Next.js Content Injection Vulnerability for Image Optimization",
+      "cve": "CVE-2025-55173",
+      "url": "https://github.com/advisories/GHSA-xv57-4mr9-wg8v",
+      "published_at": "2025-08-29T21:59:55Z",
+      "updated_at": "2025-09-11T15:35:25Z",
+      "source": "global",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.0.0, <= 15.4.4",
+          "fixed": "15.4.5"
+        },
+        {
+          "name": "next",
+          "range": ">= 0.9.9, < 14.2.31",
+          "fixed": "14.2.31"
+        }
+      ],
+      "fixedKey": "next:14.2.31|next:15.4.5",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-4342-x723-ch2f": {
+      "severity": "medium",
+      "summary": "Next.js Improper Middleware Redirect Handling Leads to SSRF",
+      "cve": "CVE-2025-57822",
+      "url": "https://github.com/advisories/GHSA-4342-x723-ch2f",
+      "published_at": "2025-08-29T21:33:09Z",
+      "updated_at": "2025-09-11T15:41:03Z",
+      "source": "global",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 15.0.0-canary.0, < 15.4.7",
+          "fixed": "15.4.7"
+        },
+        {
+          "name": "next",
+          "range": ">= 0.9.9, < 14.2.32",
+          "fixed": "14.2.32"
+        }
+      ],
+      "fixedKey": "next:14.2.32|next:15.4.7",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-c59h-r6p8-q9wc": {
+      "severity": "low",
+      "summary": "Next.js missing cache-control header may lead to CDN caching empty reply",
+      "cve": "CVE-2023-46298",
+      "url": "https://github.com/advisories/GHSA-c59h-r6p8-q9wc",
+      "published_at": "2023-10-22T03:30:23Z",
+      "updated_at": "2023-11-09T05:04:04Z",
+      "source": "global",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 0.9.9, < 13.4.20-canary.13",
+          "fixed": "13.4.20-canary.13"
+        }
+      ],
+      "fixedKey": "next:13.4.20-canary.13",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-5vj8-3v2h-h38v": {
+      "severity": "high",
+      "summary": "Remote Code Execution in next",
+      "cve": null,
+      "url": "https://github.com/advisories/GHSA-5vj8-3v2h-h38v",
+      "published_at": "2020-09-04T18:04:08Z",
+      "updated_at": "2023-01-09T05:04:26Z",
+      "source": "global",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 0.9.9, < 5.1.0",
+          "fixed": "5.1.0"
+        }
+      ],
+      "fixedKey": "next:5.1.0",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-qw96-mm2g-c8m7": {
+      "severity": "medium",
+      "summary": "Next.js has cross site scripting (XSS) vulnerability via the 404 or 500 /_error page",
+      "cve": "CVE-2018-18282",
+      "url": "https://github.com/advisories/GHSA-qw96-mm2g-c8m7",
+      "published_at": "2018-10-15T21:43:12Z",
+      "updated_at": "2023-01-09T05:03:35Z",
+      "source": "global",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 7.0.0, < 7.0.2",
+          "fixed": "7.0.2"
+        }
+      ],
+      "fixedKey": "next:7.0.2",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-m34x-wgrh-g897": {
+      "severity": "high",
+      "summary": "Directory traversal vulnerability in Next.js",
+      "cve": "CVE-2018-6184",
+      "url": "https://github.com/advisories/GHSA-m34x-wgrh-g897",
+      "published_at": "2018-01-24T19:38:52Z",
+      "updated_at": "2023-01-09T05:03:08Z",
+      "source": "global",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 1.0.0, < 4.2.3",
+          "fixed": "4.2.3"
+        }
+      ],
+      "fixedKey": "next:4.2.3",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-3f5c-4qxj-vmpf": {
+      "severity": "high",
+      "summary": "Next.js Directory Traversal Vulnerability",
+      "cve": "CVE-2017-16877",
+      "url": "https://github.com/advisories/GHSA-3f5c-4qxj-vmpf",
+      "published_at": "2017-12-05T02:04:14Z",
+      "updated_at": "2024-04-22T19:49:39Z",
+      "source": "global",
+      "packages": [
+        {
+          "name": "next",
+          "range": ">= 1.0.0, < 2.4.1",
+          "fixed": "2.4.1"
+        }
+      ],
+      "fixedKey": "next:2.4.1",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-g53w-52xc-2j85": {
+      "severity": "medium",
+      "summary": "Cross-Site Scripting in react",
+      "cve": "CVE-2013-7035",
+      "url": "https://github.com/advisories/GHSA-g53w-52xc-2j85",
+      "published_at": "2020-09-04T16:52:57Z",
+      "updated_at": "2023-05-22T18:28:20Z",
+      "source": "global",
+      "packages": [
+        {
+          "name": "react",
+          "range": ">= 0.4.0, < 0.4.2",
+          "fixed": "0.4.2"
+        },
+        {
+          "name": "react",
+          "range": ">= 0.5.0, < 0.5.2",
+          "fixed": "0.5.2"
+        }
+      ],
+      "fixedKey": "react:0.4.2|react:0.5.2",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-hg79-j56m-fxgv": {
+      "severity": "high",
+      "summary": "Cross-Site Scripting in react",
+      "cve": null,
+      "url": "https://github.com/advisories/GHSA-hg79-j56m-fxgv",
+      "published_at": "2020-09-04T15:26:04Z",
+      "updated_at": "2023-01-09T05:04:10Z",
+      "source": "global",
+      "packages": [
+        {
+          "name": "react",
+          "range": ">= 0.0.1, < 0.14.0",
+          "fixed": "0.14.0"
+        }
+      ],
+      "fixedKey": "react:0.14.0",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "GHSA-mvjj-gqq2-p4hw": {
+      "severity": "medium",
+      "summary": "Cross-Site Scripting in react-dom",
+      "cve": "CVE-2018-6341",
+      "url": "https://github.com/advisories/GHSA-mvjj-gqq2-p4hw",
+      "published_at": "2019-01-04T19:05:35Z",
+      "updated_at": "2023-09-13T19:45:27Z",
+      "source": "global",
+      "packages": [
+        {
+          "name": "react-dom",
+          "range": "= 16.0.0",
+          "fixed": "16.0.1"
+        },
+        {
+          "name": "react-dom",
+          "range": ">= 16.1.0, < 16.1.2",
+          "fixed": "16.1.2"
+        },
+        {
+          "name": "react-dom",
+          "range": "= 16.2.0",
+          "fixed": "16.2.1"
+        },
+        {
+          "name": "react-dom",
+          "range": ">= 16.3.0, < 16.3.3",
+          "fixed": "16.3.3"
+        },
+        {
+          "name": "react-dom",
+          "range": ">= 16.4.0, < 16.4.2",
+          "fixed": "16.4.2"
+        }
+      ],
+      "fixedKey": "react-dom:16.0.1|react-dom:16.1.2|react-dom:16.2.1|react-dom:16.3.3|react-dom:16.4.2",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    }
+  },
+  "feeds": {
+    "https://nodejs.org/en/blog/vulnerability/october-2026-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Wednesday, October 21, 2026 Security Releases",
+      "date": "2026-10-21T22:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/july-2026-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Wednesday, July 29, 2026 Security Releases",
+      "date": "2026-07-29T00:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/june-2026-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Thursday, June 18, 2026 Security Releases",
+      "date": "2026-06-18T04:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/march-2026-hashdos": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Developing a minimally HashDoS resistant, yet quickly reversible integer hash for V8",
+      "date": "2026-03-24T20:50:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/march-2026-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Tuesday, March 24, 2026 Security Releases",
+      "date": "2026-03-24T03:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-fixes-in-regular-releases-jan2026": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL Security Advisory Assessment, January 2026",
+      "date": "2026-01-28T17:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/january-2026-dos-mitigation-async-hooks": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Mitigating Denial-of-Service Vulnerability from Unrecoverable Stack Space Exhaustion for React, Next.js, and APM Users",
+      "date": "2026-01-13T17:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/december-2025-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Tuesday, January 13, 2026 Security Releases",
+      "date": "2026-01-13T00:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/july-2025-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Tuesday, July 15, 2025 Security Releases",
+      "date": "2025-07-15T00:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/may-2025-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Wednesday, May 14, 2025 Security Releases",
+      "date": "2025-05-14T03:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/march-2025-ci-incident": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Node.js Test CI Security Incident",
+      "date": "2025-04-23T16:30:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/updates-cve-for-end-of-life": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Updates on CVE for End-of-Life Versions",
+      "date": "2025-03-07T16:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/january-2025-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Tuesday, January 21, 2025 Security Releases",
+      "date": "2025-01-21T03:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/upcoming-cve-for-eol-versions": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Upcoming CVE for End-of-Life Node.js Versions",
+      "date": "2025-01-06T16:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/july-2024-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Monday, July 8, 2024 Security Releases",
+      "date": "2024-07-08T03:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/april-2024-security-releases-2": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Wednesday, April 10, 2024 Security Releases",
+      "date": "2024-04-10T00:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/april-2024-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Wednesday, April 3, 2024 Security Releases",
+      "date": "2024-04-03T03:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/february-2024-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Wednesday February 14 2024 Security Releases",
+      "date": "2024-02-14T15:30:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-fixes-in-regular-releases-oct2023": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL Recent Security Patches",
+      "date": "2023-10-26T17:00:15.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/october-2023-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Friday October 13 2023 Security Releases",
+      "date": "2023-10-13T13:30:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/august-2023-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Wednesday August 9th 2023 Security Releases",
+      "date": "2023-08-09T14:30:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/june-2023-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Tuesday June 20 2023 Security Releases",
+      "date": "2023-06-20T14:30:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/february-2023-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Thursday February 16 2023 Security Releases",
+      "date": "2023-02-16T21:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-fixes-in-regular-releases-dec2022": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL 3.0.7 update assessment",
+      "date": "2022-12-16T17:00:15.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/november-2022-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Nov 3 2022 Security Releases",
+      "date": "2022-11-01T21:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-november-2022": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL November Security Release",
+      "date": "2022-10-28T19:00:01.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-and-zlib-vulnerability-assessment": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL and zlib update assessment, and Node.js Assessment workflow",
+      "date": "2022-10-24T20:00:15.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/september-2022-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "September 23rd 2022 Security Releases",
+      "date": "2022-09-15T16:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/july-2022-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "July 7th 2022 Security Releases",
+      "date": "2022-07-07T16:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-fixes-in-regular-releases-jun2022": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL update assessment, and Node.js project plans",
+      "date": "2022-06-21T17:00:15.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-fixes-in-regular-releases-may2022": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL update assessment, and Node.js project plans",
+      "date": "2022-05-05T17:00:15.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/mar-2022-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL security releases require Node.js security releases",
+      "date": "2022-03-18T01:52:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/jan-2022-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "January 10th 2022 Security Releases",
+      "date": "2022-01-11T00:50:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/oct-2021-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "October 12th 2021 Security Releases",
+      "date": "2021-10-12T16:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/aug-2021-security-releases2": {
+      "feed": "Node.js vulnerability reports",
+      "title": "August 31 2021 Security Releases",
+      "date": "2021-08-31T16:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/aug-2021-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "August 2021 Security Releases",
+      "date": "2021-08-11T16:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/july-2021-security-releases-2": {
+      "feed": "Node.js vulnerability reports",
+      "title": "July 2021 Security Releases",
+      "date": "2021-07-29T16:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/july-2021-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "July 2021 Security Releases",
+      "date": "2021-07-01T16:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/april-2021-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "April 2021 Security Releases",
+      "date": "2021-04-06T20:51:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/february-2021-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "February 2021 Security Releases",
+      "date": "2021-02-23T13:30:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/january-2021-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "January 2021 Security Releases",
+      "date": "2021-01-04T19:30:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/november-2020-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "November 2020 Security Releases",
+      "date": "2020-11-16T16:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/september-2020-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "September 2020 Security Releases",
+      "date": "2020-09-15T21:50:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/june-2020-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "June 2020 Security Releases",
+      "date": "2020-06-02T12:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/april-2020-openssl-updates": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL security releases do not require Node.js security releases",
+      "date": "2020-04-21T12:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/february-2020-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "February 2020 Security Releases",
+      "date": "2020-02-06T12:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/december-2019-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "December 2019 Security Releases",
+      "date": "2019-12-18T00:23:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/september-2019-openssl-no-updates": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL security releases do not require Node.js security releases",
+      "date": "2019-09-12T17:00:15.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/september-2019-openssl-updates": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL security releases may require Node.js security releases",
+      "date": "2019-09-05T15:34:35.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/aug-2019-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "August 2019 Security Releases",
+      "date": "2019-08-16T14:58:40.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/february-2019-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "February 2019 Security Releases",
+      "date": "2019-02-28T12:53:26.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/november-2018-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "November 2018 Security Releases",
+      "date": "2018-11-28T00:55:46.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/august-2018-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "August 2018 Security Releases",
+      "date": "2018-08-11T11:07:51.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/june-2018-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "June 2018 Security Releases",
+      "date": "2018-06-12T23:00:59.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/march-2018-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "March 2018 Security Releases",
+      "date": "2018-03-21T23:49:59.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/jan-2018-spectre-meltdown": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Meltdown and Spectre - Impact On Node.js",
+      "date": "2018-01-08T17:30:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/december-2017-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Data Confidentiality/Integrity Vulnerability, December 2017",
+      "date": "2017-12-08T16:30:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-november-2017": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL update, 1.0.2m",
+      "date": "2017-10-30T23:30:01.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/oct-2017-dos": {
+      "feed": "Node.js vulnerability reports",
+      "title": "DOS security vulnerability, October 2017",
+      "date": "2017-10-24T22:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/september-2017-path-validation": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Path validation vulnerability, September 2017",
+      "date": "2017-09-29T20:09:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/july-2017-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Security updates for all active release lines, July 2017",
+      "date": "2017-07-11T17:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-january-2017": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL update, 1.0.2k",
+      "date": "2017-01-27T11:49:06.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/october-2016-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "October security releases and v6 LTS \"Boron\" security inclusions",
+      "date": "2016-10-15T10:36:44.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/september-2016-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Security updates for all active release lines, September 2016",
+      "date": "2016-09-23T10:53:30.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/june-2016-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "Security updates for all active release lines, June 2016",
+      "date": "2016-06-13T12:57:51.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-may-2016": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL updates, 1.0.1t and 1.0.2h",
+      "date": "2016-05-02T11:16:10.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/npm-tokens-leak-march-2016": {
+      "feed": "Node.js vulnerability reports",
+      "title": "npm security updates v2.15.1 and v3.8.3",
+      "date": "2016-03-31T10:41:46.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-march-2016": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL updates, 1.0.2g and 1.0.1s",
+      "date": "2016-02-29T02:08:06.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/february-2016-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "February 2016 Security Release Summary",
+      "date": "2016-02-09T17:40:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-and-low-severity-fixes-jan-2016": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL upgrade low-severity Node.js security fixes",
+      "date": "2016-01-27T11:34:41.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/december-2015-security-releases": {
+      "feed": "Node.js vulnerability reports",
+      "title": "December Security Release Summary",
+      "date": "2015-12-04T03:05:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/december-2015-security-release-update": {
+      "feed": "Node.js vulnerability reports",
+      "title": "December Security Release Schedule Update",
+      "date": "2015-12-01T01:13:57.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/cve-2015-8027_cve-2015-6764": {
+      "feed": "Node.js vulnerability reports",
+      "title": "CVE-2015-8027 Denial of Service Vulnerability / CVE-2015-6764 V8 Out-of-bounds Access Vulnerability",
+      "date": "2015-11-25T22:06:05.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/v8-memory-corruption-stack-overflow": {
+      "feed": "Node.js vulnerability reports",
+      "title": "V8 Memory Corruption and Stack Overflow (fixed in Node v0.8.28 and v0.10.30)",
+      "date": "2014-07-31T19:00:00.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/openssl-and-utf8": {
+      "feed": "Node.js vulnerability reports",
+      "title": "OpenSSL and Breaking UTF-8 Change (fixed in Node v0.8.27 and v0.10.29)",
+      "date": "2014-06-16T15:46:10.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/http-server-pipeline-flood-dos": {
+      "feed": "Node.js vulnerability reports",
+      "title": "DoS Vulnerability (fixed in Node v0.8.26 and v0.10.21)",
+      "date": "2013-10-22T17:42:10.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    },
+    "https://nodejs.org/en/blog/vulnerability/http-server-security-vulnerability-please-upgrade-to-0-6-17": {
+      "feed": "Node.js vulnerability reports",
+      "title": "HTTP Server Security Vulnerability: Please upgrade to 0.6.17",
+      "date": "2012-05-07T17:02:01.000Z",
+      "firstSeen": "2026-10-27T10:06:18.173Z"
+    }
+  },
+  "lastQuietSummary": null,
+  "lastRun": "2026-10-27T10:06:18.173Z"
+}
