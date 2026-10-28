@@ -1,24 +1,958 @@
 {
-  "branches": ["main", "staging"],
-  "packages": [
-    { "name": "next",           "repo": "vercel/next.js" },
-    { "name": "react",          "repo": "facebook/react" },
-    { "name": "react-dom",      "repo": "facebook/react" },
-    { "name": "sharp",          "repo": "lovell/sharp" },
-    { "name": "next-sanity",    "repo": "sanity-io/next-sanity" },
-    { "name": "sanity",         "repo": "sanity-io/sanity" },
-    { "name": "@sanity/client", "repo": "sanity-io/client" },
-    { "name": "next-auth",      "repo": "nextauthjs/next-auth" },
-    { "name": "jose",           "repo": "panva/jose" },
-    { "name": "sanitize-html",  "repo": "apostrophecms/sanitize-html" }
+  "org": "SupremeOpti",
+  "branches": [
+    "main",
+    "staging"
+  ],
+  "exclude": [
+    "wp-content/plugins/(ninja-tables-pro|mugo-divi-extension|the-events-calendar|OxyPowerPack|supremeopti-green-house-plugin|monolith-utility)/",
+    "wp-content/themes/(twentytwenty|fishpig)",
+    "scripts/user-capture/",
+    "config/custom-vite-plugin/"
+  ],
+  "tooling": [
+    "-sass/",
+    "supreme-sass-plugin/",
+    "^Pivot-",
+    "^pivot-block-editor",
+    "^pd-Better-Custom",
+    "design-system",
+    "figma-make",
+    "TrelloConnector"
   ],
   "repos": [
-    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",       "lockfile": "web/pnpm-lock.yaml",    "packageJson": "web/core/package.json", "label": "web" },
-    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",       "lockfile": "sanity/pnpm-lock.yaml", "packageJson": "sanity/package.json",   "label": "sanity" },
-    { "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity", "lockfile": "web/pnpm-lock.yaml",    "packageJson": "web/core/package.json", "label": "web" },
-    { "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity", "lockfile": "sanity/pnpm-lock.yaml", "packageJson": "sanity/package.json",   "label": "sanity" }
+    {
+      "repo": "SupremeOpti/absci-headlinetrial-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/accuity-wordpress-gutenberg",
+      "lockfile": "wp-content/themes/accuity/package-lock.json",
+      "packageJson": "wp-content/themes/accuity/package.json",
+      "label": "wp-content/themes/accuity",
+      "kind": "tooling",
+      "branches": [
+        "staging",
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/adimab-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/aqneursa-hcp-sass",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/aqneursa-hcp-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/aqneursa-patient-sass",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/aqneursa-patient-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "staging",
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/aqneursa-sass",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/arche-wordpress",
+      "lockfile": "wp-content/plugins/sass/package-lock.json",
+      "packageJson": "wp-content/plugins/sass/package.json",
+      "label": "wp-content/plugins/sass",
+      "kind": "tooling",
+      "branches": [
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/arm-car-t-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "staging",
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/arm-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/athens-b2b-bigcommerce",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/athens-sanity-bigcommerce",
+      "lockfile": "checkout/athens-src/package-lock.json",
+      "packageJson": "checkout/athens-src/package.json",
+      "label": "checkout/athens-src",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/athens-sanity-bigcommerce",
+      "lockfile": "frontend/pnpm-lock.yaml",
+      "packageJson": "frontend/package.json",
+      "label": "frontend",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/athens-sanity-bigcommerce",
+      "lockfile": "pnpm-lock.yaml",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/biotium-wordpress",
+      "lockfile": "wp-content/plugins/sprectra-viewer/spectra-viewer/package-lock.json",
+      "packageJson": "wp-content/plugins/sprectra-viewer/spectra-viewer/package.json",
+      "label": "wp-content/plugins/sprectra-viewer/spectra-viewer",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/biotium-wordpress",
+      "lockfile": "wp-content/plugins/supreme-sass-plugin-main/sass/package-lock.json",
+      "packageJson": "wp-content/plugins/supreme-sass-plugin-main/sass/package.json",
+      "label": "wp-content/plugins/supreme-sass-plugin-main/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/biotium-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/bmp-medical-wordpress",
+      "lockfile": "wp-content/plugins/supreme-sass-plugin-main/sass/package-lock.json",
+      "packageJson": "wp-content/plugins/supreme-sass-plugin-main/sass/package.json",
+      "label": "wp-content/plugins/supreme-sass-plugin-main/sass",
+      "kind": "tooling",
+      "branches": [
+        "BM-105-resource-library-design",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/bmp-medical-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "BM-105-resource-library-design",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity",
+      "lockfile": "sanity/pnpm-lock.yaml",
+      "packageJson": "sanity/package.json",
+      "label": "sanity",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity",
+      "lockfile": "web/pnpm-lock.yaml",
+      "packageJson": "web/package.json",
+      "label": "web",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/carcinotech-sass",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/cardiff-oncology-wordpress",
+      "lockfile": "wp-content/themes/cardiff-theme/package-lock.json",
+      "packageJson": "wp-content/themes/cardiff-theme/package.json",
+      "label": "wp-content/themes/cardiff-theme",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/carta-healthcare-wordpress",
+      "lockfile": "wp-content/plugins/supreme-sass-plugin-main/sass/package-lock.json",
+      "packageJson": "wp-content/plugins/supreme-sass-plugin-main/sass/package.json",
+      "label": "wp-content/plugins/supreme-sass-plugin-main/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/carta-healthcare-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/catalent-sanity",
+      "lockfile": "pnpm-lock.yaml",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/cellcarta-oxygen-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "staging",
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/centauri-wordpress",
+      "lockfile": "wp-content/themes/centauri/package-lock.json",
+      "packageJson": "wp-content/themes/centauri/package.json",
+      "label": "wp-content/themes/centauri",
+      "kind": "tooling",
+      "branches": [
+        "staging",
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/centricity-wordpress",
+      "lockfile": "wp-content/plugins/supreme-sass-plugin-main/sass/package-lock.json",
+      "packageJson": "wp-content/plugins/supreme-sass-plugin-main/sass/package.json",
+      "label": "wp-content/plugins/supreme-sass-plugin-main/sass",
+      "kind": "tooling",
+      "branches": [
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/centricity-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/cerenome-wordpress",
+      "lockfile": "wp-content/themes/cerenome/package-lock.json",
+      "packageJson": "wp-content/themes/cerenome/package.json",
+      "label": "wp-content/themes/cerenome",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/curator24-sanity-nextjs",
+      "lockfile": "next/pnpm-lock.yaml",
+      "packageJson": "next/package.json",
+      "label": "next",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/curator24-sanity-nextjs",
+      "lockfile": "pnpm-lock.yaml",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/curator24-sanity-nextjs",
+      "lockfile": "sanity/pnpm-lock.yaml",
+      "packageJson": "sanity/package.json",
+      "label": "sanity",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/cytoskeleton-sanity",
+      "lockfile": "checkout/package-lock.json",
+      "packageJson": "checkout/package.json",
+      "label": "checkout",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/cytoskeleton-sanity",
+      "lockfile": "pnpm-lock.yaml",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/cytoskeleton-sanity",
+      "lockfile": "web/pnpm-lock.yaml",
+      "packageJson": "web/package.json",
+      "label": "web",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/digitalinsights-wordpress",
+      "lockfile": "wp-content/plugins/supreme-sass-plugin-main/sass/package-lock.json",
+      "packageJson": "wp-content/plugins/supreme-sass-plugin-main/sass/package.json",
+      "label": "wp-content/plugins/supreme-sass-plugin-main/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/digitalinsights-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/enablecomp-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/flywheel-wordpress",
+      "lockfile": "wp-content/themes/flywheel/package-lock.json",
+      "packageJson": "wp-content/themes/flywheel/package.json",
+      "label": "wp-content/themes/flywheel",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/flywheel-wordpress-gutenberg",
+      "lockfile": "wp-content/themes/flywheel/package-lock.json",
+      "packageJson": "wp-content/themes/flywheel/package.json",
+      "label": "wp-content/themes/flywheel",
+      "kind": "tooling",
+      "branches": [
+        "staging",
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/fujifilmcdi-magento-wordpress",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/gbs110stories_website_1",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/hlaprotein-magento",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/kricket-wordpress",
+      "lockfile": "wp-content/themes/kricket/package-lock.json",
+      "packageJson": "wp-content/themes/kricket/package.json",
+      "label": "wp-content/themes/kricket",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/lunit-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "LUN-831-homepage-solutions-overview-increase-number-of-supported-links",
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/missionbio-sanity",
+      "lockfile": "pnpm-lock.yaml",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/pd-Better-Custom-Classes-for-Gutenberg-Pivot-Version",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "tooling",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/pharm-int-sass",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/Pivot-11ty-Starter",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "tooling",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/pivot-block-editor-extension-toolkit",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "tooling",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/Pivot-Lantheus-Drupal-Kit",
+      "lockfile": "starter/package-lock.json",
+      "packageJson": "starter/package.json",
+      "label": "starter",
+      "kind": "tooling",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/pivotpoint-sanity",
+      "lockfile": "pnpm-lock.yaml",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "staging",
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/raybiotech-sanity-bigcommerce",
+      "lockfile": "migration/pnpm-lock.yaml",
+      "packageJson": "migration/package.json",
+      "label": "migration",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/raybiotech-sanity-bigcommerce",
+      "lockfile": "sanity/pnpm-lock.yaml",
+      "packageJson": "sanity/package.json",
+      "label": "sanity",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/raybiotech-sanity-bigcommerce",
+      "lockfile": "web/pnpm-lock.yaml",
+      "packageJson": "web/package.json",
+      "label": "web",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/sabbio-wp",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/sabbio-wp",
+      "lockfile": "wp-content/themes/sabbio-supreme/package-lock.json",
+      "packageJson": "wp-content/themes/sabbio-supreme/package.json",
+      "label": "wp-content/themes/sabbio-supreme",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/sanofi-fabry-body-tour-app",
+      "lockfile": "app/package-lock.json",
+      "packageJson": "app/package.json",
+      "label": "app",
+      "kind": "app",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/sanofi-fabry-body-tour-app",
+      "lockfile": "studio/package-lock.json",
+      "packageJson": "studio/package.json",
+      "label": "studio",
+      "kind": "app",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/sciensus-wordpress",
+      "lockfile": "wp-content/themes/sciensus/package-lock.json",
+      "packageJson": "wp-content/themes/sciensus/package.json",
+      "label": "wp-content/themes/sciensus",
+      "kind": "tooling",
+      "branches": [
+        "development",
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/scitaris-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/sequel-med-tech-wordpress",
+      "lockfile": "wp-content/plugins/sass/package-lock.json",
+      "packageJson": "wp-content/plugins/sass/package.json",
+      "label": "wp-content/plugins/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/sequel-med-tech-wordpress",
+      "lockfile": "wp-content/plugins/supreme-sass-plugin-main/sass/package-lock.json",
+      "packageJson": "wp-content/plugins/supreme-sass-plugin-main/sass/package.json",
+      "label": "wp-content/plugins/supreme-sass-plugin-main/sass",
+      "kind": "tooling",
+      "branches": [
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/seres-therapeutics-wordpress",
+      "lockfile": "wp-content/themes/seres/package-lock.json",
+      "packageJson": "wp-content/themes/seres/package.json",
+      "label": "wp-content/themes/seres",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/si-design-system-npm",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "tooling",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/si-open-design",
+      "lockfile": "pnpm-lock.yaml",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/sitala-wordpress",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/sk-pharmteco-wordpress",
+      "lockfile": "wp-content/themes/skpharmteco/package-lock.json",
+      "packageJson": "wp-content/themes/skpharmteco/package.json",
+      "label": "wp-content/themes/skpharmteco",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/sleepres-wordpress",
+      "lockfile": "wp-content/themes/sleepres/package-lock.json",
+      "packageJson": "wp-content/themes/sleepres/package.json",
+      "label": "wp-content/themes/sleepres",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/southernbiotech-bigcommerce-sanity",
+      "lockfile": "sanity/pnpm-lock.yaml",
+      "packageJson": "sanity/package.json",
+      "label": "sanity",
+      "kind": "app",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/southernbiotech-bigcommerce-sanity",
+      "lockfile": "web/pnpm-lock.yaml",
+      "packageJson": "web/package.json",
+      "label": "web",
+      "kind": "app",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/strelis-sanity",
+      "lockfile": "pnpm-lock.yaml",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/supreme-intelligence-design-system-figma-make",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "tooling",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/supreme-sass-plugin",
+      "lockfile": "sass/package-lock.json",
+      "packageJson": "sass/package.json",
+      "label": "sass",
+      "kind": "tooling",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/supremeopti-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/synthego-wordpress-bigcommerce",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/systembio-magento-wordpress",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/TrelloConnector",
+      "lockfile": "package-lock.json",
+      "packageJson": "package.json",
+      "label": "root",
+      "kind": "tooling",
+      "branches": [
+        "main"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
+      "lockfile": "sanity/pnpm-lock.yaml",
+      "packageJson": "sanity/package.json",
+      "label": "sanity",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
+      "lockfile": "web/pnpm-lock.yaml",
+      "packageJson": "web/package.json",
+      "label": "web",
+      "kind": "app",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/veltek-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/vizgen-wordpress",
+      "lockfile": "wp-content/themes/vizgen2020/package-lock.json",
+      "packageJson": "wp-content/themes/vizgen2020/package.json",
+      "label": "wp-content/themes/vizgen2020",
+      "kind": "tooling",
+      "branches": [
+        "main",
+        "staging"
+      ]
+    },
+    {
+      "repo": "SupremeOpti/zentalis-wordpress",
+      "lockfile": "wp-content/sass/package-lock.json",
+      "packageJson": "wp-content/sass/package.json",
+      "label": "wp-content/sass",
+      "kind": "tooling",
+      "branches": [
+        "staging"
+      ]
+    }
   ],
   "feeds": [
-    { "name": "Node.js vulnerability reports", "url": "https://nodejs.org/en/feed/vulnerability.xml" }
+    {
+      "name": "Node.js vulnerability reports",
+      "url": "https://nodejs.org/en/feed/vulnerability.xml"
+    }
   ]
 }

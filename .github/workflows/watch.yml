@@ -2,19 +2,23 @@ name: watch
 
 on:
   schedule:
-    # Every 6 hours UTC, timed so one run lands at 07:00 IST, an hour before the
-    # Claude routine reads report.json at 08:00 IST. Runs at 07:00, 13:00, 19:00, 01:00 IST.
-    - cron: '30 1,7,13,19 * * *'
+    # Once a day at 08:00 IST (02:30 UTC), an hour before the Claude routine reads
+    # report.json at 09:00 IST and sends the Slack message and the email.
+    - cron: '30 2 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Fetch and compare, write report.json for inspection, commit nothing'
+        description: 'Scan and show report.json in the log, commit nothing'
         type: boolean
         default: false
       forget:
-        description: 'Comma-separated GHSA ids to drop from state so they count as new again'
+        description: 'Comma-separated advisory ids to drop from state so they count as new again'
         required: false
         default: ''
+      discover:
+        description: 'Re-discover lockfiles across the organisation and commit watchlist.json first'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -26,6 +30,7 @@ concurrency:
 jobs:
   watch:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -33,26 +38,36 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Scan
+      - name: Discover lockfiles
+        if: inputs.discover == true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_READ_TOKEN: ${{ secrets.REPO_READ_TOKEN }}
+        run: node scripts/discover.mjs
+
+      - name: Scan
+        env:
+          # The workflow's own token gets 1,000 requests an hour; a user token gets 5,000.
+          # Polling ~3,000 package repositories needs the larger budget on the first run.
+          GITHUB_TOKEN: ${{ secrets.REPO_READ_TOKEN || secrets.GITHUB_TOKEN }}
+          REPO_READ_TOKEN: ${{ secrets.REPO_READ_TOKEN }}
+          SCAN_CONCURRENCY: '6'
         run: |
-          ARGS="--scan-only"
+          ARGS=""
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           if [ -n "${{ inputs.forget }}" ]; then ARGS="$ARGS --forget ${{ inputs.forget }}"; fi
           node watch.mjs $ARGS
 
-      - name: Show report
+      - name: Show summary
         if: always()
-        run: cat report.json
+        run: node -e "const r=require('./report.json'); console.log(JSON.stringify({status:r.status,summary:r.summary,projects:r.projects.map(p=>[p.project,p.branch,p.status,p.critical,p.high])},null,1))"
 
       - name: Commit state and report
         if: always() && inputs.dry_run != true
         run: |
           git config user.name 'security-radar'
           git config user.email 'security-radar@users.noreply.github.com'
-          git add state.json report.json
+          git add state.json packages.json report.json watchlist.json
           if git diff --cached --quiet; then
             echo "nothing changed"
           else
