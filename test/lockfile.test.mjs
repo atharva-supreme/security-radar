@@ -103,3 +103,43 @@ test('declaredNode prefers engines, falls back to nvmrc', () => {
   assert.equal(declaredNode({ packageJsonText: '{}', nvmrcText: '24.2.0\n' }), '24.2.0');
   assert.equal(declaredNode({}), null);
 });
+
+import { directVersions } from '../src/lockfile.mjs';
+
+test('directVersions: pnpm importers say what the app declares itself', () => {
+  const text = `
+lockfileVersion: '9.0'
+
+importers:
+  core:
+    dependencies:
+      '@sanity/client':
+        specifier: ^7.24.0
+        version: 7.24.0
+      next:
+        specifier: 16.2.12
+        version: 16.2.12(react@19.2.7)
+    devDependencies:
+      react:
+        specifier: 19.2.7
+        version: 19.2.7
+
+packages:
+
+  sharp@0.34.5:
+    resolution: {integrity: sha512-x}
+`;
+  const d = directVersions(text, 'web/pnpm-lock.yaml', names);
+  assert.deepEqual([...d.get('next')], ['16.2.12']);
+  assert.deepEqual([...d.get('@sanity/client')], ['7.24.0']);
+  assert.deepEqual([...d.get('react')], ['19.2.7']);
+  assert.deepEqual([...d.get('sharp')], []);
+});
+
+test('directVersions: package-lock root dependencies', () => {
+  const json = { packages: { '': { dependencies: { next: '16.2.12' } }, 'node_modules/next': { version: '16.2.12' }, 'node_modules/sharp': { version: '0.34.5' } } };
+  const d = directVersions(JSON.stringify(json), 'package-lock.json', names);
+  assert.deepEqual([...d.get('next')], ['16.2.12']);
+  assert.deepEqual([...d.get('sharp')], []);
+  assert.equal(directVersions('', 'yarn.lock', names), null);
+});

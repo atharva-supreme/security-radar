@@ -34,15 +34,40 @@ function climb(name, to, advisories) {
 function upgradesFor(open, advisories) {
   const byPkg = new Map();
   for (const o of open) {
-    const row = byPkg.get(o.package) ?? { package: o.package, from: new Set(), to: null, closes: 0 };
+    const row = byPkg.get(o.package) ?? { package: o.package, from: new Set(), transitive: new Set(), to: null, closes: 0, worst: o.severity };
     row.from.add(o.installed);
+    if (o.direct === false) row.transitive.add(o.installed);
     row.closes += 1;
+    if (severityRank(o.severity) < severityRank(row.worst)) row.worst = o.severity;
     const f = parseableVersion(o.fixed);
     if (f && (!row.to || compare(f, row.to) > 0)) row.to = f;
     byPkg.set(o.package, row);
   }
-  return [...byPkg.values()].map((r) => ({ ...r, from: [...r.from].sort(compare), to: climb(r.package, r.to, advisories) }));
+  return [...byPkg.values()]
+    .sort((a, b) => severityRank(a.worst) - severityRank(b.worst) || b.closes - a.closes)
+    .map((r) => ({
+      ...r,
+      from: [...r.from].sort(compare),
+      transitive: [...r.transitive].sort(compare),
+      to: climb(r.package, r.to, advisories),
+    }));
 }
+
+// Facts a developer needs before running the command, stated once per app.
+function notesFor(label, upgrades) {
+  const notes = [];
+  for (const u of upgrades) {
+    if (!u.transitive.length) continue;
+    const all = u.transitive.length === u.from.length;
+    notes.push(
+      `${u.package} ${u.transitive.join(', ')} is not a direct dependency of ${label}: it comes through another package. ` +
+      `${all ? 'pnpm up will not move it' : 'pnpm up moves only the direct copy'}; upgrade the package that pulls it in, or add a pnpm override for ${u.package}@${u.to}.`,
+    );
+  }
+  return notes;
+}
+
+const daysSince = (iso, now) => (iso ? Math.max(0, Math.floor((now.getTime() - new Date(iso).getTime()) / 86400000)) : null);
 
 function commandFor(app, upgrades) {
   const targets = upgrades.filter((u) => u.to).map((u) => `${u.package}@${u.to}`);
@@ -66,13 +91,15 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
   const openIds = new Set();
   const appRows = apps.map((app) => {
     const project = app.project ?? app.repo.split('/').pop();
+    const branch = app.branch ?? null;
     if (!app.ok) {
-      return { project, repo: app.repo, lockfile: app.lockfile, label: app.label, ok: false, error: app.error ?? 'lockfile could not be read', installed: {}, open: [], counts: {}, upgrades: [], command: null };
+      return { project, branch, repo: app.repo, lockfile: app.lockfile, label: app.label, ok: false, error: app.error ?? 'lockfile could not be read', installed: {}, open: [], counts: {}, upgrades: [], notes: [], command: null };
     }
     const open = [];
     for (const [id, rec] of Object.entries(advisories)) {
       for (const h of matchInstalled(rec.packages, app.versions)) {
         openIds.add(id);
+        const sources = rec.sources ?? (rec.source ? [rec.source] : []);
         open.push({
           id,
           severity: rec.severity,
@@ -80,10 +107,16 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
           summary: rec.summary,
           url: rec.url,
           published_at: rec.published_at,
+          openDays: daysSince(rec.published_at, now),
           firstSeen: rec.firstSeen,
           isNew: within(rec.firstSeen, now, NEW_WINDOW_HOURS),
+          // Published by the maintainers but not yet reviewed into the GitHub Advisory Database:
+          // the window in which pnpm audit, Dependabot and OSV still say "clean".
+          early: sources.length > 0 && !sources.includes('global'),
           package: h.pkg,
           installed: h.installed,
+          // true = the app declares it; false = pulled in by another package; null = lockfile does not say
+          direct: app.direct ? app.direct.get(h.pkg)?.has(h.installed) ?? false : null,
           fixed: h.fixed ?? null,
           fixedOnNpm: published.get(`${h.pkg}@${h.fixed}`) ?? null,
         });
@@ -98,6 +131,7 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
     );
     return {
       project,
+      branch,
       repo: app.repo,
       lockfile: app.lockfile,
       label: app.label,
@@ -107,6 +141,7 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
       open,
       counts,
       upgrades,
+      notes: notesFor(app.label, upgrades),
       command: commandFor(app, upgrades),
     };
   });
@@ -119,6 +154,8 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
     moderate: allOpen.filter((o) => o.severity === 'moderate' || o.severity === 'medium').length,
     low: allOpen.filter((o) => o.severity === 'low').length,
     newOpen: allOpen.filter((o) => o.isNew).length,
+    early: allOpen.filter((o) => o.early).length,
+    oldestCriticalOpenDays: Math.max(0, ...allOpen.filter((o) => isUrgent(o.severity)).map((o) => o.openDays ?? 0)),
   };
 
   const newNotAffecting = Object.entries(advisories)
@@ -142,26 +179,29 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
   };
   const status = statusOf(allOpen, errors.length > 0 || appRows.some((a) => !a.ok));
 
-  // One row per repo, so a reader can say "project X is RED, projects Y and Z are clear"
-  // without walking every app. Order: worst first, then by name.
+  // One row per (repo, branch), so a reader can say "project X on main is RED, on staging AMBER,
+  // projects Y and Z are clear" without walking every app. Order: worst first, then name, then branch.
   const RANK = { RED: 0, UNKNOWN: 1, AMBER: 2, GREEN: 3 };
-  const projects = [...new Set(appRows.map((a) => a.project))]
-    .map((project) => {
-      const rows = appRows.filter((a) => a.project === project);
+  const keyOf = (a) => `${a.project}\u0000${a.branch ?? ''}`;
+  const projects = [...new Set(appRows.map(keyOf))]
+    .map((key) => {
+      const rows = appRows.filter((a) => keyOf(a) === key);
       const open = rows.flatMap((a) => a.open);
       return {
-        project,
+        project: rows[0].project,
+        branch: rows[0].branch,
         repo: rows[0].repo,
         status: statusOf(open, rows.some((a) => !a.ok)),
         open: open.length,
         critical: open.filter((o) => o.severity === 'critical').length,
         high: open.filter((o) => o.severity === 'high').length,
         newOpen: open.filter((o) => o.isNew).length,
+        early: open.filter((o) => o.early).length,
         apps: rows.map((a) => a.label),
         affectedApps: rows.filter((a) => a.open.length).map((a) => a.label),
       };
     })
-    .sort((a, b) => RANK[a.status] - RANK[b.status] || a.project.localeCompare(b.project));
+    .sort((a, b) => RANK[a.status] - RANK[b.status] || a.project.localeCompare(b.project) || String(a.branch).localeCompare(String(b.branch)));
 
   return {
     schema: 2,

@@ -23,7 +23,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { makeClient, normalise, npmPublished } from './src/github.mjs';
 import { resolvePackages, matchInstalled } from './src/advisories.mjs';
 import { compare, parseableVersion } from './src/semver.mjs';
-import { installedVersions, declaredNode } from './src/lockfile.mjs';
+import { installedVersions, directVersions, declaredNode } from './src/lockfile.mjs';
 import { fetchFeed } from './src/feeds.mjs';
 import {
   severityRank, isUrgent, releaseMessage, batchMessage, feedMessage, quietMessage, errorMessage,
@@ -119,6 +119,7 @@ for (const rec of collected.values()) {
     published_at: rec.published_at,
     updated_at: rec.updated_at,
     source: rec.source,
+    sources: rec.sources,
     packages: rec.packages,
     fixedKey: fixedKey(rec),
     // An advisory we meet for the first time more than a week after it was published is history
@@ -143,8 +144,14 @@ for (const feed of watchlist.feeds) {
 }
 // ---------- 4. what our repos have installed ----------
 
+// One app per (repo row, branch). `branches` at the top of the watchlist applies to every row;
+// a row's own `branches` overrides it; a row's `ref` pins a single branch or commit.
+const defaultBranches = watchlist.branches ?? [null];
+const appRows = watchlist.repos.flatMap((r) =>
+  (r.branches ?? (r.ref ? [r.ref] : defaultBranches)).map((branch) => ({ ...r, ref: branch ?? undefined, branch: branch ?? 'default' })),
+);
 const repoStatus = [];
-for (const r of watchlist.repos) {
+for (const r of appRows) {
   const dirOf = (p) => (p && p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');
   const dir = dirOf(r.lockfile) || dirOf(r.packageJson);
   // project = the repo's short name; label = the app inside it (the lockfile's folder, or "root").
@@ -153,11 +160,12 @@ for (const r of watchlist.repos) {
   try {
     const text = await ghRepos.fileText(r.repo, r.lockfile, r.ref);
     const versions = installedVersions(text, r.lockfile, [...watchedNames]);
+    const direct = directVersions(text, r.lockfile, [...watchedNames]);
     let node = null;
     if (r.packageJson) {
       try { node = declaredNode({ packageJsonText: await ghRepos.fileText(r.repo, r.packageJson, r.ref) }); } catch { /* optional */ }
     }
-    repoStatus.push({ ...r, project, label, versions, node, ok: true });
+    repoStatus.push({ ...r, project, label, versions, direct, node, ok: true });
   } catch (e) {
     repoStatus.push({ ...r, project, label, ok: false, error: e.message });
     warnings.push(`lockfile ${r.repo}/${r.lockfile}: ${e.message}${e.status === 404 && !env.REPO_READ_TOKEN ? ' (private repo and no REPO_READ_TOKEN set?)' : ''}`);
@@ -242,7 +250,7 @@ const quietDue = flag('--quiet-summary') || (now.getUTCHours() === quietHour && 
 if (!baseline && !scanOnly && !alerts.length && !feedAlerts.length && quietDue) {
   await deliver('quiet summary', quietMessage({
     now,
-    counts: { packages: watchlist.packages.length, feeds: watchlist.feeds.length, repos: watchlist.repos.length },
+    counts: { packages: watchlist.packages.length, feeds: watchlist.feeds.length, repos: repoStatus.length },
     stillOpen,
     errors: [...errors, ...warnings],
   }));

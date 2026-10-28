@@ -10,7 +10,9 @@ Why not `pnpm audit`, Dependabot or OSV: they all read the GitHub Advisory Datab
 
 `watchlist.json` is the only place scope lives. Every row in `repos[]` is one app (a repo plus a lockfile path); every row in `packages[]` is one package to watch. The scan checks exactly what is listed: ten rows means ten apps, one row means one app. The report groups apps by repo (`project`), so a repo with two lockfiles shows as one project with two apps. The Claude routine that sends the email reads the report and adapts to however many projects it finds, with no per-project configuration anywhere else.
 
-Today it lists one project, **vectorlabs-bigcommerce-sanity** (`web` and `sanity` apps), and ten packages. The other eleven SupremeOpti apps found on 2026-10-27 are in `watchlist.all-repos.json`; copy a row into `watchlist.json` to add it. A `label` on a repo row is optional and defaults to the lockfile's folder.
+**Branches.** `branches` at the top of the watchlist (today `["main", "staging"]`) applies to every repo row: each row is scanned once per branch, and the report keeps a separate project row and separate app rows per branch, because the two branches carry different lockfiles. A repo row's own `branches` list overrides the default; a `ref` pins one branch or commit.
+
+Today it lists two projects, **vectorlabs-bigcommerce-sanity** and **bostonbioproducts-bigcommerce-sanity** (`web` and `sanity` apps each, on both branches), and ten packages. The other eleven SupremeOpti apps found on 2026-10-27 are in `watchlist.all-repos.json`; copy a row into `watchlist.json` to add it. A `label` on a repo row is optional and defaults to the lockfile's folder.
 
 ## How a scan works
 
