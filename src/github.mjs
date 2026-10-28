@@ -1,6 +1,6 @@
 const API = 'https://api.github.com';
 
-export function makeClient({ token, userAgent = 'security-watch' } = {}) {
+export function makeClient({ token, userAgent = 'security-radar' } = {}) {
   const headers = {
     accept: 'application/vnd.github+json',
     'x-github-api-version': '2022-11-28',
@@ -50,7 +50,7 @@ export async function npmPublished(name, version) {
   try {
     const res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(name).replace('%40', '@')}/${encodeURIComponent(version)}`, {
       method: 'HEAD',
-      headers: { 'user-agent': 'security-watch' },
+      headers: { 'user-agent': 'security-radar' },
     });
     if (res.status === 200) return true;
     if (res.status === 404) return false;

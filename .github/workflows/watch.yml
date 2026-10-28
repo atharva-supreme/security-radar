@@ -50,8 +50,8 @@ jobs:
       - name: Commit state and report
         if: always() && inputs.dry_run != true
         run: |
-          git config user.name 'security-watch'
-          git config user.email 'security-watch@users.noreply.github.com'
+          git config user.name 'security-radar'
+          git config user.email 'security-radar@users.noreply.github.com'
           git add state.json report.json
           if git diff --cached --quiet; then
             echo "nothing changed"

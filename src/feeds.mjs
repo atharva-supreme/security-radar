@@ -33,7 +33,7 @@ export function parseFeed(xml) {
 }
 
 export async function fetchFeed(url) {
-  const res = await fetch(url, { headers: { 'user-agent': 'security-watch' } });
+  const res = await fetch(url, { headers: { 'user-agent': 'security-radar' } });
   if (!res.ok) throw new Error(`feed ${url} -> ${res.status}`);
   return parseFeed(await res.text());
 }
