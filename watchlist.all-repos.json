@@ -1,0 +1,18 @@
+{
+  "_comment": "Every SupremeOpti Next.js project found on 2026-10-27. The pilot in watchlist.json covers vectorlabs only; move rows from here into watchlist.json repos[] to widen it.",
+  "repos": [
+    { "repo": "SupremeOpti/athens-sanity-bigcommerce",           "lockfile": "frontend/pnpm-lock.yaml", "packageJson": "frontend/core/package.json" },
+    { "repo": "SupremeOpti/athens-sanity-bigcommerce",           "lockfile": "pnpm-lock.yaml",          "packageJson": "hubspot/package.json" },
+    { "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity", "lockfile": "web/pnpm-lock.yaml",      "packageJson": "web/core/package.json" },
+    { "repo": "SupremeOpti/catalent-sanity",                     "lockfile": "pnpm-lock.yaml",          "packageJson": "web/package.json" },
+    { "repo": "SupremeOpti/curator24-sanity-nextjs",             "lockfile": "next/pnpm-lock.yaml",     "packageJson": "next/package.json" },
+    { "repo": "SupremeOpti/cytoskeleton-sanity",                 "lockfile": "web/pnpm-lock.yaml",      "packageJson": "web/core/package.json" },
+    { "repo": "SupremeOpti/missionbio-sanity",                   "lockfile": "pnpm-lock.yaml",          "packageJson": "web/package.json" },
+    { "repo": "SupremeOpti/pivotpoint-sanity",                   "lockfile": "pnpm-lock.yaml",          "packageJson": "web/package.json" },
+    { "repo": "SupremeOpti/raybiotech-sanity-bigcommerce",       "lockfile": "web/pnpm-lock.yaml",      "packageJson": "web/core/package.json" },
+    { "repo": "SupremeOpti/southernbiotech-bigcommerce-sanity",  "lockfile": "web/pnpm-lock.yaml",      "packageJson": "web/core/package.json" },
+    { "repo": "SupremeOpti/strelis-sanity",                      "lockfile": "pnpm-lock.yaml",          "packageJson": "web/package.json" },
+    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",       "lockfile": "web/pnpm-lock.yaml",      "packageJson": "web/core/package.json" },
+    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",       "lockfile": "sanity/pnpm-lock.yaml",   "packageJson": "sanity/package.json" }
+  ]
+}

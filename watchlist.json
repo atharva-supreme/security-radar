@@ -1,27 +1,19 @@
 {
   "packages": [
     { "name": "next",           "repo": "vercel/next.js" },
-    { "name": "sharp",          "repo": "lovell/sharp" },
     { "name": "react",          "repo": "facebook/react" },
     { "name": "react-dom",      "repo": "facebook/react" },
+    { "name": "sharp",          "repo": "lovell/sharp" },
+    { "name": "next-sanity",    "repo": "sanity-io/next-sanity" },
     { "name": "sanity",         "repo": "sanity-io/sanity" },
     { "name": "@sanity/client", "repo": "sanity-io/client" },
-    { "name": "next-sanity",    "repo": "sanity-io/next-sanity" }
+    { "name": "next-auth",      "repo": "nextauthjs/next-auth" },
+    { "name": "jose",           "repo": "panva/jose" },
+    { "name": "sanitize-html",  "repo": "apostrophecms/sanitize-html" }
   ],
   "repos": [
-    { "repo": "SupremeOpti/athens-sanity-bigcommerce",           "lockfile": "frontend/pnpm-lock.yaml", "packageJson": "frontend/core/package.json" },
-    { "repo": "SupremeOpti/athens-sanity-bigcommerce",           "lockfile": "pnpm-lock.yaml",          "packageJson": "hubspot/package.json" },
-    { "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity", "lockfile": "web/pnpm-lock.yaml",      "packageJson": "web/core/package.json" },
-    { "repo": "SupremeOpti/catalent-sanity",                     "lockfile": "pnpm-lock.yaml",          "packageJson": "web/package.json" },
-    { "repo": "SupremeOpti/curator24-sanity-nextjs",             "lockfile": "next/pnpm-lock.yaml",     "packageJson": "next/package.json" },
-    { "repo": "SupremeOpti/cytoskeleton-sanity",                 "lockfile": "web/pnpm-lock.yaml",      "packageJson": "web/core/package.json" },
-    { "repo": "SupremeOpti/missionbio-sanity",                   "lockfile": "pnpm-lock.yaml",          "packageJson": "web/package.json" },
-    { "repo": "SupremeOpti/pivotpoint-sanity",                   "lockfile": "pnpm-lock.yaml",          "packageJson": "web/package.json" },
-    { "repo": "SupremeOpti/raybiotech-sanity-bigcommerce",       "lockfile": "web/pnpm-lock.yaml",      "packageJson": "web/core/package.json" },
-    { "repo": "SupremeOpti/southernbiotech-bigcommerce-sanity",  "lockfile": "web/pnpm-lock.yaml",      "packageJson": "web/core/package.json" },
-    { "repo": "SupremeOpti/strelis-sanity",                      "lockfile": "pnpm-lock.yaml",          "packageJson": "web/package.json" },
-    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",       "lockfile": "web/pnpm-lock.yaml",      "packageJson": "web/core/package.json" },
-    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",       "lockfile": "sanity/pnpm-lock.yaml",   "packageJson": "sanity/package.json" }
+    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity", "lockfile": "web/pnpm-lock.yaml",    "packageJson": "web/core/package.json", "label": "web (storefront)" },
+    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity", "lockfile": "sanity/pnpm-lock.yaml", "packageJson": "sanity/package.json",   "label": "sanity (Studio)" }
   ],
   "feeds": [
     { "name": "Node.js vulnerability reports", "url": "https://nodejs.org/en/feed/vulnerability.xml" }

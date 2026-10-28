@@ -2,26 +2,22 @@ name: watch
 
 on:
   schedule:
-    # Every 6 hours UTC: 05:30, 11:30, 17:30, 23:30 IST.
-    - cron: '0 */6 * * *'
+    # Every 6 hours UTC, timed so one run lands at 07:00 IST, an hour before the
+    # Claude routine reads report.json at 08:00 IST. Runs at 07:00, 13:00, 19:00, 01:00 IST.
+    - cron: '30 1,7,13,19 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Print what would be posted, post nothing, write nothing'
+        description: 'Fetch and compare, write report.json for inspection, commit nothing'
         type: boolean
         default: false
       forget:
-        description: 'Comma-separated GHSA ids to drop from state so they alert again'
+        description: 'Comma-separated GHSA ids to drop from state so they count as new again'
         required: false
         default: ''
-      quiet_summary:
-        description: 'Post the quiet-day summary now'
-        type: boolean
-        default: false
 
 permissions:
   contents: write
-  issues: write
 
 concurrency:
   group: watch
@@ -37,29 +33,29 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Run the watcher
+      - name: Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_READ_TOKEN: ${{ secrets.REPO_READ_TOKEN }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          QUIET_HOUR_UTC: '0'
         run: |
-          ARGS=""
+          ARGS="--scan-only"
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           if [ -n "${{ inputs.forget }}" ]; then ARGS="$ARGS --forget ${{ inputs.forget }}"; fi
-          if [ "${{ inputs.quiet_summary }}" = "true" ]; then ARGS="$ARGS --quiet-summary"; fi
           node watch.mjs $ARGS
 
-      - name: Commit state
+      - name: Show report
+        if: always()
+        run: cat report.json
+
+      - name: Commit state and report
         if: always() && inputs.dry_run != true
         run: |
           git config user.name 'security-watch'
           git config user.email 'security-watch@users.noreply.github.com'
-          git add state.json
+          git add state.json report.json
           if git diff --cached --quiet; then
-            echo "state unchanged"
+            echo "nothing changed"
           else
-            git commit -m "state: run $(date -u +%Y-%m-%dT%H:%MZ)"
+            git commit -m "scan: $(date -u +%Y-%m-%dT%H:%MZ)"
             git push
           fi

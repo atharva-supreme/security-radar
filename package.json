@@ -8,7 +8,8 @@
   "scripts": {
     "watch": "node watch.mjs",
     "watch:dry": "node watch.mjs --dry-run",
+    "scan": "node watch.mjs --scan-only",
     "baseline": "node watch.mjs --baseline",
-    "test": "node --test test/semver.test.mjs test/advisories.test.mjs test/lockfile.test.mjs test/feeds.test.mjs"
+    "test": "node --test test/semver.test.mjs test/advisories.test.mjs test/lockfile.test.mjs test/feeds.test.mjs test/report.test.mjs"
   }
 }

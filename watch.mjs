@@ -6,6 +6,11 @@
 //   node watch.mjs --baseline      record everything currently published without alerting (first run)
 //   node watch.mjs --forget A,B    drop advisory ids from state first, so they alert again (testing)
 //   node watch.mjs --quiet-summary post the quiet-day summary now regardless of the hour
+//   node watch.mjs --scan-only     fetch, compare, write state.json and report.json; post nothing, open nothing
+//                                  (what the workflow runs: the Claude routine reads report.json and does the telling)
+//
+// Every run writes report.json: status, what each app has installed, every open advisory with
+// its fixed version, the upgrade command per app, and what is new in the last 26 hours.
 //
 // Environment:
 //   GITHUB_TOKEN       advisory calls and issue creation (the workflow's own token is enough)
@@ -25,6 +30,7 @@ import {
   issueTitle, issueBody, feedIssueTitle, feedIssueBody,
 } from './src/format.mjs';
 import { postSlack, openIssue } from './src/notify.mjs';
+import { buildReport } from './src/report.mjs';
 
 // ---------- arguments and files ----------
 
@@ -32,6 +38,7 @@ const argv = process.argv.slice(2);
 const flag = (name) => argv.includes(name);
 const option = (name) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : null; };
 const dryRun = flag('--dry-run');
+const scanOnly = flag('--scan-only');
 const forget = (option('--forget') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
 
 const ROOT = new URL('.', import.meta.url);
@@ -96,6 +103,7 @@ log(`collected ${collected.size} advisories across ${watchlist.packages.length} 
 
 // ---------- 2. diff against state ----------
 
+const olderThanWeek = (iso) => Boolean(iso) && now.getTime() - new Date(iso).getTime() > 7 * 24 * 3600 * 1000;
 const fixedKey = (rec) => rec.packages.map((p) => `${p.name}:${p.fixed ?? ''}`).sort().join('|');
 const newAdvisories = [];
 const updatedAdvisories = [];
@@ -113,7 +121,10 @@ for (const rec of collected.values()) {
     source: rec.source,
     packages: rec.packages,
     fixedKey: fixedKey(rec),
-    firstSeen: prev?.firstSeen ?? nowIso,
+    // An advisory we meet for the first time more than a week after it was published is history
+    // (a package just added to the watchlist, or the baseline run), not news: date it by publication
+    // so report.json does not flag twenty old advisories as NEW.
+    firstSeen: prev?.firstSeen ?? (baseline || olderThanWeek(rec.published_at) ? rec.published_at ?? nowIso : nowIso),
   };
 }
 
@@ -136,7 +147,7 @@ const repoStatus = [];
 for (const r of watchlist.repos) {
   const dirOf = (p) => (p && p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');
   const dir = dirOf(r.lockfile) || dirOf(r.packageJson);
-  const label = `${r.repo.split('/').pop()}${dir ? `/${dir}` : ''}`;
+  const label = r.label ?? `${r.repo.split('/').pop()}${dir ? `/${dir}` : ''}`;
   try {
     const text = await ghRepos.fileText(r.repo, r.lockfile, r.ref);
     const versions = installedVersions(text, r.lockfile, [...watchedNames]);
@@ -146,7 +157,7 @@ for (const r of watchlist.repos) {
     }
     repoStatus.push({ ...r, label, versions, node, ok: true });
   } catch (e) {
-    repoStatus.push({ ...r, label, ok: false });
+    repoStatus.push({ ...r, label, ok: false, error: e.message });
     warnings.push(`lockfile ${r.repo}/${r.lockfile}: ${e.message}${e.status === 404 && !env.REPO_READ_TOKEN ? ' (private repo and no REPO_READ_TOKEN set?)' : ''}`);
   }
 }
@@ -189,12 +200,12 @@ const alerts = baseline ? [] : [...newAdvisories, ...updatedAdvisories]
   .sort((a, b) => severityRank(a.severity) - severityRank(b.severity) || (b.published_at ?? '').localeCompare(a.published_at ?? ''));
 
 async function deliver(kind, text) {
-  log(`\n--- ${kind}${dryRun ? ' (dry run, not posted)' : ''} ---\n${text}\n`);
-  if (dryRun) return;
+  log(`\n--- ${kind}${dryRun ? ' (dry run, not posted)' : scanOnly ? ' (scan only, not posted)' : ''} ---\n${text}\n`);
+  if (dryRun || scanOnly) return;
   try { await postSlack(webhook, text); } catch (e) { errors.push(`slack: ${e.message}`); }
 }
 async function track(title, body, labels) {
-  if (dryRun || !issueRepo) return null;
+  if (dryRun || scanOnly || !issueRepo) return null;
   try { return await openIssue(gh, issueRepo, { title, body, labels }); } catch (e) { errors.push(`issue "${title}": ${e.message}`); return null; }
 }
 
@@ -226,7 +237,7 @@ for (const fa of feedAlerts) {
 const quietHour = Number(env.QUIET_HOUR_UTC ?? 0);
 const today = nowIso.slice(0, 10);
 const quietDue = flag('--quiet-summary') || (now.getUTCHours() === quietHour && state.lastQuietSummary !== today);
-if (!baseline && !alerts.length && !feedAlerts.length && quietDue) {
+if (!baseline && !scanOnly && !alerts.length && !feedAlerts.length && quietDue) {
   await deliver('quiet summary', quietMessage({
     now,
     counts: { packages: watchlist.packages.length, feeds: watchlist.feeds.length, repos: watchlist.repos.length },
@@ -234,7 +245,7 @@ if (!baseline && !alerts.length && !feedAlerts.length && quietDue) {
     errors: [...errors, ...warnings],
   }));
   if (!dryRun) state.lastQuietSummary = today;
-} else if (errors.length && !dryRun) {
+} else if (errors.length && !dryRun && !scanOnly) {
   await deliver('errors', errorMessage([...errors, ...warnings], now));
 }
 
@@ -255,6 +266,23 @@ if (!dryRun) {
 } else {
   log('dry run: state.json not written');
 }
+
+// report.json is written on every run, dry or not: it is the hand-off to whoever does the telling.
+const published = new Map();
+for (const o of stillOpen) {
+  for (const id of o.ids) {
+    for (const p of state.advisories[id].packages) {
+      if (p.name !== o.pkg || !p.fixed || !/^\d+\.\d+\.\d+/.test(p.fixed)) continue;
+      const key = `${p.name}@${p.fixed}`;
+      if (!published.has(key)) published.set(key, await npmPublished(p.name, p.fixed));
+    }
+  }
+}
+const report = buildReport({
+  now, apps: repoStatus, advisories: state.advisories, published, feedAlerts, watchlist, errors, warnings,
+});
+await writeFile(new URL('report.json', ROOT), JSON.stringify(report, null, 2) + '\n');
+log(`report.json written: status ${report.status}, ${report.summary.open} open (${report.summary.critical} critical, ${report.summary.high} high), ${report.summary.newOpen} new`);
 
 try {
   const rl = await gh.rateLimit();
