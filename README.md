@@ -4,9 +4,11 @@ A scheduled scan that reads vendor security advisories the minute they are publi
 
 Why not `pnpm audit`, Dependabot or OSV: they all read the GitHub Advisory Database, which only lists an advisory after GitHub's curation team has reviewed it. Measured on the Next.js releases of 22 Sep and 14 Oct 2026, that review took 8 days each time. The maintainer's own repository advisory, which this scan reads first, is live the same minute as the fix.
 
-## Pilot scope
+## Scope is the watchlist, nothing else
 
-`watchlist.json` currently covers one project, **vectorlabs-bigcommerce-sanity**, as two apps (`web/` storefront and `sanity/` Studio), and ten packages: next, react, react-dom, sharp, next-sanity, sanity, @sanity/client, next-auth, jose, sanitize-html. The other eleven SupremeOpti apps found on 2026-10-27 are listed in `watchlist.all-repos.json`, ready to move across once the pilot has run for a while.
+`watchlist.json` is the only place scope lives. Every row in `repos[]` is one app (a repo plus a lockfile path); every row in `packages[]` is one package to watch. The scan checks exactly what is listed: ten rows means ten apps, one row means one app. The report groups apps by repo (`project`), so a repo with two lockfiles shows as one project with two apps. The Claude routine that sends the email reads the report and adapts to however many projects it finds, with no per-project configuration anywhere else.
+
+Today it lists one project, **vectorlabs-bigcommerce-sanity** (`web` and `sanity` apps), and ten packages. The other eleven SupremeOpti apps found on 2026-10-27 are in `watchlist.all-repos.json`; copy a row into `watchlist.json` to add it. A `label` on a repo row is optional and defaults to the lockfile's folder.
 
 ## How a scan works
 
@@ -27,7 +29,8 @@ The scan posts nothing and opens nothing. The Slack and issue code paths still e
 | --- | --- |
 | `status` | `RED` (an open critical or high), `AMBER` (open moderate or low only), `GREEN` (nothing open), `UNKNOWN` (a lockfile could not be read or a source failed; see `errors` and `warnings`) |
 | `summary` | counts: open, by severity, `newOpen`, `newNotAffecting` |
-| `apps[]` | per app: `installed` versions, `open[]` advisories (sorted critical first, each with `fixed`, `fixedOnNpm` and `isNew`), `upgrades[]` and the `command` that applies them |
+| `projects[]` | one row per repo, worst status first: `project`, `status`, `open`, `critical`, `high`, `newOpen`, `apps`, `affectedApps` |
+| `apps[]` | per app: `project`, `label`, `installed` versions, `open[]` advisories (sorted critical first, each with `fixed`, `fixedOnNpm` and `isNew`), `upgrades[]` and the `command` that applies them |
 | `newNotAffecting[]` | advisories first seen in the last 26 hours that hit none of our installed versions |
 | `feedItemsNew[]` | Node.js feed posts first seen this run |
 | `checked` | the package list, app count, and sources used |

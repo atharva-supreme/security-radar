@@ -12,8 +12,8 @@
     { "name": "sanitize-html",  "repo": "apostrophecms/sanitize-html" }
   ],
   "repos": [
-    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity", "lockfile": "web/pnpm-lock.yaml",    "packageJson": "web/core/package.json", "label": "web (storefront)" },
-    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity", "lockfile": "sanity/pnpm-lock.yaml", "packageJson": "sanity/package.json",   "label": "sanity (Studio)" }
+    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity", "lockfile": "web/pnpm-lock.yaml",    "packageJson": "web/core/package.json", "label": "web" },
+    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity", "lockfile": "sanity/pnpm-lock.yaml", "packageJson": "sanity/package.json",   "label": "sanity" }
   ],
   "feeds": [
     { "name": "Node.js vulnerability reports", "url": "https://nodejs.org/en/feed/vulnerability.xml" }

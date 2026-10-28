@@ -29,6 +29,17 @@ test('report: status, upgrades, command, new flags', () => {
   assert.equal(r.apps[1].open.length, 0);
   assert.equal(r.newNotAffecting.length, 1);
   assert.equal(r.newNotAffecting[0].id, 'GHSA-cccc');
+  assert.equal(r.apps[0].project, 'r');
+  assert.deepEqual(r.projects.map((p) => [p.project, p.status, p.critical, p.affectedApps]), [['r', 'RED', 1, ['web']]]);
+});
+
+test('report: projects are summarised one row per repo, worst first', () => {
+  const other = { repo: 'o/clean', lockfile: 'pnpm-lock.yaml', label: 'root', ok: true, versions: new Map([['next', ['16.4.1']]]) };
+  const broken = { repo: 'o/broken', lockfile: 'web/pnpm-lock.yaml', label: 'web', ok: false };
+  const r = buildReport({ now, apps: [other, ...apps, broken], advisories, watchlist });
+  assert.equal(r.status, 'UNKNOWN');
+  assert.deepEqual(r.projects.map((p) => [p.project, p.status]), [['r', 'RED'], ['broken', 'UNKNOWN'], ['clean', 'GREEN']]);
+  assert.equal(r.checked.projects, 3);
 });
 
 test('report: upgrade target climbs past a fix that has its own advisory', () => {

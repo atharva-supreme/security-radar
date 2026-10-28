@@ -1,6 +1,6 @@
 {
-  "schema": 1,
-  "generatedAt": "2026-10-28T06:34:31.849Z",
+  "schema": 2,
+  "generatedAt": "2026-10-28T06:58:49.266Z",
   "status": "RED",
   "summary": {
     "open": 27,
@@ -11,11 +11,30 @@
     "newOpen": 2,
     "newNotAffecting": 2
   },
+  "projects": [
+    {
+      "project": "vectorlabs-bigcommerce-sanity",
+      "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
+      "status": "RED",
+      "open": 27,
+      "critical": 5,
+      "high": 10,
+      "newOpen": 2,
+      "apps": [
+        "web",
+        "sanity"
+      ],
+      "affectedApps": [
+        "web"
+      ]
+    }
+  ],
   "apps": [
     {
+      "project": "vectorlabs-bigcommerce-sanity",
       "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
       "lockfile": "web/pnpm-lock.yaml",
-      "label": "web (storefront)",
+      "label": "web",
       "ok": true,
       "installed": {
         "next": [
@@ -477,9 +496,10 @@
       "command": "cd web && pnpm up next@16.4.1 sharp@0.35.5 next-auth@5.0.0-beta.32 sanitize-html@2.18.1"
     },
     {
+      "project": "vectorlabs-bigcommerce-sanity",
       "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
       "lockfile": "sanity/pnpm-lock.yaml",
-      "label": "sanity (Studio)",
+      "label": "sanity",
       "ok": true,
       "installed": {
         "react": [
@@ -546,6 +566,7 @@
       "jose",
       "sanitize-html"
     ],
+    "projects": 1,
     "apps": 2,
     "advisoriesKnown": 119,
     "sources": [
