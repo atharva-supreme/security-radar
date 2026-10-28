@@ -1,4 +1,5 @@
 {
+  "branches": ["main", "staging"],
   "packages": [
     { "name": "next",           "repo": "vercel/next.js" },
     { "name": "react",          "repo": "facebook/react" },
@@ -12,8 +13,10 @@
     { "name": "sanitize-html",  "repo": "apostrophecms/sanitize-html" }
   ],
   "repos": [
-    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity", "lockfile": "web/pnpm-lock.yaml",    "packageJson": "web/core/package.json", "label": "web" },
-    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity", "lockfile": "sanity/pnpm-lock.yaml", "packageJson": "sanity/package.json",   "label": "sanity" }
+    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",       "lockfile": "web/pnpm-lock.yaml",    "packageJson": "web/core/package.json", "label": "web" },
+    { "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",       "lockfile": "sanity/pnpm-lock.yaml", "packageJson": "sanity/package.json",   "label": "sanity" },
+    { "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity", "lockfile": "web/pnpm-lock.yaml",    "packageJson": "web/core/package.json", "label": "web" },
+    { "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity", "lockfile": "sanity/pnpm-lock.yaml", "packageJson": "sanity/package.json",   "label": "sanity" }
   ],
   "feeds": [
     { "name": "Node.js vulnerability reports", "url": "https://nodejs.org/en/feed/vulnerability.xml" }

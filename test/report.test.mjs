@@ -24,13 +24,40 @@ test('report: status, upgrades, command, new flags', () => {
   assert.equal(web.open[0].id, 'GHSA-aaaa');
   assert.equal(web.open[0].isNew, true);
   assert.equal(web.open[0].fixedOnNpm, true);
-  assert.deepEqual(web.upgrades, [{ package: 'next', from: ['16.2.12'], to: '16.4.1', closes: 2 }]);
+  assert.deepEqual(web.upgrades, [{ package: 'next', from: ['16.2.12'], transitive: [], to: '16.4.1', closes: 2, worst: 'critical' }]);
   assert.equal(web.command, 'cd web && pnpm up next@16.4.1');
   assert.equal(r.apps[1].open.length, 0);
   assert.equal(r.newNotAffecting.length, 1);
   assert.equal(r.newNotAffecting[0].id, 'GHSA-cccc');
   assert.equal(r.apps[0].project, 'r');
   assert.deepEqual(r.projects.map((p) => [p.project, p.status, p.critical, p.affectedApps]), [['r', 'RED', 1, ['web']]]);
+});
+
+test('report: early, open-days, direct and transitive facts', () => {
+  const adv = {
+    'GHSA-e': { severity: 'critical', summary: 'rce', url: 'u', published_at: '2026-10-20T02:00:00Z', firstSeen: '2026-10-27T00:00:00Z', sources: ['repo:lovell/sharp'], packages: [{ name: 'sharp', range: '< 0.35.5', fixed: '0.35.5' }] },
+    'GHSA-r': { severity: 'high', summary: 'dos', url: 'u', published_at: '2026-10-01T02:00:00Z', firstSeen: '2026-10-01T02:00:00Z', sources: ['repo:vercel/next.js', 'global'], packages: [{ name: 'next', range: '< 16.4.1', fixed: '16.4.1' }] },
+  };
+  const app = {
+    repo: 'o/r', branch: 'staging', lockfile: 'web/pnpm-lock.yaml', label: 'web', ok: true,
+    versions: new Map([['next', ['16.2.12']], ['sharp', ['0.33.5', '0.34.5']]]),
+    direct: new Map([['next', new Set(['16.2.12'])], ['sharp', new Set()]]),
+  };
+  const r = buildReport({ now, apps: [app], advisories: adv, watchlist });
+  const byId = Object.fromEntries(r.apps[0].open.map((o) => [`${o.id}@${o.installed}`, o]));
+  assert.equal(byId['GHSA-e@0.33.5'].early, true);
+  assert.equal(byId['GHSA-r@16.2.12'].early, false);
+  assert.equal(byId['GHSA-e@0.33.5'].openDays, 7);
+  assert.equal(byId['GHSA-r@16.2.12'].direct, true);
+  assert.equal(byId['GHSA-e@0.34.5'].direct, false);
+  const sharp = r.apps[0].upgrades.find((u) => u.package === 'sharp');
+  assert.deepEqual(sharp.transitive, ['0.33.5', '0.34.5']);
+  assert.equal(sharp.worst, 'critical');
+  assert.match(r.apps[0].notes[0], /sharp 0.33.5, 0.34.5 is not a direct dependency of web/);
+  assert.equal(r.summary.early, 2);
+  assert.equal(r.summary.oldestCriticalOpenDays, 26);
+  assert.equal(r.projects[0].branch, 'staging');
+  assert.equal(r.projects[0].early, 2);
 });
 
 test('report: projects are summarised one row per repo, worst first', () => {

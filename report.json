@@ -1,25 +1,83 @@
 {
   "schema": 2,
-  "generatedAt": "2026-10-28T06:58:49.266Z",
+  "generatedAt": "2026-10-28T08:28:04.036Z",
   "status": "RED",
   "summary": {
-    "open": 27,
+    "open": 42,
     "critical": 5,
-    "high": 10,
-    "moderate": 10,
+    "high": 19,
+    "moderate": 16,
     "low": 2,
-    "newOpen": 2,
+    "newOpen": 4,
+    "early": 0,
+    "oldestCriticalOpenDays": 102,
     "newNotAffecting": 2
   },
   "projects": [
     {
+      "project": "bostonbioproducts-bigcommerce-sanity",
+      "branch": "main",
+      "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity",
+      "status": "RED",
+      "open": 3,
+      "critical": 0,
+      "high": 3,
+      "newOpen": 0,
+      "early": 0,
+      "apps": [
+        "web",
+        "sanity"
+      ],
+      "affectedApps": [
+        "web"
+      ]
+    },
+    {
+      "project": "bostonbioproducts-bigcommerce-sanity",
+      "branch": "staging",
+      "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity",
+      "status": "RED",
+      "open": 3,
+      "critical": 0,
+      "high": 3,
+      "newOpen": 0,
+      "early": 0,
+      "apps": [
+        "web",
+        "sanity"
+      ],
+      "affectedApps": [
+        "web"
+      ]
+    },
+    {
       "project": "vectorlabs-bigcommerce-sanity",
+      "branch": "main",
       "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
       "status": "RED",
       "open": 27,
       "critical": 5,
       "high": 10,
       "newOpen": 2,
+      "early": 0,
+      "apps": [
+        "web",
+        "sanity"
+      ],
+      "affectedApps": [
+        "web"
+      ]
+    },
+    {
+      "project": "vectorlabs-bigcommerce-sanity",
+      "branch": "staging",
+      "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
+      "status": "RED",
+      "open": 9,
+      "critical": 0,
+      "high": 3,
+      "newOpen": 2,
+      "early": 0,
       "apps": [
         "web",
         "sanity"
@@ -32,6 +90,7 @@
   "apps": [
     {
       "project": "vectorlabs-bigcommerce-sanity",
+      "branch": "main",
       "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
       "lockfile": "web/pnpm-lock.yaml",
       "label": "web",
@@ -79,10 +138,13 @@
           "summary": "Unauthenticated Remote Code Execution in `use cache` functions returning typed arrays",
           "url": "https://github.com/vercel/next.js/security/advisories/GHSA-673q-mjm6-r5xr",
           "published_at": "2026-10-14T17:47:07Z",
+          "openDays": 13,
           "firstSeen": "2026-10-14T17:47:07Z",
           "isNew": false,
+          "early": false,
           "package": "next",
           "installed": "16.2.12",
+          "direct": true,
           "fixed": "16.4.1",
           "fixedOnNpm": true
         },
@@ -93,10 +155,13 @@
           "summary": "Unauthenticated Remote Code Execution in Image Optimization API when SVG files are used",
           "url": "https://github.com/vercel/next.js/security/advisories/GHSA-2464-fhr4-w9xw",
           "published_at": "2026-10-14T17:46:48Z",
+          "openDays": 13,
           "firstSeen": "2026-10-14T17:46:48Z",
           "isNew": false,
+          "early": false,
           "package": "next",
           "installed": "16.2.12",
+          "direct": true,
           "fixed": "16.4.1",
           "fixedOnNpm": true
         },
@@ -107,10 +172,13 @@
           "summary": "Remote Code Execution in next/og ImageResponse",
           "url": "https://github.com/vercel/next.js/security/advisories/GHSA-vcvr-r3jv-pc5j",
           "published_at": "2026-09-22T17:03:51Z",
+          "openDays": 35,
           "firstSeen": "2026-09-22T17:03:51Z",
           "isNew": false,
+          "early": false,
           "package": "next",
           "installed": "16.2.12",
+          "direct": true,
           "fixed": "16.3.6",
           "fixedOnNpm": true
         },
@@ -121,10 +189,13 @@
           "summary": "Unauthenticated Remote Code Execution in Image Optimization API when AVIF files are used",
           "url": "https://github.com/vercel/next.js/security/advisories/GHSA-2xp9-vwfh-vxw4",
           "published_at": "2026-08-25T16:16:28Z",
+          "openDays": 63,
           "firstSeen": "2026-08-25T16:16:28Z",
           "isNew": false,
+          "early": false,
           "package": "next",
           "installed": "16.2.12",
+          "direct": true,
           "fixed": "16.3.3",
           "fixedOnNpm": true
         },
@@ -135,10 +206,13 @@
           "summary": "Unauthenticated Remote Code Execution on windows-hosted servers",
           "url": "https://github.com/vercel/next.js/security/advisories/GHSA-p293-qw3h-jr36",
           "published_at": "2026-08-25T16:15:42Z",
+          "openDays": 63,
           "firstSeen": "2026-08-25T16:15:42Z",
           "isNew": false,
+          "early": false,
           "package": "next",
           "installed": "16.2.12",
+          "direct": true,
           "fixed": "16.3.3",
           "fixedOnNpm": true
         },
@@ -149,10 +223,13 @@
           "summary": "Denial of Service in App Router using Server Actions",
           "url": "https://github.com/vercel/next.js/security/advisories/GHSA-p3m5-59mp-jv5r",
           "published_at": "2026-10-14T17:47:43Z",
+          "openDays": 13,
           "firstSeen": "2026-10-14T17:47:43Z",
           "isNew": false,
+          "early": false,
           "package": "next",
           "installed": "16.2.12",
+          "direct": true,
           "fixed": "16.4.1",
           "fixedOnNpm": true
         },
@@ -163,10 +240,13 @@
           "summary": "Vulnerability in librsvg dependency CVE-2026-96889",
           "url": "https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w",
           "published_at": "2026-09-30T19:22:51Z",
+          "openDays": 27,
           "firstSeen": "2026-09-30T19:22:51Z",
           "isNew": false,
+          "early": false,
           "package": "sharp",
           "installed": "0.33.5",
+          "direct": false,
           "fixed": "0.35.5",
           "fixedOnNpm": true
         },
@@ -177,10 +257,13 @@
           "summary": "Vulnerability in librsvg dependency CVE-2026-96889",
           "url": "https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w",
           "published_at": "2026-09-30T19:22:51Z",
+          "openDays": 27,
           "firstSeen": "2026-09-30T19:22:51Z",
           "isNew": false,
+          "early": false,
           "package": "sharp",
           "installed": "0.34.5",
+          "direct": false,
           "fixed": "0.35.5",
           "fixedOnNpm": true
         },
@@ -191,10 +274,13 @@
           "summary": "Server-Side Request Forgery in Image Optimization",
           "url": "https://github.com/vercel/next.js/security/advisories/GHSA-cjq9-62q9-8jv4",
           "published_at": "2026-09-30T16:15:36Z",
+          "openDays": 27,
           "firstSeen": "2026-09-30T16:15:36Z",
           "isNew": false,
+          "early": false,
           "package": "next",
           "installed": "16.2.12",
+          "direct": true,
           "fixed": "16.3.8",
           "fixedOnNpm": true
         },
@@ -205,10 +291,13 @@
           "summary": "Vulnerabilities in libheif: CVE-2026-84383 and GHSA-2jg2-4ch7-h545",
           "url": "https://github.com/lovell/sharp/security/advisories/GHSA-rgj7-g3m4-5g8c",
           "published_at": "2026-08-27T09:33:22Z",
+          "openDays": 61,
           "firstSeen": "2026-08-27T09:33:22Z",
           "isNew": false,
+          "early": false,
           "package": "sharp",
           "installed": "0.33.5",
+          "direct": false,
           "fixed": "0.35.4",
           "fixedOnNpm": true
         },
@@ -219,10 +308,13 @@
           "summary": "Vulnerabilities in libheif: CVE-2026-84383 and GHSA-2jg2-4ch7-h545",
           "url": "https://github.com/lovell/sharp/security/advisories/GHSA-rgj7-g3m4-5g8c",
           "published_at": "2026-08-27T09:33:22Z",
+          "openDays": 61,
           "firstSeen": "2026-08-27T09:33:22Z",
           "isNew": false,
+          "early": false,
           "package": "sharp",
           "installed": "0.34.5",
+          "direct": false,
           "fixed": "0.35.4",
           "fixedOnNpm": true
         },
@@ -233,10 +325,13 @@
           "summary": "Email normalizer validates the address before Unicode normalization, allowing a homoglyph @ bypass",
           "url": "https://github.com/nextauthjs/next-auth/security/advisories/GHSA-7rqj-j65f-68wh",
           "published_at": "2026-07-20T23:36:12Z",
+          "openDays": 99,
           "firstSeen": "2026-07-20T23:36:12Z",
           "isNew": false,
+          "early": false,
           "package": "next-auth",
           "installed": "5.0.0-beta.30",
+          "direct": true,
           "fixed": "5.0.0-beta.32",
           "fixedOnNpm": true
         },
@@ -247,10 +342,13 @@
           "summary": "getToken() throws an uncaught exception on malformed Bearer authorization headers",
           "url": "https://github.com/nextauthjs/next-auth/security/advisories/GHSA-xmf8-cvqr-rfgj",
           "published_at": "2026-07-20T23:35:56Z",
+          "openDays": 99,
           "firstSeen": "2026-07-20T23:35:56Z",
           "isNew": false,
+          "early": false,
           "package": "next-auth",
           "installed": "5.0.0-beta.30",
+          "direct": true,
           "fixed": "5.0.0-beta.32",
           "fixedOnNpm": true
         },
@@ -261,10 +359,13 @@
           "summary": "Vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591, CVE-2026-69242",
           "url": "https://github.com/lovell/sharp/security/advisories/GHSA-f88m-g3jw-g9cj",
           "published_at": "2026-07-17T10:48:23Z",
+          "openDays": 102,
           "firstSeen": "2026-07-17T10:48:23Z",
           "isNew": false,
+          "early": false,
           "package": "sharp",
           "installed": "0.33.5",
+          "direct": false,
           "fixed": "0.35.0",
           "fixedOnNpm": true
         },
@@ -275,10 +376,13 @@
           "summary": "Vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591, CVE-2026-69242",
           "url": "https://github.com/lovell/sharp/security/advisories/GHSA-f88m-g3jw-g9cj",
           "published_at": "2026-07-17T10:48:23Z",
+          "openDays": 102,
           "firstSeen": "2026-07-17T10:48:23Z",
           "isNew": false,
+          "early": false,
           "package": "sharp",
           "installed": "0.34.5",
+          "direct": false,
           "fixed": "0.35.0",
           "fixedOnNpm": true
         },
@@ -289,10 +393,13 @@
           "summary": "ApostropheCMS: Incomplete CVE-2026-53606: `meta http-equiv=refresh` `content` still ships `javascript:` / `data:` URLs",
           "url": "https://github.com/advisories/GHSA-cv27-6wvh-8x7j",
           "published_at": "2026-10-20T18:15:33Z",
+          "openDays": 7,
           "firstSeen": "2026-10-27T13:44:54.617Z",
           "isNew": true,
+          "early": false,
           "package": "sanitize-html",
           "installed": "2.17.2",
+          "direct": true,
           "fixed": "2.18.0",
           "fixedOnNpm": true
         },
@@ -303,10 +410,13 @@
           "summary": "ApostropheCMS sanitize-html: nonTextTags discard region ends early on an implied close, letting <noscript> content render",
           "url": "https://github.com/advisories/GHSA-x3q4-9hxx-gx8m",
           "published_at": "2026-10-20T18:03:22Z",
+          "openDays": 7,
           "firstSeen": "2026-10-27T13:44:54.617Z",
           "isNew": true,
+          "early": false,
           "package": "sanitize-html",
           "installed": "2.17.2",
+          "direct": true,
           "fixed": "2.18.0",
           "fixedOnNpm": true
         },
@@ -317,10 +427,13 @@
           "summary": "Information disclosure in Next.js App Router metadata image routes via dynamicParams bypass",
           "url": "https://github.com/vercel/next.js/security/advisories/GHSA-f87g-xv8r-7p7x",
           "published_at": "2026-09-30T16:14:44Z",
+          "openDays": 27,
           "firstSeen": "2026-09-30T16:14:44Z",
           "isNew": false,
+          "early": false,
           "package": "next",
           "installed": "16.2.12",
+          "direct": true,
           "fixed": "16.3.8",
           "fixedOnNpm": true
         },
@@ -331,10 +444,13 @@
           "summary": "Cache poisoning of SSG and ISR pages in self-hosted Next.js applications",
           "url": "https://github.com/vercel/next.js/security/advisories/GHSA-4jqv-mc3x-m676",
           "published_at": "2026-09-30T16:14:22Z",
+          "openDays": 27,
           "firstSeen": "2026-09-30T16:14:22Z",
           "isNew": false,
+          "early": false,
           "package": "next",
           "installed": "16.2.12",
+          "direct": true,
           "fixed": "16.3.8",
           "fixedOnNpm": true
         },
@@ -345,10 +461,13 @@
           "summary": "Cache poisoning in Next.js SSG/ISR rendering leads to cross-user content substitution and persistent denial of service",
           "url": "https://github.com/vercel/next.js/security/advisories/GHSA-mcj8-r9mp-w47p",
           "published_at": "2026-09-30T16:14:19Z",
+          "openDays": 27,
           "firstSeen": "2026-09-30T16:14:19Z",
           "isNew": false,
+          "early": false,
           "package": "next",
           "installed": "16.2.12",
+          "direct": true,
           "fixed": "16.3.8",
           "fixedOnNpm": true
         },
@@ -359,10 +478,13 @@
           "summary": "ApostropheCMS: Mutation-XSS / allowedTags bypass via literal `</textarea/>` solidus close",
           "url": "https://github.com/advisories/GHSA-jxwj-j7wr-gfrw",
           "published_at": "2026-09-03T20:07:16Z",
+          "openDays": 54,
           "firstSeen": "2026-09-03T20:07:16Z",
           "isNew": false,
+          "early": false,
           "package": "sanitize-html",
           "installed": "2.17.2",
+          "direct": true,
           "fixed": "2.17.6",
           "fixedOnNpm": true
         },
@@ -373,10 +495,13 @@
           "summary": "ApostropheCMS: Stored XSS via SVG SMIL URI-list scheme-policy bypass",
           "url": "https://github.com/advisories/GHSA-g8qq-57p8-ggw5",
           "published_at": "2026-09-01T21:20:01Z",
+          "openDays": 56,
           "firstSeen": "2026-09-01T21:20:01Z",
           "isNew": false,
+          "early": false,
           "package": "sanitize-html",
           "installed": "2.17.2",
+          "direct": true,
           "fixed": "2.17.7",
           "fixedOnNpm": true
         },
@@ -387,10 +512,13 @@
           "summary": "sanitize-html has incomplete URI scheme validation in that allows javascript: URIs through action, formaction, data, poster, and background attributes",
           "url": "https://github.com/advisories/GHSA-vccv-cmxp-4j9h",
           "published_at": "2026-07-31T21:43:51Z",
+          "openDays": 88,
           "firstSeen": "2026-07-31T21:43:51Z",
           "isNew": false,
+          "early": false,
           "package": "sanitize-html",
           "installed": "2.17.2",
+          "direct": true,
           "fixed": "2.17.5",
           "fixedOnNpm": true
         },
@@ -401,10 +529,13 @@
           "summary": "OAuth state, nonce, and PKCE check cookies are not bound to the provider that created them",
           "url": "https://github.com/nextauthjs/next-auth/security/advisories/GHSA-x445-f3h2-j279",
           "published_at": "2026-07-20T23:36:15Z",
+          "openDays": 99,
           "firstSeen": "2026-07-20T23:36:15Z",
           "isNew": false,
+          "early": false,
           "package": "next-auth",
           "installed": "5.0.0-beta.30",
+          "direct": true,
           "fixed": "5.0.0-beta.32",
           "fixedOnNpm": true
         },
@@ -415,10 +546,13 @@
           "summary": "sanitize-html allowedTags Bypass via Entity-Decoded Text in nonTextTags Elements",
           "url": "https://github.com/advisories/GHSA-9mrh-v2v3-xpfm",
           "published_at": "2026-04-16T21:08:29Z",
+          "openDays": 194,
           "firstSeen": "2026-04-16T21:08:29Z",
           "isNew": false,
+          "early": false,
           "package": "sanitize-html",
           "installed": "2.17.2",
+          "direct": true,
           "fixed": "2.17.3",
           "fixedOnNpm": true
         },
@@ -429,10 +563,13 @@
           "summary": "Information disclosure in the Next.js development server's Model Context Protocol endpoint",
           "url": "https://github.com/vercel/next.js/security/advisories/GHSA-39w2-rjm5-chcv",
           "published_at": "2026-09-30T16:14:15Z",
+          "openDays": 27,
           "firstSeen": "2026-09-30T16:14:15Z",
           "isNew": false,
+          "early": false,
           "package": "next",
           "installed": "16.2.12",
+          "direct": true,
           "fixed": "16.3.8",
           "fixedOnNpm": true
         },
@@ -443,10 +580,13 @@
           "summary": "Configuration errors can cause existence-based auth checks to fail open (auth object populated with an error)",
           "url": "https://github.com/nextauthjs/next-auth/security/advisories/GHSA-8fpg-xm3f-6cx3",
           "published_at": "2026-07-20T23:36:13Z",
+          "openDays": 99,
           "firstSeen": "2026-07-20T23:36:13Z",
           "isNew": false,
+          "early": false,
           "package": "next-auth",
           "installed": "5.0.0-beta.30",
+          "direct": true,
           "fixed": "5.0.0-beta.32",
           "fixedOnNpm": true
         }
@@ -464,8 +604,10 @@
           "from": [
             "16.2.12"
           ],
+          "transitive": [],
           "to": "16.4.1",
-          "closes": 11
+          "closes": 11,
+          "worst": "critical"
         },
         {
           "package": "sharp",
@@ -473,30 +615,277 @@
             "0.33.5",
             "0.34.5"
           ],
+          "transitive": [
+            "0.33.5",
+            "0.34.5"
+          ],
           "to": "0.35.5",
-          "closes": 6
+          "closes": 6,
+          "worst": "high"
         },
         {
           "package": "next-auth",
           "from": [
             "5.0.0-beta.30"
           ],
+          "transitive": [],
           "to": "5.0.0-beta.32",
-          "closes": 4
+          "closes": 4,
+          "worst": "high"
         },
         {
           "package": "sanitize-html",
           "from": [
             "2.17.2"
           ],
+          "transitive": [],
           "to": "2.18.1",
-          "closes": 6
+          "closes": 6,
+          "worst": "medium"
         }
+      ],
+      "notes": [
+        "sharp 0.33.5, 0.34.5 is not a direct dependency of web: it comes through another package. pnpm up will not move it; upgrade the package that pulls it in, or add a pnpm override for sharp@0.35.5."
       ],
       "command": "cd web && pnpm up next@16.4.1 sharp@0.35.5 next-auth@5.0.0-beta.32 sanitize-html@2.18.1"
     },
     {
       "project": "vectorlabs-bigcommerce-sanity",
+      "branch": "staging",
+      "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
+      "lockfile": "web/pnpm-lock.yaml",
+      "label": "web",
+      "ok": true,
+      "installed": {
+        "next": [
+          "16.4.3"
+        ],
+        "react": [
+          "19.2.7"
+        ],
+        "react-dom": [
+          "19.2.7"
+        ],
+        "sharp": [
+          "0.33.5",
+          "0.35.5"
+        ],
+        "next-sanity": [
+          "13.1.4"
+        ],
+        "sanity": [
+          "6.5.0"
+        ],
+        "@sanity/client": [
+          "7.24.0",
+          "8.11.0"
+        ],
+        "next-auth": [
+          "5.0.0-beta.32"
+        ],
+        "jose": [
+          "5.10.0",
+          "6.1.3"
+        ],
+        "sanitize-html": [
+          "2.17.2"
+        ]
+      },
+      "node": null,
+      "open": [
+        {
+          "id": "GHSA-wq5f-xc86-pv6w",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerability in librsvg dependency CVE-2026-96889",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w",
+          "published_at": "2026-09-30T19:22:51Z",
+          "openDays": 27,
+          "firstSeen": "2026-09-30T19:22:51Z",
+          "isNew": false,
+          "early": false,
+          "package": "sharp",
+          "installed": "0.33.5",
+          "direct": false,
+          "fixed": "0.35.5",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-rgj7-g3m4-5g8c",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerabilities in libheif: CVE-2026-84383 and GHSA-2jg2-4ch7-h545",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-rgj7-g3m4-5g8c",
+          "published_at": "2026-08-27T09:33:22Z",
+          "openDays": 61,
+          "firstSeen": "2026-08-27T09:33:22Z",
+          "isNew": false,
+          "early": false,
+          "package": "sharp",
+          "installed": "0.33.5",
+          "direct": false,
+          "fixed": "0.35.4",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-f88m-g3jw-g9cj",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591, CVE-2026-69242",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-f88m-g3jw-g9cj",
+          "published_at": "2026-07-17T10:48:23Z",
+          "openDays": 102,
+          "firstSeen": "2026-07-17T10:48:23Z",
+          "isNew": false,
+          "early": false,
+          "package": "sharp",
+          "installed": "0.33.5",
+          "direct": false,
+          "fixed": "0.35.0",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-cv27-6wvh-8x7j",
+          "severity": "medium",
+          "cve": "CVE-2026-113661",
+          "summary": "ApostropheCMS: Incomplete CVE-2026-53606: `meta http-equiv=refresh` `content` still ships `javascript:` / `data:` URLs",
+          "url": "https://github.com/advisories/GHSA-cv27-6wvh-8x7j",
+          "published_at": "2026-10-20T18:15:33Z",
+          "openDays": 7,
+          "firstSeen": "2026-10-27T13:44:54.617Z",
+          "isNew": true,
+          "early": false,
+          "package": "sanitize-html",
+          "installed": "2.17.2",
+          "direct": true,
+          "fixed": "2.18.0",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-x3q4-9hxx-gx8m",
+          "severity": "medium",
+          "cve": "CVE-2026-113654",
+          "summary": "ApostropheCMS sanitize-html: nonTextTags discard region ends early on an implied close, letting <noscript> content render",
+          "url": "https://github.com/advisories/GHSA-x3q4-9hxx-gx8m",
+          "published_at": "2026-10-20T18:03:22Z",
+          "openDays": 7,
+          "firstSeen": "2026-10-27T13:44:54.617Z",
+          "isNew": true,
+          "early": false,
+          "package": "sanitize-html",
+          "installed": "2.17.2",
+          "direct": true,
+          "fixed": "2.18.0",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-jxwj-j7wr-gfrw",
+          "severity": "medium",
+          "cve": "CVE-2026-63670",
+          "summary": "ApostropheCMS: Mutation-XSS / allowedTags bypass via literal `</textarea/>` solidus close",
+          "url": "https://github.com/advisories/GHSA-jxwj-j7wr-gfrw",
+          "published_at": "2026-09-03T20:07:16Z",
+          "openDays": 54,
+          "firstSeen": "2026-09-03T20:07:16Z",
+          "isNew": false,
+          "early": false,
+          "package": "sanitize-html",
+          "installed": "2.17.2",
+          "direct": true,
+          "fixed": "2.17.6",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-g8qq-57p8-ggw5",
+          "severity": "medium",
+          "cve": "CVE-2026-84371",
+          "summary": "ApostropheCMS: Stored XSS via SVG SMIL URI-list scheme-policy bypass",
+          "url": "https://github.com/advisories/GHSA-g8qq-57p8-ggw5",
+          "published_at": "2026-09-01T21:20:01Z",
+          "openDays": 56,
+          "firstSeen": "2026-09-01T21:20:01Z",
+          "isNew": false,
+          "early": false,
+          "package": "sanitize-html",
+          "installed": "2.17.2",
+          "direct": true,
+          "fixed": "2.17.7",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-vccv-cmxp-4j9h",
+          "severity": "medium",
+          "cve": "CVE-2026-53606",
+          "summary": "sanitize-html has incomplete URI scheme validation in that allows javascript: URIs through action, formaction, data, poster, and background attributes",
+          "url": "https://github.com/advisories/GHSA-vccv-cmxp-4j9h",
+          "published_at": "2026-07-31T21:43:51Z",
+          "openDays": 88,
+          "firstSeen": "2026-07-31T21:43:51Z",
+          "isNew": false,
+          "early": false,
+          "package": "sanitize-html",
+          "installed": "2.17.2",
+          "direct": true,
+          "fixed": "2.17.5",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-9mrh-v2v3-xpfm",
+          "severity": "medium",
+          "cve": "CVE-2026-40186",
+          "summary": "sanitize-html allowedTags Bypass via Entity-Decoded Text in nonTextTags Elements",
+          "url": "https://github.com/advisories/GHSA-9mrh-v2v3-xpfm",
+          "published_at": "2026-04-16T21:08:29Z",
+          "openDays": 194,
+          "firstSeen": "2026-04-16T21:08:29Z",
+          "isNew": false,
+          "early": false,
+          "package": "sanitize-html",
+          "installed": "2.17.2",
+          "direct": true,
+          "fixed": "2.17.3",
+          "fixedOnNpm": true
+        }
+      ],
+      "counts": {
+        "critical": 0,
+        "high": 3,
+        "moderate": 6,
+        "low": 0,
+        "unknown": 0
+      },
+      "upgrades": [
+        {
+          "package": "sharp",
+          "from": [
+            "0.33.5"
+          ],
+          "transitive": [
+            "0.33.5"
+          ],
+          "to": "0.35.5",
+          "closes": 3,
+          "worst": "high"
+        },
+        {
+          "package": "sanitize-html",
+          "from": [
+            "2.17.2"
+          ],
+          "transitive": [],
+          "to": "2.18.1",
+          "closes": 6,
+          "worst": "medium"
+        }
+      ],
+      "notes": [
+        "sharp 0.33.5 is not a direct dependency of web: it comes through another package. pnpm up will not move it; upgrade the package that pulls it in, or add a pnpm override for sharp@0.35.5."
+      ],
+      "command": "cd web && pnpm up sharp@0.35.5 sanitize-html@2.18.1"
+    },
+    {
+      "project": "vectorlabs-bigcommerce-sanity",
+      "branch": "main",
       "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
       "lockfile": "sanity/pnpm-lock.yaml",
       "label": "sanity",
@@ -525,6 +914,353 @@
         "unknown": 0
       },
       "upgrades": [],
+      "notes": [],
+      "command": null
+    },
+    {
+      "project": "vectorlabs-bigcommerce-sanity",
+      "branch": "staging",
+      "repo": "SupremeOpti/vectorlabs-bigcommerce-sanity",
+      "lockfile": "sanity/pnpm-lock.yaml",
+      "label": "sanity",
+      "ok": true,
+      "installed": {
+        "react": [
+          "19.3.1"
+        ],
+        "react-dom": [
+          "19.3.1"
+        ],
+        "sanity": [
+          "6.9.0"
+        ],
+        "@sanity/client": [
+          "7.26.2"
+        ]
+      },
+      "node": null,
+      "open": [],
+      "counts": {
+        "critical": 0,
+        "high": 0,
+        "moderate": 0,
+        "low": 0,
+        "unknown": 0
+      },
+      "upgrades": [],
+      "notes": [],
+      "command": null
+    },
+    {
+      "project": "bostonbioproducts-bigcommerce-sanity",
+      "branch": "main",
+      "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity",
+      "lockfile": "web/pnpm-lock.yaml",
+      "label": "web",
+      "ok": true,
+      "installed": {
+        "next": [
+          "16.4.2"
+        ],
+        "react": [
+          "19.3.1"
+        ],
+        "react-dom": [
+          "19.3.1"
+        ],
+        "sharp": [
+          "0.33.5",
+          "0.35.5"
+        ],
+        "next-sanity": [
+          "12.0.12"
+        ],
+        "sanity": [
+          "4.21.1"
+        ],
+        "@sanity/client": [
+          "6.29.1",
+          "7.14.0"
+        ],
+        "next-auth": [
+          "5.0.0-beta.32"
+        ],
+        "jose": [
+          "5.10.0",
+          "6.2.12"
+        ],
+        "sanitize-html": [
+          "2.18.1"
+        ]
+      },
+      "node": null,
+      "open": [
+        {
+          "id": "GHSA-wq5f-xc86-pv6w",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerability in librsvg dependency CVE-2026-96889",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w",
+          "published_at": "2026-09-30T19:22:51Z",
+          "openDays": 27,
+          "firstSeen": "2026-09-30T19:22:51Z",
+          "isNew": false,
+          "early": false,
+          "package": "sharp",
+          "installed": "0.33.5",
+          "direct": false,
+          "fixed": "0.35.5",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-rgj7-g3m4-5g8c",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerabilities in libheif: CVE-2026-84383 and GHSA-2jg2-4ch7-h545",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-rgj7-g3m4-5g8c",
+          "published_at": "2026-08-27T09:33:22Z",
+          "openDays": 61,
+          "firstSeen": "2026-08-27T09:33:22Z",
+          "isNew": false,
+          "early": false,
+          "package": "sharp",
+          "installed": "0.33.5",
+          "direct": false,
+          "fixed": "0.35.4",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-f88m-g3jw-g9cj",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591, CVE-2026-69242",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-f88m-g3jw-g9cj",
+          "published_at": "2026-07-17T10:48:23Z",
+          "openDays": 102,
+          "firstSeen": "2026-07-17T10:48:23Z",
+          "isNew": false,
+          "early": false,
+          "package": "sharp",
+          "installed": "0.33.5",
+          "direct": false,
+          "fixed": "0.35.0",
+          "fixedOnNpm": true
+        }
+      ],
+      "counts": {
+        "critical": 0,
+        "high": 3,
+        "moderate": 0,
+        "low": 0,
+        "unknown": 0
+      },
+      "upgrades": [
+        {
+          "package": "sharp",
+          "from": [
+            "0.33.5"
+          ],
+          "transitive": [
+            "0.33.5"
+          ],
+          "to": "0.35.5",
+          "closes": 3,
+          "worst": "high"
+        }
+      ],
+      "notes": [
+        "sharp 0.33.5 is not a direct dependency of web: it comes through another package. pnpm up will not move it; upgrade the package that pulls it in, or add a pnpm override for sharp@0.35.5."
+      ],
+      "command": "cd web && pnpm up sharp@0.35.5"
+    },
+    {
+      "project": "bostonbioproducts-bigcommerce-sanity",
+      "branch": "staging",
+      "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity",
+      "lockfile": "web/pnpm-lock.yaml",
+      "label": "web",
+      "ok": true,
+      "installed": {
+        "next": [
+          "16.4.2"
+        ],
+        "react": [
+          "19.3.1"
+        ],
+        "react-dom": [
+          "19.3.1"
+        ],
+        "sharp": [
+          "0.33.5",
+          "0.35.5"
+        ],
+        "next-sanity": [
+          "12.0.12"
+        ],
+        "sanity": [
+          "4.21.1"
+        ],
+        "@sanity/client": [
+          "6.29.1",
+          "7.14.0"
+        ],
+        "next-auth": [
+          "5.0.0-beta.32"
+        ],
+        "jose": [
+          "5.10.0",
+          "6.2.12"
+        ],
+        "sanitize-html": [
+          "2.18.1"
+        ]
+      },
+      "node": null,
+      "open": [
+        {
+          "id": "GHSA-wq5f-xc86-pv6w",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerability in librsvg dependency CVE-2026-96889",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w",
+          "published_at": "2026-09-30T19:22:51Z",
+          "openDays": 27,
+          "firstSeen": "2026-09-30T19:22:51Z",
+          "isNew": false,
+          "early": false,
+          "package": "sharp",
+          "installed": "0.33.5",
+          "direct": false,
+          "fixed": "0.35.5",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-rgj7-g3m4-5g8c",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerabilities in libheif: CVE-2026-84383 and GHSA-2jg2-4ch7-h545",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-rgj7-g3m4-5g8c",
+          "published_at": "2026-08-27T09:33:22Z",
+          "openDays": 61,
+          "firstSeen": "2026-08-27T09:33:22Z",
+          "isNew": false,
+          "early": false,
+          "package": "sharp",
+          "installed": "0.33.5",
+          "direct": false,
+          "fixed": "0.35.4",
+          "fixedOnNpm": true
+        },
+        {
+          "id": "GHSA-f88m-g3jw-g9cj",
+          "severity": "high",
+          "cve": null,
+          "summary": "Vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591, CVE-2026-69242",
+          "url": "https://github.com/lovell/sharp/security/advisories/GHSA-f88m-g3jw-g9cj",
+          "published_at": "2026-07-17T10:48:23Z",
+          "openDays": 102,
+          "firstSeen": "2026-07-17T10:48:23Z",
+          "isNew": false,
+          "early": false,
+          "package": "sharp",
+          "installed": "0.33.5",
+          "direct": false,
+          "fixed": "0.35.0",
+          "fixedOnNpm": true
+        }
+      ],
+      "counts": {
+        "critical": 0,
+        "high": 3,
+        "moderate": 0,
+        "low": 0,
+        "unknown": 0
+      },
+      "upgrades": [
+        {
+          "package": "sharp",
+          "from": [
+            "0.33.5"
+          ],
+          "transitive": [
+            "0.33.5"
+          ],
+          "to": "0.35.5",
+          "closes": 3,
+          "worst": "high"
+        }
+      ],
+      "notes": [
+        "sharp 0.33.5 is not a direct dependency of web: it comes through another package. pnpm up will not move it; upgrade the package that pulls it in, or add a pnpm override for sharp@0.35.5."
+      ],
+      "command": "cd web && pnpm up sharp@0.35.5"
+    },
+    {
+      "project": "bostonbioproducts-bigcommerce-sanity",
+      "branch": "main",
+      "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity",
+      "lockfile": "sanity/pnpm-lock.yaml",
+      "label": "sanity",
+      "ok": true,
+      "installed": {
+        "react": [
+          "19.3.1"
+        ],
+        "react-dom": [
+          "19.3.1"
+        ],
+        "sanity": [
+          "5.4.0"
+        ],
+        "@sanity/client": [
+          "7.14.0"
+        ]
+      },
+      "node": null,
+      "open": [],
+      "counts": {
+        "critical": 0,
+        "high": 0,
+        "moderate": 0,
+        "low": 0,
+        "unknown": 0
+      },
+      "upgrades": [],
+      "notes": [],
+      "command": null
+    },
+    {
+      "project": "bostonbioproducts-bigcommerce-sanity",
+      "branch": "staging",
+      "repo": "SupremeOpti/bostonbioproducts-bigcommerce-sanity",
+      "lockfile": "sanity/pnpm-lock.yaml",
+      "label": "sanity",
+      "ok": true,
+      "installed": {
+        "react": [
+          "19.3.1"
+        ],
+        "react-dom": [
+          "19.3.1"
+        ],
+        "sanity": [
+          "5.4.0"
+        ],
+        "@sanity/client": [
+          "7.14.0"
+        ]
+      },
+      "node": null,
+      "open": [],
+      "counts": {
+        "critical": 0,
+        "high": 0,
+        "moderate": 0,
+        "low": 0,
+        "unknown": 0
+      },
+      "upgrades": [],
+      "notes": [],
       "command": null
     }
   ],
@@ -566,8 +1302,8 @@
       "jose",
       "sanitize-html"
     ],
-    "projects": 1,
-    "apps": 2,
+    "projects": 4,
+    "apps": 8,
     "advisoriesKnown": 119,
     "sources": [
       "GitHub repository advisories (maintainer, same minute as release)",
