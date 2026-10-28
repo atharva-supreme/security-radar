@@ -8,29 +8,34 @@ export function makeClient({ token, userAgent = 'security-radar' } = {}) {
   };
   if (token) headers.authorization = `Bearer ${token}`;
 
-  async function request(path, { accept, method = 'GET', body, raw = false } = {}) {
+  async function request(path, { accept, method = 'GET', body, raw = false, etag } = {}) {
     const res = await fetch(path.startsWith('http') ? path : `${API}${path}`, {
       method,
       headers: {
         ...headers,
         ...(accept ? { accept } : {}),
         ...(body ? { 'content-type': 'application/json' } : {}),
+        ...(etag ? { 'if-none-match': etag } : {}),
       },
       body: body ? JSON.stringify(body) : undefined,
     });
+    if (res.status === 304) return { notModified: true, etag };
     if (!res.ok) {
       const text = await res.text().catch(() => '');
       const err = new Error(`GitHub ${method} ${path} -> ${res.status} ${text.slice(0, 200)}`);
       err.status = res.status;
+      err.retryAfter = Number(res.headers.get('retry-after') ?? 0);
       throw err;
     }
-    return raw ? res.text() : res.json();
+    const data = raw ? await res.text() : await res.json();
+    return etag !== undefined ? { data, etag: res.headers.get('etag') } : data;
   }
 
   return {
     // Repository-level advisories: published by the maintainer, same minute as the release.
-    repoAdvisories: (repo) =>
-      request(`/repos/${repo}/security-advisories?state=published&per_page=100&sort=published&direction=desc`),
+    // With `etag`, a 304 answer costs no rate limit and returns { notModified: true }.
+    repoAdvisories: (repo, etag) =>
+      request(`/repos/${repo}/security-advisories?state=published&per_page=100&sort=published&direction=desc`, { etag: etag ?? null }),
     // Global GitHub Advisory Database: complete, but reviewed a week or so later.
     globalAdvisories: (pkg) =>
       request(`/advisories?affects=${encodeURIComponent(pkg)}&ecosystem=npm&per_page=100&sort=published&direction=desc`),
@@ -39,6 +44,17 @@ export function makeClient({ token, userAgent = 'security-radar' } = {}) {
         accept: 'application/vnd.github.raw+json',
         raw: true,
       }),
+    repoMeta: (repo) => request(`/repos/${repo}`),
+    tree: (repo, ref) => request(`/repos/${repo}/git/trees/${encodeURIComponent(ref)}?recursive=1`),
+    orgRepos: async (org) => {
+      const all = [];
+      for (let page = 1; ; page++) {
+        const batch = await request(`/orgs/${org}/repos?per_page=100&type=all&page=${page}`);
+        if (!batch.length) break;
+        all.push(...batch);
+      }
+      return all;
+    },
     createIssue: (repo, { title, body, labels }) =>
       request(`/repos/${repo}/issues`, { method: 'POST', body: { title, body, labels } }),
     rateLimit: () => request('/rate_limit'),
@@ -60,8 +76,8 @@ export async function npmPublished(name, version) {
   }
 }
 
-// Normalise either endpoint's shape to one record.
-export function normalise(raw, source, watchedNames) {
+// Normalise either endpoint's shape to one record. `watchedNames` (optional) keeps only those packages.
+export function normalise(raw, source, watchedNames = null) {
   const packages = (raw.vulnerabilities ?? [])
     .filter((v) => (v.package?.ecosystem ?? '').toLowerCase() === 'npm')
     .map((v) => ({
@@ -70,7 +86,7 @@ export function normalise(raw, source, watchedNames) {
       // Repository advisories say patched_versions; the global database says first_patched_version.
       fixed: v.patched_versions || v.first_patched_version || null,
     }));
-  const watched = packages.filter((p) => watchedNames.has(p.name));
+  const watched = watchedNames ? packages.filter((p) => watchedNames.has(p.name)) : packages;
   return {
     id: raw.ghsa_id,
     cve: raw.cve_id ?? null,

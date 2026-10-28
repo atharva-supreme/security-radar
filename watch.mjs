@@ -1,35 +1,31 @@
 #!/usr/bin/env node
-// Security Radar (automated dependency vulnerability monitoring): one run = fetch every source, diff against state.json, post what is new, write state.
+// Security Radar (automated dependency vulnerability monitoring): one scan = read every lockfile
+// in the watchlist, check every package in it against two advisory sources, write report.json.
 //
-//   node watch.mjs                 normal run (posts to Slack and opens issues when configured)
-//   node watch.mjs --dry-run       fetch and diff, print what would be posted, change nothing
-//   node watch.mjs --baseline      record everything currently published without alerting (first run)
-//   node watch.mjs --forget A,B    drop advisory ids from state first, so they alert again (testing)
-//   node watch.mjs --quiet-summary post the quiet-day summary now regardless of the hour
-//   node watch.mjs --scan-only     fetch, compare, write state.json and report.json; post nothing, open nothing
-//                                  (what the workflow runs: the Claude routine reads report.json and does the telling)
+//   node watch.mjs                 scan, then write state.json, packages.json and report.json
+//   node watch.mjs --dry-run       scan and write report.json only; state and caches untouched
+//   node watch.mjs --forget A,B    drop advisory ids from state first, so they count as new again
 //
-// Every run writes report.json: status, what each app has installed, every open advisory with
-// its fixed version, the upgrade command per app, and what is new in the last 26 hours.
+// Sources, in the order they matter:
+//   1. The maintainers' own repository advisories on GitHub, found through each package's npm
+//      "repository" field. Published the same minute as the fix. Conditional requests (ETag), so
+//      an unchanged repo costs nothing against the rate limit.
+//   2. OSV.dev, batch-queried for every package@version we have installed. Complete and reviewed,
+//      about a week behind source 1, and the only source for MAL- (malicious package) records.
+//   3. The Node.js vulnerability feed, since Node is not an npm package.
 //
 // Environment:
-//   GITHUB_TOKEN       advisory calls and issue creation (the workflow's own token is enough)
-//   REPO_READ_TOKEN    read-only Contents on the repos in watchlist.json (fine-grained PAT); falls back to GITHUB_TOKEN
-//   SLACK_WEBHOOK_URL  incoming webhook; when unset, nothing is posted to Slack
-//   GITHUB_REPOSITORY  owner/name of the repo that holds the tracking issues (set by Actions)
-//   QUIET_HOUR_UTC     hour at which the once-a-day quiet summary is posted (default 0 = 05:30 IST)
+//   GITHUB_TOKEN       advisory calls (the workflow's own token is enough)
+//   REPO_READ_TOKEN    read-only Contents on the repos in watchlist.json; falls back to GITHUB_TOKEN
+//   SCAN_CONCURRENCY   parallel requests per source (default 4)
 
 import { readFile, writeFile } from 'node:fs/promises';
-import { makeClient, normalise, npmPublished } from './src/github.mjs';
+import { makeClient, normalise } from './src/github.mjs';
+import { queryBatch, vuln as osvVuln, trim as osvTrim, fixedFor } from './src/osv.mjs';
+import { repoOf, published, pool } from './src/npm.mjs';
 import { resolvePackages, matchInstalled } from './src/advisories.mjs';
-import { compare, parseableVersion } from './src/semver.mjs';
 import { installedVersions, directVersions, declaredNode } from './src/lockfile.mjs';
 import { fetchFeed } from './src/feeds.mjs';
-import {
-  severityRank, isUrgent, releaseMessage, batchMessage, feedMessage, quietMessage, errorMessage,
-  issueTitle, issueBody, feedIssueTitle, feedIssueBody,
-} from './src/format.mjs';
-import { postSlack, openIssue } from './src/notify.mjs';
 import { buildReport } from './src/report.mjs';
 
 // ---------- arguments and files ----------
@@ -38,261 +34,261 @@ const argv = process.argv.slice(2);
 const flag = (name) => argv.includes(name);
 const option = (name) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : null; };
 const dryRun = flag('--dry-run');
-const scanOnly = flag('--scan-only');
 const forget = (option('--forget') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
 
 const ROOT = new URL('.', import.meta.url);
-const watchlist = JSON.parse(await readFile(new URL('watchlist.json', ROOT), 'utf8'));
-const state = JSON.parse(await readFile(new URL('state.json', ROOT), 'utf8'));
+const readJson = async (name, fallback) => { try { return JSON.parse(await readFile(new URL(name, ROOT), 'utf8')); } catch { return fallback; } };
+const watchlist = await readJson('watchlist.json', null);
+if (!watchlist) throw new Error('watchlist.json missing');
+const state = await readJson('state.json', {});
 state.advisories ??= {};
+state.etags ??= {};
 state.feeds ??= {};
+const packages = await readJson('packages.json', {}); // npm name -> { repo, checkedAt }
 
 const env = process.env;
 const now = new Date();
 const nowIso = now.toISOString();
+const concurrency = Number(env.SCAN_CONCURRENCY ?? 4);
 const gh = makeClient({ token: env.GITHUB_TOKEN });
 const ghRepos = env.REPO_READ_TOKEN ? makeClient({ token: env.REPO_READ_TOKEN }) : gh;
-const watchedNames = new Set(watchlist.packages.map((p) => p.name));
-const errors = [];   // a source or a notification failed: the run exits non-zero
-const warnings = []; // degraded but usable: a lockfile could not be read, so that repo is "unknown"
+const errors = [];   // a whole source failed: the run exits non-zero
+const warnings = []; // degraded but usable: one lockfile or one repo could not be read
 const log = (...a) => console.log(...a);
+const olderThanWeek = (iso) => Boolean(iso) && now.getTime() - new Date(iso).getTime() > 7 * 24 * 3600 * 1000;
 
 for (const id of forget) {
   if (state.advisories[id]) { delete state.advisories[id]; log(`forgot ${id}`); }
 }
-const baseline = flag('--baseline') || Object.keys(state.advisories).length === 0;
-if (baseline) log('baseline mode: recording everything currently published, alerting on nothing');
 
-// ---------- 1. advisories from both GitHub sources ----------
+// ---------- 1. apps: one per (repo row, branch), with everything each lockfile has installed ----------
 
-// Each id keeps what every source said; the two are combined once all fetching is done.
-const seen = new Map(); // id -> { meta, repoEntries, globalEntries, sources }
-function merge(rec) {
-  const relevant = rec.packages.length === 0 || rec.packages.some((p) => watchedNames.has(p.name));
-  if (!relevant) return;
-  const entry = seen.get(rec.id) ?? { meta: null, repoEntries: [], globalEntries: [], sources: [] };
-  // The earliest publication is the one we quote: that is the repo-level advisory, same minute as the release.
-  if (!entry.meta || (rec.published_at ?? '') < (entry.meta.published_at ?? '')) entry.meta = { ...rec, cve: rec.cve ?? entry.meta?.cve ?? null };
-  else if (!entry.meta.cve && rec.cve) entry.meta.cve = rec.cve;
-  (rec.source === 'global' ? entry.globalEntries : entry.repoEntries).push(...rec.packages);
-  entry.sources.push(rec.source);
-  seen.set(rec.id, entry);
-}
+const defaultBranches = watchlist.branches ?? [null];
+const appRows = (watchlist.repos ?? []).flatMap((r) =>
+  (r.branches ?? (r.ref ? [r.ref] : defaultBranches)).map((branch) => {
+    const dirOf = (p) => (p && p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');
+    const dir = dirOf(r.lockfile) || dirOf(r.packageJson);
+    return {
+      ...r,
+      ref: branch ?? undefined,
+      branch: branch ?? 'default',
+      project: r.repo.split('/').pop(),
+      label: r.label ?? (dir || 'root'),
+      kind: r.kind ?? 'app',
+    };
+  }),
+);
 
-const repos = [...new Set(watchlist.packages.map((p) => p.repo).filter(Boolean))];
-for (const repo of repos) {
+const apps = await pool(appRows, concurrency, async (r) => {
   try {
-    for (const raw of await gh.repoAdvisories(repo)) merge(normalise(raw, `repo:${repo}`, watchedNames));
-  } catch (e) { errors.push(`repo advisories ${repo}: ${e.message}`); }
+    const text = await ghRepos.fileText(r.repo, r.lockfile, r.ref);
+    const versions = installedVersions(text, r.lockfile);
+    const direct = directVersions(text, r.lockfile);
+    let node = null;
+    if (r.packageJson) {
+      try { node = declaredNode({ packageJsonText: await ghRepos.fileText(r.repo, r.packageJson, r.ref) }); } catch { /* optional */ }
+    }
+    return { ...r, versions, direct, node, ok: true };
+  } catch (e) {
+    warnings.push(`lockfile ${r.repo}@${r.branch}/${r.lockfile}: ${e.message}${e.status === 404 && !env.REPO_READ_TOKEN ? ' (private repo and no REPO_READ_TOKEN set?)' : ''}`);
+    return { ...r, ok: false, error: e.message };
+  }
+});
+
+const pairKeys = new Set();
+const names = new Set();
+for (const a of apps) {
+  if (!a.ok) continue;
+  for (const [name, vs] of a.versions) { names.add(name); for (const v of vs) pairKeys.add(`${name}@${v}`); }
 }
-for (const p of watchlist.packages) {
+const pairs = [...pairKeys].map((k) => { const i = k.lastIndexOf('@'); return { name: k.slice(0, i), version: k.slice(i + 1) }; });
+log(`${apps.length} apps (${apps.filter((a) => a.ok).length} read), ${names.size} packages, ${pairs.length} package@version pairs`);
+
+// ---------- 2. OSV: every pair, batched ----------
+
+let osvHits = new Map(); // "name@version" -> [{ id, modified }]
+try {
+  osvHits = await queryBatch(pairs);
+} catch (e) { errors.push(`osv querybatch: ${e.message}`); }
+
+const osvIds = new Map(); // id -> latest modified seen
+for (const list of osvHits.values()) for (const v of list) {
+  if (!osvIds.has(v.id) || osvIds.get(v.id) < v.modified) osvIds.set(v.id, v.modified);
+}
+// Refetch only when OSV's own "modified" stamp moved. The batch and detail endpoints format the
+// stamp differently, so the batch value is remembered as-is and compared as a string next time.
+const stale = [...osvIds].filter(([id, modified]) => !state.advisories[id]?.osv || state.advisories[id].osvModified !== modified);
+log(`osv: ${osvIds.size} advisories hit, ${stale.length} to fetch`);
+await pool(stale, concurrency * 2, async ([id, modified]) => {
   try {
-    for (const raw of await gh.globalAdvisories(p.name)) merge(normalise(raw, 'global', watchedNames));
-  } catch (e) { errors.push(`global advisories ${p.name}: ${e.message}`); }
+    const rec = osvTrim(await osvVuln(id));
+    const prev = state.advisories[id] ?? {};
+    state.advisories[id] = {
+      ...prev,
+      ...rec,
+      osv: true,
+      osvModified: modified,
+      repoPackages: prev.repoPackages ?? null,
+      sources: [...new Set([...(prev.sources ?? []), 'osv'])],
+      firstSeen: prev.firstSeen ?? (olderThanWeek(rec.published_at) ? rec.published_at : nowIso),
+    };
+  } catch (e) { warnings.push(`osv vuln ${id}: ${e.message}`); }
+});
+
+// ---------- 3. repository-level advisories for every package's GitHub repo ----------
+
+const unknownNames = [...names].filter((n) => !packages[n] || (packages[n].repo === null && olderThanWeek(packages[n].checkedAt) && !packages[n].missing));
+log(`npm: ${names.size} packages, ${unknownNames.length} repo lookups`);
+await pool(unknownNames, concurrency * 2, async (name) => {
+  try { packages[name] = await repoOf(name); } catch (e) { warnings.push(`npm ${name}: ${e.message}`); }
+});
+
+const repoToNames = new Map();
+for (const n of names) {
+  const repo = packages[n]?.repo;
+  if (!repo) continue;
+  repoToNames.set(repo, [...(repoToNames.get(repo) ?? []), n]);
 }
+// Budget: never spend the last 150 requests of the hour. A 304 answer is free, so repos with a
+// cached ETag go first; repos never polled before are spread over as many runs as the limit needs.
+let budget = Infinity;
+try {
+  const rl = await gh.rateLimit();
+  budget = rl.resources.core.remaining - 150;
+  log(`github: ${rl.resources.core.remaining}/${rl.resources.core.limit} requests left this hour, budget ${Math.max(0, budget)}`);
+} catch { /* unknown limit: go ahead */ }
+const repoQueue = [...repoToNames].sort(([a], [b]) => (state.etags[b] ? 1 : 0) - (state.etags[a] ? 1 : 0));
+const repoStats = { polled: 0, unchanged: 0, updated: 0, failed: 0, deferred: 0 };
+let rateLimited = false;
+await pool(repoQueue, concurrency, async ([repo, pkgNames]) => {
+  if (rateLimited || budget <= 0) { repoStats.deferred += 1; return; }
+  repoStats.polled += 1;
+  budget -= 1;
+  try {
+    const res = await gh.repoAdvisories(repo, state.etags[repo]);
+    if (res.notModified) { repoStats.unchanged += 1; budget += 1; return; }
+    repoStats.updated += 1;
+    state.etags[repo] = res.etag;
+    const wanted = new Set(pkgNames);
+    for (const raw of res.data) {
+      const rec = normalise(raw, `repo:${repo}`, wanted);
+      const relevant = rec.packages.filter((p) => wanted.has(p.name));
+      if (!relevant.length) continue;
+      const prev = state.advisories[rec.id] ?? {};
+      state.advisories[rec.id] = {
+        ...prev,
+        id: rec.id,
+        cve: prev.cve ?? rec.cve,
+        summary: prev.summary ?? rec.summary,
+        severity: prev.severity && prev.severity !== 'unknown' ? prev.severity : rec.severity,
+        published_at: prev.published_at && prev.published_at < rec.published_at ? prev.published_at : rec.published_at,
+        updated_at: rec.updated_at,
+        url: prev.url ?? rec.url,
+        packages: prev.packages ?? [],
+        repoPackages: relevant,
+        repo,
+        sources: [...new Set([...(prev.sources ?? []), 'repo'])],
+        firstSeen: prev.firstSeen ?? (olderThanWeek(rec.published_at) ? rec.published_at : nowIso),
+      };
+    }
+  } catch (e) {
+    repoStats.failed += 1;
+    if (e.status === 403 && /rate limit/i.test(e.message)) { rateLimited = true; errors.push(`github rate limit hit after ${repoStats.polled} repos: ${e.message}`); }
+    else if (e.status === 404) { /* repo moved or private: nothing to read */ }
+    else warnings.push(`repo advisories ${repo}: ${e.message}`);
+  }
+});
+log(`github: ${repoStats.polled} repos polled, ${repoStats.unchanged} unchanged, ${repoStats.updated} updated, ${repoStats.failed} failed, ${repoStats.deferred} deferred to the next run`);
+if (repoStats.deferred) warnings.push(`${repoStats.deferred} package repositories not polled this run (rate-limit budget); they are picked up on the next run`);
 
-const collected = new Map();
-for (const [id, entry] of seen) {
-  collected.set(id, {
-    ...entry.meta,
-    packages: resolvePackages(entry.repoEntries, entry.globalEntries),
-    sources: [...new Set(entry.sources)],
-  });
-}
-log(`collected ${collected.size} advisories across ${watchlist.packages.length} packages`);
-
-// ---------- 2. diff against state ----------
-
-const olderThanWeek = (iso) => Boolean(iso) && now.getTime() - new Date(iso).getTime() > 7 * 24 * 3600 * 1000;
-const fixedKey = (rec) => rec.packages.map((p) => `${p.name}:${p.fixed ?? ''}`).sort().join('|');
-const newAdvisories = [];
-const updatedAdvisories = [];
-for (const rec of collected.values()) {
-  const prev = state.advisories[rec.id];
-  if (!prev) newAdvisories.push(rec);
-  else if (prev.fixedKey !== fixedKey(rec)) updatedAdvisories.push(rec);
-  state.advisories[rec.id] = {
-    severity: rec.severity,
-    summary: rec.summary,
-    cve: rec.cve,
-    url: rec.url,
-    published_at: rec.published_at,
-    updated_at: rec.updated_at,
-    source: rec.source,
-    sources: rec.sources,
-    packages: rec.packages,
-    fixedKey: fixedKey(rec),
-    // An advisory we meet for the first time more than a week after it was published is history
-    // (a package just added to the watchlist, or the baseline run), not news: date it by publication
-    // so report.json does not flag twenty old advisories as NEW.
-    firstSeen: prev?.firstSeen ?? (baseline || olderThanWeek(rec.published_at) ? rec.published_at ?? nowIso : nowIso),
-  };
-}
-
-// ---------- 3. feeds ----------
+// ---------- 4. feeds ----------
 
 const feedAlerts = [];
-for (const feed of watchlist.feeds) {
+for (const feed of watchlist.feeds ?? []) {
   try {
     const items = await fetchFeed(feed.url);
     for (const item of items) {
       if (!item.link || state.feeds[item.link]) continue;
       state.feeds[item.link] = { feed: feed.name, title: item.title, date: item.date, firstSeen: nowIso };
-      if (!baseline && !feed.informational) feedAlerts.push({ feed, item });
+      if (!olderThanWeek(item.date)) feedAlerts.push({ feed, item });
     }
   } catch (e) { errors.push(`feed ${feed.name}: ${e.message}`); }
 }
-// ---------- 4. what our repos have installed ----------
 
-// One app per (repo row, branch). `branches` at the top of the watchlist applies to every row;
-// a row's own `branches` overrides it; a row's `ref` pins a single branch or commit.
-const defaultBranches = watchlist.branches ?? [null];
-const appRows = watchlist.repos.flatMap((r) =>
-  (r.branches ?? (r.ref ? [r.ref] : defaultBranches)).map((branch) => ({ ...r, ref: branch ?? undefined, branch: branch ?? 'default' })),
-);
-const repoStatus = [];
-for (const r of appRows) {
-  const dirOf = (p) => (p && p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');
-  const dir = dirOf(r.lockfile) || dirOf(r.packageJson);
-  // project = the repo's short name; label = the app inside it (the lockfile's folder, or "root").
-  const project = r.repo.split('/').pop();
-  const label = r.label ?? (dir || 'root');
-  try {
-    const text = await ghRepos.fileText(r.repo, r.lockfile, r.ref);
-    const versions = installedVersions(text, r.lockfile, [...watchedNames]);
-    const direct = directVersions(text, r.lockfile, [...watchedNames]);
-    let node = null;
-    if (r.packageJson) {
-      try { node = declaredNode({ packageJsonText: await ghRepos.fileText(r.repo, r.packageJson, r.ref) }); } catch { /* optional */ }
-    }
-    repoStatus.push({ ...r, project, label, versions, direct, node, ok: true });
-  } catch (e) {
-    repoStatus.push({ ...r, project, label, ok: false, error: e.message });
-    warnings.push(`lockfile ${r.repo}/${r.lockfile}: ${e.message}${e.status === 404 && !env.REPO_READ_TOKEN ? ' (private repo and no REPO_READ_TOKEN set?)' : ''}`);
-  }
-}
+// ---------- 5. match: what is open in each app ----------
 
-function affectedRepos(rec) {
-  const out = { affected: [], clear: [], unknown: [] };
-  for (const r of repoStatus) {
-    if (!r.ok) { out.unknown.push(r.label); continue; }
-    const hits = matchInstalled(rec.packages, r.versions);
-    if (hits.length) out.affected.push({ label: r.label, installed: hits.map((h) => `${h.pkg} ${h.installed}`).join(', '), hits });
-    else out.clear.push(r.label);
-  }
-  return out;
-}
-
-// One row per (repo, package, installed version): how many advisories it is exposed to,
-// the highest fixed version among them, and the oldest publication date.
-const openByInstall = new Map();
+// id -> resolved repo-level ranges, computed once
+const repoRanges = new Map();
 for (const [id, rec] of Object.entries(state.advisories)) {
-  for (const a of affectedRepos(rec).affected) {
-    for (const h of a.hits) {
-      const key = `${a.label}|${h.pkg}|${h.installed}`;
-      const row = openByInstall.get(key) ?? { label: a.label, pkg: h.pkg, installed: h.installed, fixed: null, since: null, ids: [] };
-      row.ids.push(id);
-      const f = parseableVersion(h.fixed);
-      if (f && (!row.fixed || compare(f, row.fixed) > 0)) row.fixed = f;
-      if (rec.published_at && (!row.since || rec.published_at < row.since)) row.since = rec.published_at;
-      openByInstall.set(key, row);
+  if (rec.repoPackages?.length) repoRanges.set(id, resolvePackages(rec.repoPackages, []));
+}
+
+for (const a of apps) {
+  a.open = [];
+  if (!a.ok) continue;
+  const seen = new Set();
+  // OSV: exact hits per pair
+  for (const [name, vs] of a.versions) {
+    for (const v of vs) {
+      for (const hit of osvHits.get(`${name}@${v}`) ?? []) {
+        const rec = state.advisories[hit.id];
+        if (!rec) continue;
+        const key = `${hit.id}|${name}|${v}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const pkg = (rec.packages ?? []).find((p) => p.name === name);
+        a.open.push({ id: hit.id, package: name, installed: v, fixed: pkg ? fixedFor(pkg, v) : null, early: false });
+      }
+    }
+  }
+  // Repository-level: range matching, for advisories OSV has not caught up with
+  for (const [id, pkgs] of repoRanges) {
+    for (const h of matchInstalled(pkgs, a.versions)) {
+      const key = `${id}|${h.pkg}|${h.installed}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      a.open.push({ id, package: h.pkg, installed: h.installed, fixed: h.fixed ?? null, early: true });
     }
   }
 }
-const stillOpen = [...openByInstall.values()].sort((a, b) => a.label.localeCompare(b.label) || a.pkg.localeCompare(b.pkg));
-const nodeDeclared = repoStatus.filter((r) => r.ok && r.node).map((r) => ({ label: r.label, node: r.node }));
 
-// ---------- 5. notify ----------
+// Is the named fixed version actually on npm? Checked once per package@fixed.
+const fixedKeys = new Set();
+for (const a of apps) for (const o of a.open) if (o.fixed && /^\d+\.\d+\.\d+/.test(o.fixed)) fixedKeys.add(`${o.package}@${o.fixed}`);
+const publishedMap = new Map();
+await pool([...fixedKeys], concurrency * 2, async (key) => {
+  const i = key.lastIndexOf('@');
+  publishedMap.set(key, await published(key.slice(0, i), key.slice(i + 1)));
+});
 
-const issueRepo = env.GITHUB_REPOSITORY ?? null;
-const webhook = env.SLACK_WEBHOOK_URL ?? null;
-const alerts = baseline ? [] : [...newAdvisories, ...updatedAdvisories]
-  .sort((a, b) => severityRank(a.severity) - severityRank(b.severity) || (b.published_at ?? '').localeCompare(a.published_at ?? ''));
+// ---------- 6. write ----------
 
-async function deliver(kind, text) {
-  log(`\n--- ${kind}${dryRun ? ' (dry run, not posted)' : scanOnly ? ' (scan only, not posted)' : ''} ---\n${text}\n`);
-  if (dryRun || scanOnly) return;
-  try { await postSlack(webhook, text); } catch (e) { errors.push(`slack: ${e.message}`); }
-}
-async function track(title, body, labels) {
-  if (dryRun || scanOnly || !issueRepo) return null;
-  try { return await openIssue(gh, issueRepo, { title, body, labels }); } catch (e) { errors.push(`issue "${title}": ${e.message}`); return null; }
-}
-
-const urgent = alerts.filter((a) => isUrgent(a.severity));
-const lower = alerts.filter((a) => !isUrgent(a.severity));
-
-for (const rec of urgent) {
-  const repos = affectedRepos(rec);
-  const published = new Map();
-  for (const p of rec.packages) {
-    if (p.fixed && /^\d+\.\d+\.\d+/.test(p.fixed)) published.set(`${p.name}@${p.fixed}`, await npmPublished(p.name, p.fixed));
-  }
-  const issueUrl = await track(issueTitle(rec), issueBody(rec, repos), ['security', rec.severity]);
-  await deliver(`${rec.severity} ${rec.id}`, releaseMessage(rec, repos, { issueUrl, published }));
-}
-if (lower.length) {
-  const entries = [];
-  for (const rec of lower) {
-    const issueUrl = await track(issueTitle(rec), issueBody(rec, affectedRepos(rec)), ['security', rec.severity]);
-    entries.push({ rec, issueUrl });
-  }
-  await deliver(`${lower.length} lower-severity`, batchMessage(entries));
-}
-for (const fa of feedAlerts) {
-  const issueUrl = await track(feedIssueTitle(fa), feedIssueBody(fa, nodeDeclared), ['security', 'feed']);
-  await deliver(`feed ${fa.feed.name}`, feedMessage(fa, nodeDeclared, issueUrl));
-}
-
-const quietHour = Number(env.QUIET_HOUR_UTC ?? 0);
-const today = nowIso.slice(0, 10);
-const quietDue = flag('--quiet-summary') || (now.getUTCHours() === quietHour && state.lastQuietSummary !== today);
-if (!baseline && !scanOnly && !alerts.length && !feedAlerts.length && quietDue) {
-  await deliver('quiet summary', quietMessage({
-    now,
-    counts: { packages: watchlist.packages.length, feeds: watchlist.feeds.length, repos: repoStatus.length },
-    stillOpen,
-    errors: [...errors, ...warnings],
-  }));
-  if (!dryRun) state.lastQuietSummary = today;
-} else if (errors.length && !dryRun && !scanOnly) {
-  await deliver('errors', errorMessage([...errors, ...warnings], now));
-}
-
-// ---------- 6. write state and report ----------
-
-if (baseline) {
-  log(`baseline recorded: ${Object.keys(state.advisories).length} advisories, ${Object.keys(state.feeds).length} feed items`);
-}
-log(`new: ${newAdvisories.length}, updated: ${updatedAdvisories.length}, feed items: ${feedAlerts.length}, installs still exposed: ${stillOpen.length}`);
-for (const o of stillOpen) log(`  open  ${o.label}: ${o.pkg} ${o.installed} -> ${o.fixed ?? 'not stated'} (${o.ids.length} advisories, oldest ${o.since?.slice(0, 10)})`);
-if (warnings.length) { log('warnings:'); for (const w of warnings) log(`  ${w}`); }
-if (errors.length) { log('errors:'); for (const e of errors) log(`  ${e}`); }
-
+// Caches first: the scan's network work must survive a bug in report building.
 if (!dryRun) {
   state.lastRun = nowIso;
-  await writeFile(new URL('state.json', ROOT), JSON.stringify(state, null, 2) + '\n');
-  log('state.json written');
+  await writeFile(new URL('state.json', ROOT), JSON.stringify(state, null, 1) + '\n');
+  await writeFile(new URL('packages.json', ROOT), JSON.stringify(packages, null, 1) + '\n');
+  log('state.json and packages.json written');
 } else {
-  log('dry run: state.json not written');
+  log('dry run: state.json and packages.json not written');
 }
 
-// report.json is written on every run, dry or not: it is the hand-off to whoever does the telling.
-const published = new Map();
-for (const o of stillOpen) {
-  for (const id of o.ids) {
-    for (const p of state.advisories[id].packages) {
-      if (p.name !== o.pkg || !p.fixed || !/^\d+\.\d+\.\d+/.test(p.fixed)) continue;
-      const key = `${p.name}@${p.fixed}`;
-      if (!published.has(key)) published.set(key, await npmPublished(p.name, p.fixed));
-    }
-  }
-}
 const report = buildReport({
-  now, apps: repoStatus, advisories: state.advisories, published, feedAlerts, watchlist, errors, warnings,
+  now,
+  apps,
+  advisories: state.advisories,
+  published: publishedMap,
+  feedAlerts,
+  watchlist,
+  counts: { packages: names.size, pairs: pairs.length, reposPolled: repoStats.polled, reposDeferred: repoStats.deferred, osvAdvisories: osvIds.size },
+  errors,
+  warnings,
 });
-await writeFile(new URL('report.json', ROOT), JSON.stringify(report, null, 2) + '\n');
-log(`report.json written: status ${report.status}, ${report.summary.open} open (${report.summary.critical} critical, ${report.summary.high} high), ${report.summary.newOpen} new`);
+// Compact on purpose: pretty-printing this file would double its size for nothing a reader needs.
+await writeFile(new URL('report.json', ROOT), JSON.stringify(report) + '\n');
+log(`report.json written: ${report.status}, ${report.summary.open} open (${report.summary.critical} critical, ${report.summary.high} high), ${report.summary.newOpen} new, ${report.summary.early} early, ${report.advisories.length} distinct advisories across ${report.projects.length} project-branches`);
+if (warnings.length) { log(`warnings (${warnings.length}):`); for (const w of warnings.slice(0, 20)) log(`  ${w}`); }
+if (errors.length) { log('errors:'); for (const e of errors) log(`  ${e}`); }
 
 try {
   const rl = await gh.rateLimit();
