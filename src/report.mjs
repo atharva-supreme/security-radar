@@ -109,6 +109,7 @@ const RANK = { RED: 0, UNKNOWN: 1, AMBER: 2, GREEN: 3 };
  */
 export function buildReport({ now, apps, advisories, published = new Map(), feedAlerts = [], watchlist = {}, counts = {}, errors = [], warnings = [] }) {
   const byAdvisory = new Map(); // id -> { ...rec summary, hits: [{ project, branch, label, kind, installed }] }
+  const fullOpen = []; // every app's complete open list, index-aligned with appRows (tooling rows omit theirs)
 
   const appRows = apps.map((app) => {
     const project = app.project ?? app.repo.split('/').pop();
@@ -116,6 +117,7 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
     const kind = app.kind ?? 'app';
     const base = { project, branch, kind, repo: app.repo, lockfile: app.lockfile, label: app.label };
     if (!app.ok) {
+      fullOpen.push([]);
       return { ...base, ok: false, error: app.error ?? 'lockfile could not be read', installed: {}, open: [], counts: {}, upgrades: [], notes: [], command: null };
     }
     const label = app.label;
@@ -153,6 +155,7 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
       return entry;
     });
     open.sort(sortOpen);
+    fullOpen.push(open);
     // Per-app rows carry the matching facts only; the advisory's own text lives once in advisories[].
     const slim = (o) => ({ id: o.id, severity: o.severity, package: o.package, installed: o.installed, fixed: o.fixed, fixedOnNpm: o.fixedOnNpm, direct: o.direct, early: o.early, isNew: o.isNew, openDays: o.openDays });
     const countsBySev = { critical: 0, high: 0, moderate: 0, low: 0, unknown: 0 };
@@ -177,7 +180,7 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
     };
   });
 
-  const allOpen = appRows.flatMap((a) => a.open);
+  const allOpen = fullOpen.flat();
   const distinct = [...byAdvisory.values()].map(({ hitKeys, projectSet, ...a }) => ({
     ...a,
     apps: hitKeys.size,
@@ -209,9 +212,10 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
   const keyOf = (a) => `${a.project}\u0000${a.branch ?? ''}`;
   const projects = [...new Set(appRows.map(keyOf))]
     .map((key) => {
-      const rows = appRows.filter((a) => keyOf(a) === key);
-      const open = rows.flatMap((a) => a.open);
-      const appOpen = rows.filter((a) => a.kind === 'app').flatMap((a) => a.open);
+      const idx = appRows.map((a, i) => (keyOf(a) === key ? i : -1)).filter((i) => i >= 0);
+      const rows = idx.map((i) => appRows[i]);
+      const open = idx.flatMap((i) => fullOpen[i]);
+      const appOpen = idx.filter((i) => appRows[i].kind === 'app').flatMap((i) => fullOpen[i]);
       return {
         project: rows[0].project,
         branch: rows[0].branch,
@@ -226,7 +230,7 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
         newOpen: open.filter((o) => o.isNew).length,
         early: open.filter((o) => o.early).length,
         apps: rows.map((a) => a.label),
-        affectedApps: rows.filter((a) => a.open.length).map((a) => a.label),
+        affectedApps: idx.filter((i) => fullOpen[i].length).map((i) => appRows[i].label),
       };
     })
     .sort((a, b) => RANK[a.status] - RANK[b.status] || a.project.localeCompare(b.project) || String(a.branch).localeCompare(String(b.branch)));

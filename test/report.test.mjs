@@ -60,7 +60,8 @@ test('report: status, flags, upgrades, notes, command, distinct advisories', () 
   assert.equal(r.apps[1].open.length, 0);
   assert.equal(r.newNotAffecting.map((n) => n.id).join(), 'GHSA-cccc');
   const a = r.advisories.find((x) => x.id === 'GHSA-eeee');
-  assert.equal(a.apps, 2);
+  assert.equal(a.apps, 1, 'two installed versions in one lockfile is one app');
+  assert.equal(a.hits.length, 2);
   assert.equal(a.projectBranches, 1);
   assert.deepEqual(a.projects, ['r']);
   assert.equal(r.advisories[0].id, 'GHSA-eeee', 'critical first, newest first');
