@@ -147,7 +147,9 @@ const repoStatus = [];
 for (const r of watchlist.repos) {
   const dirOf = (p) => (p && p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');
   const dir = dirOf(r.lockfile) || dirOf(r.packageJson);
-  const label = r.label ?? `${r.repo.split('/').pop()}${dir ? `/${dir}` : ''}`;
+  // project = the repo's short name; label = the app inside it (the lockfile's folder, or "root").
+  const project = r.repo.split('/').pop();
+  const label = r.label ?? (dir || 'root');
   try {
     const text = await ghRepos.fileText(r.repo, r.lockfile, r.ref);
     const versions = installedVersions(text, r.lockfile, [...watchedNames]);
@@ -155,9 +157,9 @@ for (const r of watchlist.repos) {
     if (r.packageJson) {
       try { node = declaredNode({ packageJsonText: await ghRepos.fileText(r.repo, r.packageJson, r.ref) }); } catch { /* optional */ }
     }
-    repoStatus.push({ ...r, label, versions, node, ok: true });
+    repoStatus.push({ ...r, project, label, versions, node, ok: true });
   } catch (e) {
-    repoStatus.push({ ...r, label, ok: false, error: e.message });
+    repoStatus.push({ ...r, project, label, ok: false, error: e.message });
     warnings.push(`lockfile ${r.repo}/${r.lockfile}: ${e.message}${e.status === 404 && !env.REPO_READ_TOKEN ? ' (private repo and no REPO_READ_TOKEN set?)' : ''}`);
   }
 }

@@ -65,8 +65,9 @@ function commandFor(app, upgrades) {
 export function buildReport({ now, apps, advisories, published = new Map(), feedAlerts = [], watchlist, errors = [], warnings = [] }) {
   const openIds = new Set();
   const appRows = apps.map((app) => {
+    const project = app.project ?? app.repo.split('/').pop();
     if (!app.ok) {
-      return { repo: app.repo, lockfile: app.lockfile, label: app.label, ok: false, error: app.error ?? 'lockfile could not be read', installed: {}, open: [], counts: {}, upgrades: [], command: null };
+      return { project, repo: app.repo, lockfile: app.lockfile, label: app.label, ok: false, error: app.error ?? 'lockfile could not be read', installed: {}, open: [], counts: {}, upgrades: [], command: null };
     }
     const open = [];
     for (const [id, rec] of Object.entries(advisories)) {
@@ -96,6 +97,7 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
       [...app.versions.entries()].map(([k, v]) => [k, [...v].sort(compare)]).filter(([, v]) => v.length),
     );
     return {
+      project,
       repo: app.repo,
       lockfile: app.lockfile,
       label: app.label,
@@ -133,21 +135,46 @@ export function buildReport({ now, apps, advisories, published = new Map(), feed
     .sort(sortOpen);
   summary.newNotAffecting = newNotAffecting.length;
 
-  let status = 'GREEN';
-  if (allOpen.some((o) => isUrgent(o.severity))) status = 'RED';
-  else if (allOpen.length) status = 'AMBER';
-  if (errors.length || appRows.some((a) => !a.ok)) status = 'UNKNOWN';
+  const statusOf = (open, broken) => {
+    if (broken) return 'UNKNOWN';
+    if (open.some((o) => isUrgent(o.severity))) return 'RED';
+    return open.length ? 'AMBER' : 'GREEN';
+  };
+  const status = statusOf(allOpen, errors.length > 0 || appRows.some((a) => !a.ok));
+
+  // One row per repo, so a reader can say "project X is RED, projects Y and Z are clear"
+  // without walking every app. Order: worst first, then by name.
+  const RANK = { RED: 0, UNKNOWN: 1, AMBER: 2, GREEN: 3 };
+  const projects = [...new Set(appRows.map((a) => a.project))]
+    .map((project) => {
+      const rows = appRows.filter((a) => a.project === project);
+      const open = rows.flatMap((a) => a.open);
+      return {
+        project,
+        repo: rows[0].repo,
+        status: statusOf(open, rows.some((a) => !a.ok)),
+        open: open.length,
+        critical: open.filter((o) => o.severity === 'critical').length,
+        high: open.filter((o) => o.severity === 'high').length,
+        newOpen: open.filter((o) => o.isNew).length,
+        apps: rows.map((a) => a.label),
+        affectedApps: rows.filter((a) => a.open.length).map((a) => a.label),
+      };
+    })
+    .sort((a, b) => RANK[a.status] - RANK[b.status] || a.project.localeCompare(b.project));
 
   return {
-    schema: 1,
+    schema: 2,
     generatedAt: now.toISOString(),
     status,
     summary,
+    projects,
     apps: appRows,
     newNotAffecting,
     feedItemsNew: feedAlerts.map(({ feed, item }) => ({ feed: feed.name, title: item.title, link: item.link, date: item.date })),
     checked: {
       packages: watchlist.packages.map((p) => p.name),
+      projects: projects.length,
       apps: apps.length,
       advisoriesKnown: Object.keys(advisories).length,
       sources: ['GitHub repository advisories (maintainer, same minute as release)', 'GitHub Advisory Database (reviewed, about a week later)'],
