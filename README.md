@@ -1,4 +1,6 @@
-# security-watch
+# Security Radar
+
+Automated dependency vulnerability monitoring.
 
 A scheduled scan that reads vendor security advisories the minute they are published, compares them with what our projects actually have installed, and writes the result to `report.json`. A Claude Code routine reads that file every morning and sends the email and Slack message. This repo does the finding; the routine does the telling.
 

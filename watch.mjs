@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// security-watch: one run = fetch every source, diff against state.json, post what is new, write state.
+// Security Radar (automated dependency vulnerability monitoring): one run = fetch every source, diff against state.json, post what is new, write state.
 //
 //   node watch.mjs                 normal run (posts to Slack and opens issues when configured)
 //   node watch.mjs --dry-run       fetch and diff, print what would be posted, change nothing

@@ -70,7 +70,7 @@ export function feedMessage({ feed, item }, nodeDeclared = [], issueUrl) {
 }
 
 export function quietMessage({ now = new Date(), counts, stillOpen, errors }) {
-  const lines = [`security-watch · ${fmtIst(now)} · no new advisories`];
+  const lines = [`Security Radar · ${fmtIst(now)} · no new advisories`];
   lines.push(`Checked ${counts.packages} packages, ${counts.feeds} feeds, ${counts.repos} repos.`);
   if (stillOpen.length) {
     const repos = new Set(stillOpen.map((o) => o.label)).size;
@@ -87,7 +87,7 @@ export function quietMessage({ now = new Date(), counts, stillOpen, errors }) {
 }
 
 export function errorMessage(errors, now = new Date()) {
-  return [`security-watch · ${fmtIst(now)} · run had errors`, ...errors.map((e) => `  ${e}`)].join('\n');
+  return [`Security Radar · ${fmtIst(now)} · run had errors`, ...errors.map((e) => `  ${e}`)].join('\n');
 }
 
 export function issueTitle(rec) {
@@ -112,7 +112,7 @@ export function issueBody(rec, repos) {
   if (repos.affected.length) lines.push('**Affected**', ...repos.affected.map((r) => `- ${r.label}: ${r.installed}`), '');
   if (repos.clear.length) lines.push('**Clear**', ...repos.clear.map((r) => `- ${r}`), '');
   if (repos.unknown.length) lines.push('**Could not read lockfile**', ...repos.unknown.map((r) => `- ${r}`), '');
-  lines.push('---', 'Opened automatically by security-watch. Close when every affected repo is on the fixed version.');
+  lines.push('---', 'Opened automatically by Security Radar. Close when every affected repo is on the fixed version.');
   return lines.join('\n');
 }
 
@@ -125,6 +125,6 @@ export function feedIssueBody({ feed, item }, nodeDeclared = []) {
   if (nodeDeclared.length) {
     lines.push('### Our repos declare', '', '| Repo | Node |', '| --- | --- |', ...nodeDeclared.map((r) => `| ${r.label} | ${r.node} |`), '');
   }
-  lines.push('---', 'Opened automatically by security-watch. Read the post, compare the affected lines to what each repo declares, close when done.');
+  lines.push('---', 'Opened automatically by Security Radar. Read the post, compare the affected lines to what each repo declares, close when done.');
   return lines.join('\n');
 }

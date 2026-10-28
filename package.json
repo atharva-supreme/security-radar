@@ -1,8 +1,8 @@
 {
-  "name": "security-watch",
+  "name": "security-radar",
   "version": "1.0.0",
   "private": true,
-  "description": "Watches vendor security advisories for the packages and runtimes our projects depend on and posts one alert per advisory.",
+  "description": "Security Radar: automated dependency vulnerability monitoring. Reads maintainers' security advisories the minute they publish, checks every listed lockfile, writes report.json.",
   "type": "module",
   "engines": { "node": ">=22" },
   "scripts": {
