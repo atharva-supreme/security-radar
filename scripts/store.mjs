@@ -3,6 +3,7 @@
 // Idempotent: the same date loaded twice replaces that day's rows. Needs MYSQL_URL.
 
 import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import mysql from 'mysql2/promise';
 
 const file = process.argv[2];
@@ -48,14 +49,15 @@ try {
     const c = a.counts ?? {};
     countRows.push([scanId, a.project, a.branch ?? '', a.label, a.kind, bit(a.ok) ?? 0, a.packages ?? 0, c.critical ?? 0, c.high ?? 0, c.moderate ?? 0, c.low ?? 0, a.command ?? null]);
     for (const o of a.open ?? []) {
-      findingRows.push([scanId, a.project, a.branch ?? '', a.label, a.kind, o.id, o.severity, o.package, o.installed, o.fixed ?? null, bit(o.fixedOnNpm), bit(o.direct), bit(o.early) ?? 0, bit(o.isNew) ?? 0, o.openDays ?? null]);
+      const hash = createHash('sha1').update([a.project, a.branch ?? '', a.label, o.id, o.package, o.installed].join('|')).digest('hex');
+      findingRows.push([scanId, hash, a.project, a.branch ?? '', a.label, a.kind, o.id, o.severity, o.package, o.installed, o.fixed ?? null, bit(o.fixedOnNpm), bit(o.direct), bit(o.early) ?? 0, bit(o.isNew) ?? 0, o.openDays ?? null]);
     }
   }
   for (let i = 0; i < countRows.length; i += 500) {
     await conn.query('INSERT INTO app_counts (scan_id, project, branch, app, kind, ok, packages_n, critical_n, high_n, moderate_n, low_n, command) VALUES ?', [countRows.slice(i, i + 500)]);
   }
   for (let i = 0; i < findingRows.length; i += 1000) {
-    await conn.query('INSERT IGNORE INTO findings (scan_id, project, branch, app, kind, advisory_id, severity, package, installed, fixed, fixed_on_npm, direct, early, is_new, open_days) VALUES ?', [findingRows.slice(i, i + 1000)]);
+    await conn.query('INSERT IGNORE INTO findings (scan_id, row_hash, project, branch, app, kind, advisory_id, severity, package, installed, fixed, fixed_on_npm, direct, early, is_new, open_days) VALUES ?', [findingRows.slice(i, i + 1000)]);
   }
   await conn.commit();
   console.log(`stored ${day}: scan #${scanId}, ${advRows.length} advisories, ${findingRows.length} findings, ${countRows.length} app rows`);

@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS advisories (
 
 CREATE TABLE IF NOT EXISTS findings (
   scan_id       INT          NOT NULL,
+  row_hash      CHAR(40)     NOT NULL,  -- sha1(project|branch|app|advisory|package|installed): six text columns exceed the 3072-byte key limit
   project       VARCHAR(128) NOT NULL,
   branch        VARCHAR(128) NOT NULL,
   app           VARCHAR(255) NOT NULL,
@@ -44,7 +45,7 @@ CREATE TABLE IF NOT EXISTS findings (
   early         TINYINT(1)   NOT NULL DEFAULT 0,
   is_new        TINYINT(1)   NOT NULL DEFAULT 0,
   open_days     INT          NULL,
-  PRIMARY KEY (scan_id, project, branch, app, advisory_id, package, installed),
+  PRIMARY KEY (scan_id, row_hash),
   INDEX ix_f_project (project, branch), INDEX ix_f_advisory (advisory_id), INDEX ix_f_severity (severity),
   CONSTRAINT fk_findings_scan FOREIGN KEY (scan_id) REFERENCES scans(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
