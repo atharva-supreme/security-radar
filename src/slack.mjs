@@ -28,6 +28,8 @@ const sevLabel = (s) => SEV_LABEL[s] ?? String(s ?? 'unknown').toUpperCase();
 const raw = (text) => ({ type: 'raw_text', text: String(text) });
 const section = (text) => ({ type: 'section', text: { type: 'mrkdwn', text } });
 const divider = () => ({ type: 'divider' });
+// A header block renders as a large bold title; plain text only, 150 characters at most.
+const header = (text) => ({ type: 'header', text: { type: 'plain_text', text: String(text).slice(0, 150), emoji: true } });
 const dateLabel = (d) => d.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
 const timeIst = (iso) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }) + ' IST';
 
@@ -236,11 +238,14 @@ export function projectMessages(view) {
 
   const statusLine = (b) => `\`${b.branch}\` · ${STATUS_EMOJI[b.status]} *${b.status}* · ${b.critical} critical, ${b.high} high`;
   const fallback = `Security Radar · ${view.name} · ${view.perBranch.map((b) => `${b.branch} ${b.status} (${b.critical} critical, ${b.high} high)`).join(' · ')}`;
+  // Slack stacks consecutive posts from one app under a single name, so each message opens with a
+  // large header and closes with a divider to stay visibly separate in the channel.
   return pages.map((units, i) => {
     const part = pages.length > 1 ? ` (${i + 1}/${pages.length})` : '';
-    const blocks = [section(`*:package: ${esc(view.name)}${part}*`)];
+    const blocks = [header(`:package: ${view.name}${part}`)];
     for (const u of units) blocks.push(section(u.cont ? `\`${u.branch.branch}\` · continued` : statusLine(u.branch)), tableBlock(u.rows));
     if (i === pages.length - 1 && view.summary.length) blocks.push(...sectionsOf(view.summary, { prefix: ':memo: *Summary*' }));
+    blocks.push(divider());
     return { text: fallback + part, blocks };
   });
 }
@@ -265,15 +270,14 @@ function summaryMessage(report, views, advisories, { narrative, now }) {
     return { text: `Security Radar · ${date} · all clear`, blocks: [section(text)] };
   }
 
-  const header = [
-    `${STATUS_EMOJI[status]} *Security Radar · ${date}*`,
+  const statusLines = [
     `_${affected.length} of ${views.length} projects affected · ${critical + high} critical/high open across ${distinct.size} advisories · oldest critical open ${oldestCritical} days · ${newOpen} new since yesterday${early ? `, ${early} early` : ''}${malicious ? `, ${malicious} MALICIOUS` : ''}_`,
   ];
   if (status === 'UNKNOWN') {
     const broken = apps.filter((a) => !a.ok);
-    header.push(`:warning: ${broken.length} lockfile(s) could not be read: ${esc(broken[0].error ?? 'unknown error')}`);
+    statusLines.push(`:warning: ${broken.length} lockfile(s) could not be read: ${esc(broken[0].error ?? 'unknown error')}`);
   }
-  const blocks = [section(header.join('\n'))];
+  const blocks = [header(`${STATUS_EMOJI[status]} Security Radar · ${date}`), section(statusLines.join('\n'))];
   if (narrative) blocks.push(section(esc(narrative.trim())));
   blocks.push(divider());
 
@@ -292,7 +296,7 @@ function summaryMessage(report, views, advisories, { narrative, now }) {
     blocks.push(divider());
   }
   const packages = apps.reduce((n, a) => n + (a.packages ?? 0), 0);
-  blocks.push(section(`_${packages.toLocaleString('en-US')} packages in ${apps.length} lockfiles across ${views.length} projects · scan ${timeIst(report.generatedAt)}_`));
+  blocks.push(section(`_${packages.toLocaleString('en-US')} packages in ${apps.length} lockfiles across ${views.length} projects · scan ${timeIst(report.generatedAt)}_`), divider());
   return { text: `Security Radar · ${date} · ${status} · ${affected.length} of ${views.length} projects affected`, blocks };
 }
 
