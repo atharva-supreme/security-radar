@@ -50,14 +50,16 @@ test('summary, one message per affected project with a table per branch, then th
   const msgs = buildMessages(sampleReport(), { projects, now: new Date('2026-10-29T04:00:00Z') });
   assert.equal(msgs.length, 3);
   const [summary, catalent, clear] = msgs;
-  assert.match(summary.blocks[0].text.text, /1 of 2 projects affected · 3 critical\/high open across 4 advisories/);
+  assert.match(summary.blocks[1].text.text, /1 of 2 projects affected · 3 critical\/high open across 4 advisories/); // block 0 is the header
   const issues = summary.blocks.find((b) => b.text?.text.startsWith('• '));
   assert.match(issues.text.text, /A1.*hits 1 apps in 1 projects.*\*NEW\*/); // the tooling hit on wp-site is not counted
   assert.match(issues.text.text, /&lt;A1&gt;/); // mrkdwn escaped
 
-  // heading, main status + table, staging status + table, summary
-  assert.deepEqual(catalent.blocks.map((b) => b.type), ['section', 'section', 'table', 'section', 'table', 'section']);
-  assert.equal(catalent.blocks[0].text.text, '*:package: Catalent*');
+  // header, main status + table, staging status + table, summary, divider
+  assert.deepEqual(catalent.blocks.map((b) => b.type), ['header', 'section', 'table', 'section', 'table', 'section', 'divider']);
+  assert.deepEqual(catalent.blocks[0].text, { type: 'plain_text', text: ':package: Catalent', emoji: true });
+  assert.equal(summary.blocks[0].type, 'header');
+  assert.equal(summary.blocks.at(-1).type, 'divider');
   assert.match(catalent.blocks[1].text.text, /^`main` · :red_circle: \*RED\* · 1 critical, 2 high$/);
   assert.match(catalent.blocks[3].text.text, /^`staging` · :large_green_circle: \*GREEN\* · 0 critical, 0 high$/);
   const main = catalent.blocks[2];
@@ -73,6 +75,7 @@ test('summary, one message per affected project with a table per branch, then th
   assert.equal(catalent.blocks[4].rows[1][1].text, 'clear');
 
   const summaryText = catalent.blocks[5].text.text;
+  assert.equal(catalent.blocks[5].type, 'section');
   assert.match(summaryText, /^:memo: \*Summary\*\n/);
   assert.match(summaryText, /\*Fix first:\* next 16\.3\.5 → 16\.4\.1 closes 2 \(1 critical, 1 high\) on main; undici 7\.29\.0 → 7\.30\.1 closes 1 \(1 high\) on main\./);
   assert.match(summaryText, /\*New since yesterday:\* 2 on `main` \(next, undici\); `staging` clear\./);
@@ -99,6 +102,7 @@ test('all clear is a single line', () => {
   const msgs = buildMessages(r, { projects: { 'Org/vectorlabs': 'VectorLabs' } });
   assert.equal(msgs.length, 1);
   assert.match(msgs[0].blocks[0].text.text, /1 projects clear, no action needed/);
+  assert.equal(msgs[0].blocks[0].type, 'section'); // the all-clear line stays small
 });
 
 test('long projects split across messages by rows and by characters; tables stay per branch; nothing trimmed', () => {
@@ -121,7 +125,7 @@ test('long projects split across messages by rows and by characters; tables stay
   r.apps[0].open = many.map((u) => ({ ...open[0], package: u.package }));
   const one = buildMessages(r, { projects, only: 'catalent' });
   assert.equal(one.length, 1);
-  assert.deepEqual(one[0].blocks.map((b) => b.type), ['section', 'section', 'table', 'section', 'table', 'section', 'table', 'section', 'table', 'section']);
+  assert.deepEqual(one[0].blocks.map((b) => b.type), ['header', 'section', 'table', 'section', 'table', 'section', 'table', 'section', 'table', 'section', 'divider']);
   assert.match(one[0].blocks[3].text.text, /^`main` · continued$/);
   assert.match(one[0].blocks[7].text.text, /^`staging` · /);
 
@@ -131,7 +135,7 @@ test('long projects split across messages by rows and by characters; tables stay
   r.apps[0].open = long.map((u) => ({ ...open[0], package: u.package }));
   const msgs = buildMessages(r, { projects, only: 'catalent' });
   assert.ok(msgs.length >= 3, `expected several messages, got ${msgs.length}`);
-  assert.match(msgs[0].blocks[0].text.text, new RegExp(`Catalent \\(1/${msgs.length}\\)`));
+  assert.equal(msgs[0].blocks[0].text.text, `:package: Catalent (1/${msgs.length})`);
   assert.match(msgs[1].blocks[1].text.text, /^`main` · continued$/);
   const tables = msgs.flatMap((m) => m.blocks.filter((b) => b.type === 'table'));
   assert.equal(tables.reduce((n, t) => n + t.rows.length - 1, 0), 251); // 250 main rows + the staging "clear" row
