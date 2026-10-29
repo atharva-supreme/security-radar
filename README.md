@@ -70,6 +70,8 @@ Slack caps a table at 100 rows and 10,000 characters of cell text per message; t
 
 The server is the only copy of the state and the reports; nothing is pushed back to GitHub. The `watch` GitHub Actions workflow is kept but disabled.
 
+`state.json`, `packages.json` and `report.json` are git-ignored: the first scan creates them, every later scan updates them, and a `git pull` on the server never touches them. To update the server, `git pull` is enough.
+
 ## Running locally
 
 ```bash
@@ -89,9 +91,9 @@ The first scan looks up every package on npm once and polls every repository wit
 | --- | --- |
 | `watchlist.json` | Scope: org, branches, exclusions, tooling rules, the lockfile rows discovery found, feeds |
 | `scripts/discover.mjs` | Walks the organisation and rewrites `watchlist.repos` |
-| `state.json` | Every advisory seen (trimmed), ETags per repository, feed items. Edit only via `--forget` |
-| `packages.json` | npm package -> GitHub repository, cached |
-| `report.json` | The latest scan result; one copy per day under `data/reports/` on the server |
+| `state.json` | Every advisory seen (trimmed), ETags per repository, feed items. Edit only via `--forget`. Git-ignored, created by the first scan |
+| `packages.json` | npm package -> GitHub repository, cached. Git-ignored, created by the first scan |
+| `report.json` | The latest scan result; one copy per day under `data/reports/` on the server. Git-ignored |
 | `watch.mjs` | The scan. No npm dependencies |
 | `src/` | GitHub client, OSV client, npm registry lookup, semver range check, lockfile readers, feed parser, report builder, Slack message builder |
 | `scripts/slack.mjs` | Posts the messages; `--dry-run`, `--only <project>`, `--narrative-file` |
