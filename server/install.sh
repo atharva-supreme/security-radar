@@ -32,8 +32,11 @@ fi
 mkdir -p data/reports logs
 chmod +x server/daily.sh
 
-# cron: 08:00 Asia/Kolkata every day. The server's own clock zone does not matter: TZ is set per line.
-CRON_LINE="0 8 * * * TZ=Asia/Kolkata $ROOT/server/daily.sh >> $ROOT/logs/cron.log 2>&1"
+# cron reads the schedule in the server's own clock, so convert 08:00 Asia/Kolkata to server-local time.
+LOCAL_HM="$(date -d "TZ=\"Asia/Kolkata\" 08:00" +%H:%M)"
+CRON_H="${LOCAL_HM%%:*}"; CRON_M="${LOCAL_HM##*:}"
+echo "08:00 Asia/Kolkata is $LOCAL_HM on this server's clock ($(date +%Z))"
+CRON_LINE="$((10#$CRON_M)) $((10#$CRON_H)) * * * TZ=Asia/Kolkata $ROOT/server/daily.sh >> $ROOT/logs/cron.log 2>&1"
 ( crontab -l 2>/dev/null | grep -v 'security-radar\|server/daily.sh' ; echo "$CRON_LINE" ) | crontab -
 echo "cron installed:"; crontab -l | grep daily.sh
 echo
