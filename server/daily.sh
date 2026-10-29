@@ -4,7 +4,8 @@
 #   1. scan        node watch.mjs            -> report.json (+ state.json, packages.json caches)
 #   2. keep        copy report.json          -> data/reports/YYYY-MM-DD.json (one file per day, never overwritten)
 #   3. store       node scripts/store.mjs    -> MySQL (scans, findings, advisories) for history queries
-#   4. tell        claude -p server/report.prompt.md -> one Slack message per project, via the webhook
+#   4. narrate     claude -p server/narrative.prompt.md -> a short paragraph for the summary message (optional)
+#   5. tell        node scripts/slack.mjs    -> Slack via the webhook: summary, one table per project, clear list
 #
 # Each step logs to logs/YYYY-MM-DD.log. A failed scan stops the run (there is nothing to tell);
 # a failed store does not (the messages still go out; the day's file is on disk to load later).
@@ -36,8 +37,17 @@ else
   log "MYSQL_URL not set, history store skipped"
 fi
 
-log "claude report start"
-claude -p "$(cat server/report.prompt.md)" \
-  --allowedTools "Bash,Read,Write" \
-  --output-format text >> "$LOG" 2>&1
-log "claude report done (exit $?)"
+NARRATIVE="data/narrative-$DAY.txt"
+log "narrative start"
+if claude -p "$(cat server/narrative.prompt.md)" --allowedTools "Bash,Read" --output-format text > "$NARRATIVE" 2>> "$LOG"; then
+  log "narrative done ($(wc -c < "$NARRATIVE") bytes)"
+else
+  log "narrative FAILED (continuing without it)"; : > "$NARRATIVE"
+fi
+
+log "slack start"
+if node scripts/slack.mjs "data/reports/$DAY.json" --narrative-file "$NARRATIVE" >> "$LOG" 2>&1; then
+  log "slack done"
+else
+  log "slack FAILED (see above)"; exit 1
+fi

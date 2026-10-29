@@ -20,6 +20,20 @@
     "figma-make",
     "TrelloConnector"
   ],
+  "report": {
+    "projects": {
+      "SupremeOpti/athens-sanity-bigcommerce": "Athens BioSciences",
+      "SupremeOpti/bostonbioproducts-bigcommerce-sanity": "Boston BioProducts",
+      "SupremeOpti/catalent-sanity": "Catalent",
+      "SupremeOpti/curator24-sanity-nextjs": "Curator24",
+      "SupremeOpti/cytoskeleton-sanity": "Cytoskeleton",
+      "SupremeOpti/missionbio-sanity": "Mission Bio",
+      "SupremeOpti/raybiotech-sanity-bigcommerce": "RayBiotech",
+      "SupremeOpti/si-open-design": "SI Open Design",
+      "SupremeOpti/southernbiotech-bigcommerce-sanity": "SouthernBiotech",
+      "SupremeOpti/vectorlabs-bigcommerce-sanity": "VectorLabs"
+    }
+  },
   "repos": [
     {
       "repo": "SupremeOpti/absci-headlinetrial-wordpress",
