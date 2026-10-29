@@ -4,12 +4,18 @@
   "private": true,
   "description": "Security Radar: automated dependency vulnerability monitoring. Reads maintainers' security advisories the minute they publish, checks every listed lockfile, writes report.json.",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "watch": "node watch.mjs",
     "dry": "node watch.mjs --dry-run",
     "scan": "node watch.mjs",
     "discover": "node scripts/discover.mjs",
-    "test": "node --test test/semver.test.mjs test/advisories.test.mjs test/lockfile.test.mjs test/feeds.test.mjs test/report.test.mjs test/osv.test.mjs"
+    "test": "node --test test/semver.test.mjs test/advisories.test.mjs test/lockfile.test.mjs test/feeds.test.mjs test/report.test.mjs test/osv.test.mjs",
+    "store": "node scripts/store.mjs"
+  },
+  "dependencies": {
+    "mysql2": "^3.11.0"
   }
 }
