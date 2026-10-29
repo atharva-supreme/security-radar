@@ -1,9 +1,10 @@
 // Slack messages built in code from report.json: one summary, one message per affected project
-// (both branches in one native table block), one "clear" list. Nothing here is free text from a
-// model; the only model-written part is the optional narrative paragraph passed in by the caller.
+// (one native table block per branch, then a four-line summary), one "clear" list. Nothing here is
+// free text from a model; the only model-written part is the optional narrative paragraph passed in
+// by the caller.
 //
 // Slack limits that shape this file (docs.slack.dev/reference/block-kit/blocks/table-block):
-//   one table block per message · 100 rows · 20 columns · 10,000 characters across all cells
+//   100 rows per table · 20 columns · 10,000 characters across all cells of a message
 //   section text 3,000 characters · 50 blocks per message
 // A project that does not fit in one message is split into "Name (1/2)", "Name (2/2)": rows are
 // never dropped and never wrapped (column_settings.is_wrapped = false on every column).
@@ -18,7 +19,8 @@ const TOP_ISSUES = 10;
 const STATUS_EMOJI = { RED: ':red_circle:', AMBER: ':large_yellow_circle:', GREEN: ':large_green_circle:', UNKNOWN: ':white_circle:' };
 const SEV_LABEL = { critical: 'CRITICAL', high: 'HIGH', moderate: 'MODERATE', medium: 'MODERATE', low: 'LOW' };
 const SEV_EMOJI = { critical: ':red_circle:', high: ':large_orange_circle:', moderate: ':large_yellow_circle:', medium: ':large_yellow_circle:', low: ':white_circle:' };
-const COLUMNS = ['Branch', 'App', 'Package', 'Installed', 'Upgrade to', 'Closes', 'Severity', 'Open'];
+const COLUMNS = ['App', 'Package', 'Installed', 'Upgrade to', 'Closes', 'Severity', 'Open', 'Direct'];
+const CLOSES_COL = COLUMNS.indexOf('Closes');
 
 // mrkdwn text fields need these three escaped; raw_text and rich_text cells do not.
 export const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -38,6 +40,7 @@ function richCell(parts) {
   return { type: 'rich_text', elements: [{ type: 'rich_text_section', elements }] };
 }
 const cellChars = (cell) => (cell.type === 'rich_text' ? cell.elements[0].elements.reduce((n, e) => n + e.text.length, 0) : cell.text.length);
+const rowsChars = (rows) => rows.reduce((s, row) => s + row.reduce((t, c) => t + cellChars(c), 0), 0) + COLUMNS.join('').length;
 
 // The worst open advisory behind an upgrade row: severity first, then longest open.
 function worstBehind(app, upgrade) {
@@ -56,38 +59,40 @@ function branchStatus(apps) {
 }
 const count = (apps, sev) => apps.reduce((n, a) => n + (a.counts?.[sev] ?? 0), 0);
 
-export function tableRows(branchApps, advisories) {
-  // branchApps: [{ branch, apps: [appRow] }] -> data rows (arrays of cells) for the table block
+// yes / no / partly: whether the app declares the package itself (the upgrade command moves it) or
+// another package pulls it in (an override is needed). "partly" = one installed copy of each.
+const directness = (up) => (!up.transitive?.length ? 'yes' : up.transitive.length >= up.from.length ? 'no' : 'partly');
+
+export function tableRows(apps, advisories) {
+  // apps: the kind "app" lockfile rows of ONE branch -> data rows (arrays of cells) for its table block
   const rows = [];
-  for (const { branch, apps } of branchApps) {
-    for (const app of apps) {
-      if (!app.ok) {
-        rows.push([raw(branch), raw(app.label), raw('lockfile could not be read'), raw('—'), raw('—'), raw('—'), raw('—'), raw('—')]);
-        continue;
-      }
-      if (!app.upgrades?.length) {
-        rows.push([raw(branch), raw(app.label), raw('clear'), raw('—'), raw('—'), raw('—'), raw('—'), raw('—')]);
-        continue;
-      }
-      for (const up of app.upgrades) {
-        const worst = worstBehind(app, up);
-        const adv = worst ? advisories.get(worst.id) : null;
-        const label = sevLabel(up.worst);
-        const severity = adv?.url ? richCell([{ text: label, url: adv.url, bold: true }]) : richCell([{ text: label, bold: true }]);
-        const openParts = [{ text: worst?.openDays != null ? `${worst.openDays} days` : '—' }];
-        if (worst?.isNew) openParts.push({ text: ' · ' }, { text: 'NEW', bold: true });
-        if (worst?.early) openParts.push({ text: ' · ' }, { text: 'early', bold: true });
-        rows.push([
-          raw(branch),
-          raw(app.label),
-          raw(up.package),
-          raw(up.from.join(', ')),
-          raw(up.to ?? 'none yet'),
-          raw(String(up.closes)),
-          severity,
-          richCell(openParts),
-        ]);
-      }
+  for (const app of apps) {
+    if (!app.ok) {
+      rows.push([raw(app.label), raw('lockfile could not be read'), raw('—'), raw('—'), raw('—'), raw('—'), raw('—'), raw('—')]);
+      continue;
+    }
+    if (!app.upgrades?.length) {
+      rows.push([raw(app.label), raw('clear'), raw('—'), raw('—'), raw('—'), raw('—'), raw('—'), raw('—')]);
+      continue;
+    }
+    for (const up of app.upgrades) {
+      const worst = worstBehind(app, up);
+      const adv = worst ? advisories.get(worst.id) : null;
+      const label = sevLabel(up.worst);
+      const severity = adv?.url ? richCell([{ text: label, url: adv.url, bold: true }]) : richCell([{ text: label, bold: true }]);
+      const openParts = [{ text: worst?.openDays != null ? `${worst.openDays} days` : '—' }];
+      if (worst?.isNew) openParts.push({ text: ' · ' }, { text: 'NEW', bold: true });
+      if (worst?.early) openParts.push({ text: ' · ' }, { text: 'early', bold: true });
+      rows.push([
+        raw(app.label),
+        raw(up.package),
+        raw(up.from.join(', ')),
+        raw(up.to ?? 'none yet'),
+        raw(String(up.closes)),
+        severity,
+        richCell(openParts),
+        raw(directness(up)),
+      ]);
     }
   }
   return rows;
@@ -96,7 +101,7 @@ export function tableRows(branchApps, advisories) {
 function tableBlock(rows) {
   return {
     type: 'table',
-    column_settings: COLUMNS.map((_, i) => ({ align: i === 5 ? 'right' : 'left', is_wrapped: false })),
+    column_settings: COLUMNS.map((_, i) => ({ align: i === CLOSES_COL ? 'right' : 'left', is_wrapped: false })),
     rows: [COLUMNS.map(raw), ...rows],
   };
 }
@@ -135,30 +140,107 @@ function sectionsOf(lines, { prefix = '' } = {}) {
   return blocks;
 }
 
+const nameList = (items, max = 6) => items.slice(0, max).join(', ') + (items.length > max ? ` and ${items.length - max} more` : '');
+function overridesWord(apps) {
+  const files = apps.map((a) => a.lockfile ?? '');
+  if (files.some((f) => f.endsWith('pnpm-lock.yaml'))) return ['pnpm up', 'pnpm overrides'];
+  if (files.some((f) => f.endsWith('yarn.lock'))) return ['yarn upgrade', 'yarn resolutions'];
+  return ['npm update', 'npm overrides'];
+}
+
+// Four lines per project, each from report fields: fix first, new since yesterday, transitive, no fix yet.
+export function projectSummary(perBranch) {
+  const lines = [];
+
+  // Fix first: the upgrades (package -> version) that close the most critical/high, across branches and apps.
+  const byUpgrade = new Map();
+  for (const b of perBranch) {
+    for (const app of b.apps) {
+      for (const up of app.upgrades ?? []) {
+        if (!up.to) continue;
+        const key = `${up.package}@${up.to}`;
+        const e = byUpgrade.get(key) ?? { package: up.package, to: up.to, from: new Set(), closes: 0, critical: 0, high: 0, branches: new Set() };
+        up.from.forEach((v) => e.from.add(v));
+        e.closes += up.closes;
+        for (const o of (app.open ?? []).filter((o) => o.package === up.package)) {
+          if (o.severity === 'critical') e.critical++;
+          else if (o.severity === 'high') e.high++;
+        }
+        e.branches.add(b.branch);
+        byUpgrade.set(key, e);
+      }
+    }
+  }
+  const top = [...byUpgrade.values()].sort((a, b) => b.critical - a.critical || b.high - a.high || b.closes - a.closes).slice(0, 2);
+  if (top.length) {
+    const sev = (e) => [e.critical ? `${e.critical} critical` : '', e.high ? `${e.high} high` : ''].filter(Boolean).join(', ');
+    lines.push(`• *Fix first:* ${top.map((e) => `${esc(e.package)} ${[...e.from].join(', ')} → ${e.to} closes ${e.closes}${sev(e) ? ` (${sev(e)})` : ''} on ${[...e.branches].join(' and ')}`).join('; ')}.`);
+  }
+
+  // New since yesterday, per branch.
+  const parts = perBranch.map((b) => {
+    const open = b.apps.flatMap((a) => a.open ?? []);
+    const fresh = open.filter((o) => o.isNew);
+    if (!open.length) return `\`${b.branch}\` clear`;
+    if (!fresh.length) return `\`${b.branch}\` unchanged, ${open.length} open`;
+    return `${fresh.length} on \`${b.branch}\` (${esc(nameList([...new Set(fresh.map((o) => o.package))]))})`;
+  });
+  lines.push(`• *New since yesterday:* ${parts.join('; ')}.`);
+
+  // Transitive packages: the fact the old notes repeated per package, once, with the override targets.
+  const allApps = perBranch.flatMap((b) => b.apps);
+  const upgrades = allApps.flatMap((a) => a.upgrades ?? []);
+  const transitive = upgrades.filter((u) => u.transitive?.length);
+  if (transitive.length) {
+    const [upgradeCmd, overrides] = overridesWord(allApps);
+    const distinct = (list) => new Set(list.map((u) => u.package)).size; // a package on both branches counts once
+    const targets = [...new Set(transitive.filter((u) => u.to).map((u) => `${u.package}@${u.to}`))];
+    lines.push(`• *Transitive, ${upgradeCmd} will not move them:* ${distinct(transitive)} of ${distinct(upgrades)} packages${targets.length ? `. ${overrides}: ${esc(targets.join(', '))}` : ''}.`);
+  }
+
+  // No fix published yet.
+  const noFix = [];
+  for (const b of perBranch) for (const app of b.apps) for (const up of app.upgrades ?? []) if (!up.to) noFix.push(`${up.package} ${up.from.join(', ')} on ${b.branch}`);
+  if (noFix.length) lines.push(`• *No fix published yet:* ${esc([...new Set(noFix)].join('; '))}. Remove, replace, or wait.`);
+  return lines;
+}
+
 function projectView(report, repo, name, advisories) {
   const apps = report.apps.filter((a) => a.repo === repo && a.kind === 'app');
   const branches = [...new Set(apps.map((a) => a.branch))];
   const perBranch = branches.map((branch) => {
     const list = apps.filter((a) => a.branch === branch);
-    return { branch, apps: list, status: branchStatus(list), critical: count(list, 'critical'), high: count(list, 'high') };
+    return { branch, apps: list, status: branchStatus(list), critical: count(list, 'critical'), high: count(list, 'high'), rows: tableRows(list, advisories) };
   });
   const affected = perBranch.some((b) => b.status !== 'GREEN');
-  const notes = [...new Set(apps.flatMap((a) => a.notes ?? []))];
-  return { repo, name, apps, perBranch, affected, notes, rows: tableRows(perBranch, advisories) };
+  return { repo, name, apps, perBranch, affected, summary: projectSummary(perBranch) };
 }
 
 export function projectMessages(view) {
-  const chunks = chunkRows(view.rows);
-  const statusLine = view.perBranch
-    .map((b) => `\`${b.branch}\` · ${STATUS_EMOJI[b.status]} *${b.status}* · ${b.critical} critical, ${b.high} high`)
-    .join('\n');
-  const fallback = `Security Radar · ${view.name} · ${view.perBranch.map((b) => `${b.branch} ${b.status} (${b.critical} critical, ${b.high} high)`).join(' · ')}`;
-  return chunks.map((rows, i) => {
-    const part = chunks.length > 1 ? ` (${i + 1}/${chunks.length})` : '';
-    const blocks = [section(`*:package: ${esc(view.name)}${part}*\n${statusLine}`), tableBlock(rows)];
-    if (i === chunks.length - 1 && view.notes.length) {
-      blocks.push(...sectionsOf(view.notes.map((n) => `_• ${esc(n)}_`), { prefix: ':memo: _Note:_' }));
+  // One table per branch. A branch's rows are chunked to the table limits, then the chunks are packed
+  // into messages in branch order while the message stays under the per-message character limit.
+  const units = view.perBranch.flatMap((b) => chunkRows(b.rows).map((rows, i) => ({ branch: b, rows, cont: i > 0, chars: rowsChars(rows) })));
+  const pages = [];
+  let page = [];
+  let chars = 0;
+  for (const u of units) {
+    if (page.length && chars + u.chars > MAX_CELL_CHARS) {
+      pages.push(page);
+      page = [];
+      chars = 0;
     }
+    page.push(u);
+    chars += u.chars;
+  }
+  if (page.length) pages.push(page);
+
+  const statusLine = (b) => `\`${b.branch}\` · ${STATUS_EMOJI[b.status]} *${b.status}* · ${b.critical} critical, ${b.high} high`;
+  const fallback = `Security Radar · ${view.name} · ${view.perBranch.map((b) => `${b.branch} ${b.status} (${b.critical} critical, ${b.high} high)`).join(' · ')}`;
+  return pages.map((units, i) => {
+    const part = pages.length > 1 ? ` (${i + 1}/${pages.length})` : '';
+    const blocks = [section(`*:package: ${esc(view.name)}${part}*`)];
+    for (const u of units) blocks.push(section(u.cont ? `\`${u.branch.branch}\` · continued` : statusLine(u.branch)), tableBlock(u.rows));
+    if (i === pages.length - 1 && view.summary.length) blocks.push(...sectionsOf(view.summary, { prefix: ':memo: *Summary*' }));
     return { text: fallback + part, blocks };
   });
 }
