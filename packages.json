@@ -21776,5 +21776,53 @@
  "@ai-sdk/provider": {
   "repo": "vercel/ai",
   "checkedAt": "2026-10-28T12:15:33.917Z"
+ },
+ "@pierre/diffs": {
+  "repo": null,
+  "checkedAt": "2026-10-29T08:47:14.665Z"
+ },
+ "parse-duration": {
+  "repo": "jkroso/parse-duration",
+  "checkedAt": "2026-10-29T08:47:14.670Z"
+ },
+ "cobe": {
+  "repo": "shuding/cobe",
+  "checkedAt": "2026-10-29T08:47:14.672Z"
+ },
+ "@sanity/workflow-blueprint": {
+  "repo": "sanity-io/workflows",
+  "checkedAt": "2026-10-29T08:47:14.675Z"
+ },
+ "@sanity/schema-descriptor-utils": {
+  "repo": "sanity-io/schema-descriptor-utils",
+  "checkedAt": "2026-10-29T08:47:14.675Z"
+ },
+ "@portabletext/repair": {
+  "repo": "portabletext/editor",
+  "checkedAt": "2026-10-29T08:47:14.677Z"
+ },
+ "@pierre/highlights": {
+  "repo": null,
+  "checkedAt": "2026-10-29T08:47:14.683Z"
+ },
+ "@shikijs/primitive": {
+  "repo": "shikijs/shiki",
+  "checkedAt": "2026-10-29T08:47:14.713Z"
+ },
+ "@pierre/theme": {
+  "repo": "pierrecomputer/pierre",
+  "checkedAt": "2026-10-29T08:47:14.721Z"
+ },
+ "@typescript/typescript6": {
+  "repo": "microsoft/TypeScript",
+  "checkedAt": "2026-10-29T08:47:14.741Z"
+ },
+ "@sanity-labs/groq-wasm": {
+  "repo": "sanity-labs/sanity-lint",
+  "checkedAt": "2026-10-29T08:47:14.764Z"
+ },
+ "@pierre/theming": {
+  "repo": null,
+  "checkedAt": "2026-10-29T08:47:15.026Z"
  }
 }
