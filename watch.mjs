@@ -27,6 +27,7 @@ import { resolvePackages, matchInstalled } from './src/advisories.mjs';
 import { installedVersions, directVersions, declaredNode } from './src/lockfile.mjs';
 import { fetchFeed } from './src/feeds.mjs';
 import { buildReport } from './src/report.mjs';
+import { scanRows } from './src/scope.mjs';
 
 // ---------- arguments and files ----------
 
@@ -64,7 +65,9 @@ for (const id of forget) {
 // ---------- 1. apps: one per (repo row, branch), with everything each lockfile has installed ----------
 
 const defaultBranches = watchlist.branches ?? [null];
-const appRows = (watchlist.repos ?? []).flatMap((r) =>
+const scope = scanRows(watchlist);
+log(`scan mode ${scope.mode}: ${scope.rows.length} lockfile rows${scope.skipped ? `, ${scope.skipped} skipped (not a reported project, or build tooling)` : ''}`);
+const appRows = scope.rows.flatMap((r) =>
   (r.branches ?? (r.ref ? [r.ref] : defaultBranches)).map((branch) => {
     const dirOf = (p) => (p && p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');
     const dir = dirOf(r.lockfile) || dirOf(r.packageJson);

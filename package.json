@@ -12,7 +12,7 @@
     "dry": "node watch.mjs --dry-run",
     "scan": "node watch.mjs",
     "discover": "node scripts/discover.mjs",
-    "test": "node --test test/semver.test.mjs test/advisories.test.mjs test/lockfile.test.mjs test/feeds.test.mjs test/report.test.mjs test/osv.test.mjs test/slack.test.mjs",
+    "test": "node --test test/semver.test.mjs test/advisories.test.mjs test/lockfile.test.mjs test/feeds.test.mjs test/report.test.mjs test/osv.test.mjs test/slack.test.mjs test/scope.test.mjs",
     "store": "node scripts/store.mjs",
     "slack": "node scripts/slack.mjs"
   },

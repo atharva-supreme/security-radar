@@ -1,5 +1,6 @@
 {
   "org": "SupremeOpti",
+  "scan": "reported",
   "branches": [
     "main",
     "staging"
