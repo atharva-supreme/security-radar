@@ -20,13 +20,13 @@ chmod 600 .env
 set -a; . ./.env; set +a
 
 if [ -n "${MYSQL_URL:-}" ]; then
-  # mysql://user:pass@host:port/db
-  node -e '
+  # Applies server/schema.sql through the mysql CLI. Every statement is CREATE TABLE IF NOT EXISTS,
+  # so this is safe when the tables were already created by hand (phpMyAdmin); a CLI connection
+  # failure only means you apply the schema yourself.
+  if node -e '
     const u = new URL(process.env.MYSQL_URL);
-    const db = u.pathname.slice(1);
-    console.log(`mysql -h ${u.hostname} -P ${u.port || 3306} -u ${decodeURIComponent(u.username)} -p${decodeURIComponent(u.password)} -e "CREATE DATABASE IF NOT EXISTS \\`${db}\\`" && mysql -h ${u.hostname} -P ${u.port || 3306} -u ${decodeURIComponent(u.username)} -p${decodeURIComponent(u.password)} ${db} < server/schema.sql`);
-  ' | bash
-  echo "MySQL schema applied"
+    console.log(`mysql -h ${u.hostname} -P ${u.port || 3306} -u ${decodeURIComponent(u.username)} -p${decodeURIComponent(u.password)} ${u.pathname.slice(1)} < server/schema.sql`);
+  ' | bash 2>/dev/null; then echo "MySQL schema applied (or already present)"; else echo "MySQL CLI could not apply the schema; apply server/schema.sql by hand if the tables do not exist yet"; fi
 fi
 
 mkdir -p data/reports logs
