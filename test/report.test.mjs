@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildReport, affects } from '../src/report.mjs';
+import { buildReport, affects, unitsFor } from '../src/report.mjs';
 
 const now = new Date('2026-10-27T02:00:00Z');
 const advisories = {
@@ -14,12 +14,13 @@ const web = {
   repo: 'o/r', branch: 'main', label: 'web', kind: 'app', lockfile: 'web/pnpm-lock.yaml', ok: true,
   versions: new Map([['next', new Set(['16.2.12'])], ['sharp', new Set(['0.33.5', '0.34.5'])], ['sanitize-html', new Set(['2.17.8'])]]),
   direct: new Map([['next', new Set(['16.2.12'])], ['sanitize-html', new Set(['2.17.8'])]]),
+  graph: { importers: ['.'], isProd: (name) => name !== 'sanitize-html', via: (name) => (name === 'sharp' ? { direct: 'next', importer: '.', dev: false, depth: 1 } : null) },
   open: [
-    { id: 'GHSA-aaaa', package: 'next', installed: '16.2.12', fixed: '16.4.1', early: false },
-    { id: 'GHSA-bbbb', package: 'next', installed: '16.2.12', fixed: '16.3.6', early: false },
-    { id: 'GHSA-eeee', package: 'sharp', installed: '0.33.5', fixed: '0.35.5', early: true },
-    { id: 'GHSA-eeee', package: 'sharp', installed: '0.34.5', fixed: '0.35.5', early: true },
-    { id: 'GHSA-gggg', package: 'sanitize-html', installed: '2.17.8', fixed: '2.18.0', early: false },
+    { id: 'GHSA-aaaa', package: 'next', installed: '16.2.12', fixed: '16.4.1', fixedAny: '16.4.1', early: false },
+    { id: 'GHSA-bbbb', package: 'next', installed: '16.2.12', fixed: '16.3.6', fixedAny: '16.3.6', early: false },
+    { id: 'GHSA-eeee', package: 'sharp', installed: '0.33.5', fixed: null, fixedAny: '0.35.5', early: true },
+    { id: 'GHSA-eeee', package: 'sharp', installed: '0.34.5', fixed: null, fixedAny: '0.35.5', early: true },
+    { id: 'GHSA-gggg', package: 'sanitize-html', installed: '2.17.8', fixed: '2.18.0', fixedAny: '2.18.0', early: false },
   ],
 };
 const sanity = { repo: 'o/r', branch: 'main', label: 'sanity', kind: 'app', lockfile: 'sanity/pnpm-lock.yaml', ok: true, versions: new Map([['sanity', new Set(['6.9.0'])]]), direct: new Map(), open: [] };
@@ -50,13 +51,24 @@ test('report: status, flags, upgrades, notes, command, distinct advisories', () 
   assert.equal(aaaa.direct, true);
   assert.equal(aaaa.fixedOnNpm, true);
   assert.equal(aaaa.openDays, 12);
-  const sharp = w.upgrades.find((u) => u.package === 'sharp');
-  assert.deepEqual(sharp.transitive, ['0.33.5', '0.34.5']);
-  assert.equal(sharp.worst, 'critical');
+  assert.equal(aaaa.prod, true);
+  const sharps = w.upgrades.filter((u) => u.package === 'sharp');
+  assert.deepEqual(sharps.map((u) => [u.line, u.from, u.to, u.toMajor, u.direct, u.tier, u.reason]), [
+    ['0.33', ['0.33.5'], null, null, false, 'P1', 'fix is another major, not a direct dependency'],
+    ['0.34', ['0.34.5'], null, null, false, 'P1', 'fix is another major, not a direct dependency'],
+  ], 'two 0.x lines, neither has an in-line fix, sharp is transitive: no override across lines');
+  assert.deepEqual(sharps[0].via, { direct: 'next', importer: '.', dev: false, depth: 1 });
+  const next = w.upgrades.find((u) => u.package === 'next');
+  assert.deepEqual([next.to, next.closes, next.tier, next.direct, next.prod], ['16.4.1', 2, 'P0', true, true]);
   const sh = w.upgrades.find((u) => u.package === 'sanitize-html');
   assert.equal(sh.to, '2.18.1', 'climbs past 2.18.0, which has its own advisory');
-  assert.match(w.notes[0], /sharp 0.33.5, 0.34.5 is not a direct dependency of web/);
-  assert.equal(w.command, 'cd web && pnpm up next@16.4.1 sanitize-html@2.18.1', 'transitive-only packages are left out of the command');
+  assert.equal(sh.tier, 'P2', 'devDependencies only');
+  assert.equal(sh.reason, 'dev-only');
+  assert.equal(w.command, 'cd web && pnpm up next@16.4.1', 'P0 direct packages only');
+  assert.equal(w.overrides, null);
+  assert.deepEqual(w.tiers, { P0: 1, P1: 2, P2: 1 });
+  const main = r.projects.find((p) => p.project === 'r' && p.branch === 'main');
+  assert.deepEqual(main.health, { score: 58, status: 'RED', critical: 1, high: 0, p1: 1, p2: 1 });
   assert.equal(r.apps[1].open.length, 0);
   assert.equal(r.newNotAffecting.map((n) => n.id).join(), 'GHSA-cccc');
   const a = r.advisories.find((x) => x.id === 'GHSA-eeee');
@@ -85,8 +97,48 @@ test('report: one project row per (repo, branch), worst first, tooling kept apar
   assert.deepEqual(a.projects, ['r', 'wp']);
 });
 
+test('unitsFor: a transitive package with no in-line fix is "closed by" the parent bump when the parent target requires the fixed child', () => {
+  const via = { direct: 'next', importer: '.', dev: false, depth: 1 };
+  const rows = [
+    { id: 'N1', severity: 'critical', package: 'next', installed: '16.3.4', fixed: '16.4.1', fixedAny: '16.4.1', direct: true, prod: true, openDays: 10 },
+    { id: 'S1', severity: 'high', package: 'sharp', installed: '0.34.5', fixed: null, fixedAny: '0.35.5', direct: false, prod: true, via, openDays: 20 },
+  ];
+  const closed = unitsFor(rows, {}, { manifests: new Map([['next@16.4.1', { dependencies: {}, optionalDependencies: { sharp: '^0.35.5' } }]]) });
+  const sharp = closed.find((u) => u.package === 'sharp');
+  assert.deepEqual([sharp.tier, sharp.to, sharp.fixAbove, sharp.reason], ['P1', null, '0.35.5', 'closed by next 16.4.1']);
+  assert.deepEqual(sharp.closedBy, { package: 'next', version: '16.4.1', range: '^0.35.5', resolves: '0.35.5' });
+  // a range that may still resolve to the vulnerable line does not count
+  const open = unitsFor(rows, {}, { manifests: new Map([['next@16.4.1', { dependencies: {}, optionalDependencies: { sharp: '^0.34.3 || ^0.35.5' } }]]) });
+  assert.equal(open.find((u) => u.package === 'sharp').closedBy, null);
+  assert.equal(unitsFor(rows, {}).find((u) => u.package === 'sharp').reason, 'fix is another major, not a direct dependency');
+});
+
 test('report: nothing open is GREEN', () => {
   const r = buildReport({ now, apps: [sanity], advisories: adv });
   assert.equal(r.status, 'GREEN');
   assert.equal(r.apps[0].command, null);
+  assert.deepEqual(r.projects[0].health, { score: 100, status: 'GREEN', critical: 0, high: 0, p1: 0, p2: 0 });
+});
+
+test('unitsFor: a direct dependency with no in-line fix gets a labelled major bump; a transitive one does not', () => {
+  const rows = (direct) => [
+    { id: 'J1', severity: 'critical', package: 'jspdf', installed: '3.0.4', fixed: null, fixedAny: '4.0.0', direct, prod: true, openDays: 10 },
+    { id: 'J2', severity: 'high', package: 'jspdf', installed: '3.0.4', fixed: null, fixedAny: '4.2.1', direct, prod: true, openDays: 5 },
+    { id: 'J3', severity: 'low', package: 'jspdf', installed: '3.0.4', fixed: null, fixedAny: null, direct, prod: true, openDays: 5 },
+  ];
+  const [d] = unitsFor(rows(true), {});
+  assert.deepEqual([d.to, d.toMajor, d.closes, d.tier, d.reason, d.worst], [null, '4.2.1', 2, 'P0', 'major bump', 'critical']);
+  const [t] = unitsFor(rows(false), {});
+  assert.deepEqual([t.to, t.toMajor, t.tier], [null, null, 'P1']);
+  // one in-line fix covering every critical/high: P0 on the line even if a low has no fix
+  const [u] = unitsFor([
+    { id: 'D1', severity: 'high', package: 'dompurify', installed: '3.2.6', fixed: '3.4.17', fixedAny: '3.4.17', direct: true, prod: true, openDays: 1 },
+    { id: 'D2', severity: 'low', package: 'dompurify', installed: '3.2.6', fixed: null, fixedAny: null, direct: true, prod: true, openDays: 1 },
+  ], {});
+  assert.deepEqual([u.to, u.closes, u.open, u.tier, u.lineComplete], ['3.4.17', 1, 2, 'P0', true]);
+  // the tooling list and dev-only win over severity
+  const [v] = unitsFor([{ id: 'V1', severity: 'critical', package: 'vite', installed: '7.3.1', fixed: '7.3.7', fixedAny: '7.3.7', direct: false, prod: true, openDays: 1 }], {}, { isTooling: (n) => n === 'vite' });
+  assert.deepEqual([v.tier, v.reason], ['P2', 'build tooling']);
+  const [w] = unitsFor([{ id: 'V1', severity: 'critical', package: 'esbuild', installed: '0.19.1', fixed: '0.19.2', fixedAny: '0.19.2', direct: false, prod: false, openDays: 1 }], {});
+  assert.deepEqual([w.tier, w.reason], ['P2', 'dev-only']);
 });

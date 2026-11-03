@@ -2,7 +2,7 @@
 // behind the maintainers' own advisories) plus the MAL- malicious-package records. Its batch
 // query matches versions server-side, 1000 package@version pairs per request, no key, no quota.
 
-import { compare, parseableVersion } from './semver.mjs';
+import { lineFix, anyFix } from './semver.mjs';
 
 const API = 'https://api.osv.dev/v1';
 const headers = { 'content-type': 'application/json', 'user-agent': 'security-radar' };
@@ -75,11 +75,14 @@ export function trim(v) {
   };
 }
 
-// The fixed version for an installed version: the smallest "fixed" event above it on the same
-// major line, else the smallest above it at all, else null.
+// The fixed version for an installed version: the lowest stable "fixed" event above it on the same
+// version line (major, or 0.minor), else null. Never a downgrade, a pre-release or another major.
 export function fixedFor(pkg, installed) {
-  const list = Array.isArray(pkg.fixed) ? pkg.fixed : pkg.fixed ? [pkg.fixed] : [];
-  const candidates = list.map(parseableVersion).filter(Boolean).filter((f) => compare(f, installed) > 0).sort(compare);
-  const major = installed.split('.')[0];
-  return candidates.find((f) => f.split('.')[0] === major) ?? candidates[0] ?? null;
+  return lineFix(pkg.fixed, installed);
+}
+
+// The lowest stable fix above the installed version on any line: what a direct dependency can take
+// by upgrading itself across a major. Null when the advisory names nothing above the install.
+export function fixedAnyFor(pkg, installed) {
+  return anyFix(pkg.fixed, installed);
 }

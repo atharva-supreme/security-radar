@@ -22,11 +22,14 @@ const conn = await mysql.createConnection({
   database: u.pathname.slice(1), charset: 'utf8mb4',
 });
 
-try {
+// MariaDB answers a prepared DELETE with ER_NEED_REPREPARE (1615) when table statistics moved
+// between prepare and execute, which is every morning here. Plain queries do not prepare; and if
+// the error still shows up, the whole load is retried once.
+async function load() {
   await conn.beginTransaction();
-  await conn.execute('DELETE FROM scans WHERE scan_date = ?', [day]); // cascades to findings and app_counts
+  await conn.query('DELETE FROM scans WHERE scan_date = ?', [day]); // cascades to findings and app_counts
   const s = r.summary;
-  const [ins] = await conn.execute(
+  const [ins] = await conn.query(
     `INSERT INTO scans (scan_date, generated_at, status, open_total, distinct_total, critical_n, high_n, moderate_n, low_n, new_open, early_n, malicious_n, packages_n, apps_n, projects_n)
      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [day, dt(r.generatedAt), r.status, s.open, s.distinct, s.critical, s.high, s.moderate, s.low, s.newOpen, s.early, s.malicious ?? 0, r.checked.packages ?? 0, r.checked.apps ?? 0, r.checked.projects ?? 0],
@@ -61,8 +64,19 @@ try {
   }
   await conn.commit();
   console.log(`stored ${day}: scan #${scanId}, ${advRows.length} advisories, ${findingRows.length} findings, ${countRows.length} app rows`);
+}
+
+try {
+  try {
+    await load();
+  } catch (e) {
+    await conn.rollback().catch(() => {});
+    if (e.errno !== 1615) throw e;
+    console.log('ER_NEED_REPREPARE from the server, retrying once');
+    await load();
+  }
 } catch (e) {
-  await conn.rollback();
+  await conn.rollback().catch(() => {});
   throw e;
 } finally {
   await conn.end();

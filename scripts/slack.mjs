@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// Posts the day's Slack messages from a report file.
+// Posts the day's Slack messages from a report file: one message per reported project.
 //
-//   node scripts/slack.mjs report.json                       post everything: summary, one per affected project, clear list
+//   node scripts/slack.mjs data/reports/2026-10-30.json --verdicts data/verdicts/2026-10-30.json
 //   node scripts/slack.mjs report.json --only Catalent       post one project only (repo or display name), for testing
 //   node scripts/slack.mjs report.json --dry-run             print the payloads, post nothing
-//   node scripts/slack.mjs report.json --narrative-file f    include Claude's paragraph in the summary message
+//   node scripts/slack.mjs report.json --text                print the messages as plain text (what a phone shows), post nothing
 //
-// Needs SLACK_WEBHOOK_URL (not with --dry-run). Reported projects and their names: watchlist.json "report.projects".
+// Without a verdicts file (the filter did not run) every P0 is listed and the message says "unfiltered".
 
 import { readFile } from 'node:fs/promises';
 import { setTimeout as sleep } from 'node:timers/promises';
@@ -15,19 +15,36 @@ import { buildMessages } from '../src/slack.mjs';
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
 const value = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
-const file = args.find((a) => !a.startsWith('--') && !['--only', '--narrative-file'].includes(args[args.indexOf(a) - 1])) ?? 'report.json';
+const file = args.find((a, i) => !a.startsWith('--') && !['--only', '--verdicts', '--usage'].includes(args[i - 1])) ?? 'report.json';
 
 const report = JSON.parse(await readFile(file, 'utf8'));
+if ((report.schema ?? 0) < 4) { console.error(`${file} is report schema ${report.schema}; this version needs schema 4 (run node watch.mjs first)`); process.exit(2); }
 const watchlist = JSON.parse(await readFile(new URL('../watchlist.json', import.meta.url), 'utf8'));
 const projects = watchlist.report?.projects ?? {};
 if (!Object.keys(projects).length) { console.error('watchlist.json has no report.projects; nothing to post'); process.exit(2); }
 
-let narrative = '';
-const nf = value('--narrative-file');
-if (nf) narrative = await readFile(nf, 'utf8').catch(() => '');
+const day = /(\d{4}-\d{2}-\d{2})/.exec(file)?.[1] ?? report.generatedAt.slice(0, 10);
+const verdictsPath = value('--verdicts') ?? `data/verdicts/${day}.json`;
+const verdicts = await readFile(new URL(`../${verdictsPath}`, import.meta.url), 'utf8').then(JSON.parse).catch(() => null);
+if (!verdicts) console.error(`no verdicts at ${verdictsPath}: posting unfiltered P0 lines`);
 
-const messages = buildMessages(report, { projects, narrative, only: value('--only') });
+const usagePath = value('--usage') ?? `data/usage/${day}.json`;
+const usage = await readFile(usagePath, 'utf8').then(JSON.parse).catch(() => null);
+if (!usage) console.log(`usage file ${usagePath} not found: no "Unused" lines today`);
+const messages = buildMessages(report, { projects, verdicts, only: value('--only'), usage, implicitUse: watchlist.report?.implicitUse ?? [] });
 
+if (flag('--text')) {
+  for (const m of messages) {
+    for (const b of m.blocks) {
+      if (b.type === 'header') console.log(`\n${b.text.text}`);
+      else if (b.type === 'section') console.log(b.text.text);
+      else if (b.type === 'context') console.log(b.elements[0].text);
+      else if (b.type === 'divider') console.log('────────');
+    }
+  }
+  console.error(`${messages.length} message(s) built, nothing posted`);
+  process.exit(0);
+}
 if (flag('--dry-run')) {
   for (const m of messages) console.log(JSON.stringify(m, null, 1));
   console.error(`${messages.length} message(s) built, nothing posted`);
@@ -49,7 +66,7 @@ for (const [i, m] of messages.entries()) {
   }
   const ok = res.ok && text.trim() === 'ok';
   if (!ok) failed++;
-  console.log(`${ok ? 'posted' : 'FAILED'} ${i + 1}/${messages.length}: ${m.text.slice(0, 80)}${ok ? '' : ` -> ${res.status} ${text.slice(0, 200)}`}`);
+  console.log(`${ok ? 'posted' : 'FAILED'} ${i + 1}/${messages.length}: ${m.text.slice(0, 90)}${ok ? '' : ` -> ${res.status} ${text.slice(0, 200)}`}`);
   if (i < messages.length - 1) await sleep(1000);
 }
 console.log(`${messages.length - failed} of ${messages.length} Slack messages posted${failed ? `, ${failed} failed` : ''}`);

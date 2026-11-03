@@ -50,9 +50,15 @@ test('matchInstalled reports one hit per install and picks the fixed version on 
   const versions = new Map([['next', new Set(['16.2.12'])], ['sharp', new Set(['0.33.5', '0.34.5'])]]);
   const hits = matchInstalled(packages, versions).sort((a, b) => `${a.pkg}${a.installed}`.localeCompare(`${b.pkg}${b.installed}`));
   assert.deepEqual(hits, [
-    { pkg: 'next', installed: '16.2.12', fixed: '16.3.8' },
-    { pkg: 'sharp', installed: '0.33.5', fixed: '0.35.5' },
-    { pkg: 'sharp', installed: '0.34.5', fixed: '0.35.5' },
+    { pkg: 'next', installed: '16.2.12', fixed: '16.3.8', fixedAny: '16.3.8' },
+    { pkg: 'sharp', installed: '0.33.5', fixed: null, fixedAny: '0.35.5' }, // 0.33 -> 0.35 is another line: no in-line fix
+    { pkg: 'sharp', installed: '0.34.5', fixed: null, fixedAny: '0.35.5' },
   ]);
   assert.deepEqual(matchInstalled(packages, new Map([['next', new Set(['16.4.1'])]])), []);
+});
+
+test('matchInstalled reads a fixed list and ignores a lower-line fix for a higher install', () => {
+  const packages = [{ name: 'next', range: '>= 10.0.0', fixed: '15.5.28, 16.4.1' }];
+  const hits = matchInstalled(packages, new Map([['next', new Set(['16.2.12', '15.5.27'])]])).sort((a, b) => a.installed.localeCompare(b.installed));
+  assert.deepEqual(hits.map((h) => [h.installed, h.fixed]), [['15.5.27', '15.5.28'], ['16.2.12', '16.4.1']]);
 });

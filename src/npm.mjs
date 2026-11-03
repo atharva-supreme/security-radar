@@ -19,6 +19,18 @@ export async function repoOf(name) {
   return { repo: githubRepoFrom(json.repository), checkedAt: new Date().toISOString() };
 }
 
+// The dependency ranges a published version declares, or null when the lookup failed.
+export async function manifest(name, version) {
+  try {
+    const res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(name).replace('%40', '@')}/${encodeURIComponent(version)}`, { headers });
+    if (!res.ok) return null;
+    const j = await res.json();
+    return { dependencies: j.dependencies ?? {}, optionalDependencies: j.optionalDependencies ?? {}, peerDependencies: j.peerDependencies ?? {} };
+  } catch {
+    return null;
+  }
+}
+
 // True when the exact version is on the registry, false when it is not, null when the check failed.
 export async function published(name, version) {
   try {

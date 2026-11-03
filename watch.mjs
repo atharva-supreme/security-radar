@@ -4,6 +4,7 @@
 //
 //   node watch.mjs                 scan, then write state.json, packages.json and report.json
 //   node watch.mjs --dry-run       scan and write report.json only; state and caches untouched
+//   node watch.mjs --skip-repos    do not poll the maintainers' repositories (local testing: uses the cached advisories)
 //   node watch.mjs --forget A,B    drop advisory ids from state first, so they count as new again
 //
 // Sources, in the order they matter:
@@ -12,6 +13,8 @@
 //      an unchanged repo costs nothing against the rate limit.
 //   2. OSV.dev, batch-queried for every package@version we have installed. Complete and reviewed,
 //      about a week behind source 1, and the only source for MAL- (malicious package) records.
+//      Where OSV knows a package, its reviewed ranges decide; a hand-typed repository range
+//      never adds a hit OSV has already ruled out.
 //   3. The Node.js vulnerability feed, since Node is not an npm package.
 //
 // Environment:
@@ -21,13 +24,14 @@
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { makeClient, normalise } from './src/github.mjs';
-import { queryBatch, vuln as osvVuln, trim as osvTrim, fixedFor } from './src/osv.mjs';
-import { repoOf, published, pool } from './src/npm.mjs';
+import { queryBatch, vuln as osvVuln, trim as osvTrim, fixedFor, fixedAnyFor } from './src/osv.mjs';
+import { repoOf, published, manifest, pool } from './src/npm.mjs';
 import { resolvePackages, matchInstalled } from './src/advisories.mjs';
-import { installedVersions, directVersions, declaredNode } from './src/lockfile.mjs';
+import { installedVersions, directVersions, dependencyGraph, declaredNode } from './src/lockfile.mjs';
 import { fetchFeed } from './src/feeds.mjs';
-import { buildReport } from './src/report.mjs';
+import { buildReport, manifestKeys } from './src/report.mjs';
 import { scanRows } from './src/scope.mjs';
+import { lineFix, anyFix } from './src/semver.mjs';
 
 // ---------- arguments and files ----------
 
@@ -35,6 +39,7 @@ const argv = process.argv.slice(2);
 const flag = (name) => argv.includes(name);
 const option = (name) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : null; };
 const dryRun = flag('--dry-run');
+const skipRepos = flag('--skip-repos');
 const forget = (option('--forget') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
 
 const ROOT = new URL('.', import.meta.url);
@@ -87,11 +92,12 @@ const apps = await pool(appRows, concurrency, async (r) => {
     const text = await ghRepos.fileText(r.repo, r.lockfile, r.ref);
     const versions = installedVersions(text, r.lockfile);
     const direct = directVersions(text, r.lockfile);
+    const graph = dependencyGraph(text, r.lockfile);
     let node = null;
     if (r.packageJson) {
       try { node = declaredNode({ packageJsonText: await ghRepos.fileText(r.repo, r.packageJson, r.ref) }); } catch { /* optional */ }
     }
-    return { ...r, versions, direct, node, ok: true };
+    return { ...r, versions, direct, graph, node, ok: true };
   } catch (e) {
     warnings.push(`lockfile ${r.repo}@${r.branch}/${r.lockfile}: ${e.message}${e.status === 404 && !env.REPO_READ_TOKEN ? ' (private repo and no REPO_READ_TOKEN set?)' : ''}`);
     return { ...r, ok: false, error: e.message };
@@ -140,69 +146,73 @@ await pool(stale, concurrency * 2, async ([id, modified]) => {
 
 // ---------- 3. repository-level advisories for every package's GitHub repo ----------
 
-const unknownNames = [...names].filter((n) => !packages[n] || (packages[n].repo === null && olderThanWeek(packages[n].checkedAt) && !packages[n].missing));
-log(`npm: ${names.size} packages, ${unknownNames.length} repo lookups`);
-await pool(unknownNames, concurrency * 2, async (name) => {
-  try { packages[name] = await repoOf(name); } catch (e) { warnings.push(`npm ${name}: ${e.message}`); }
-});
-
-const repoToNames = new Map();
-for (const n of names) {
-  const repo = packages[n]?.repo;
-  if (!repo) continue;
-  repoToNames.set(repo, [...(repoToNames.get(repo) ?? []), n]);
-}
-// Budget: never spend the last 150 requests of the hour. A 304 answer is free, so repos with a
-// cached ETag go first; repos never polled before are spread over as many runs as the limit needs.
-let budget = Infinity;
-try {
-  const rl = await gh.rateLimit();
-  budget = rl.resources.core.remaining - 150;
-  log(`github: ${rl.resources.core.remaining}/${rl.resources.core.limit} requests left this hour, budget ${Math.max(0, budget)}`);
-} catch { /* unknown limit: go ahead */ }
-const repoQueue = [...repoToNames].sort(([a], [b]) => (state.etags[b] ? 1 : 0) - (state.etags[a] ? 1 : 0));
 const repoStats = { polled: 0, unchanged: 0, updated: 0, failed: 0, deferred: 0 };
-let rateLimited = false;
-await pool(repoQueue, concurrency, async ([repo, pkgNames]) => {
-  if (rateLimited || budget <= 0) { repoStats.deferred += 1; return; }
-  repoStats.polled += 1;
-  budget -= 1;
-  try {
-    const res = await gh.repoAdvisories(repo, state.etags[repo]);
-    if (res.notModified) { repoStats.unchanged += 1; budget += 1; return; }
-    repoStats.updated += 1;
-    state.etags[repo] = res.etag;
-    const wanted = new Set(pkgNames);
-    for (const raw of res.data) {
-      const rec = normalise(raw, `repo:${repo}`, wanted);
-      const relevant = rec.packages.filter((p) => wanted.has(p.name));
-      if (!relevant.length) continue;
-      const prev = state.advisories[rec.id] ?? {};
-      state.advisories[rec.id] = {
-        ...prev,
-        id: rec.id,
-        cve: prev.cve ?? rec.cve,
-        summary: prev.summary ?? rec.summary,
-        severity: prev.severity && prev.severity !== 'unknown' ? prev.severity : rec.severity,
-        published_at: prev.published_at && prev.published_at < rec.published_at ? prev.published_at : rec.published_at,
-        updated_at: rec.updated_at,
-        url: prev.url ?? rec.url,
-        packages: prev.packages ?? [],
-        repoPackages: relevant,
-        repo,
-        sources: [...new Set([...(prev.sources ?? []), 'repo'])],
-        firstSeen: prev.firstSeen ?? (olderThanWeek(rec.published_at) ? rec.published_at : nowIso),
-      };
-    }
-  } catch (e) {
-    repoStats.failed += 1;
-    if (e.status === 403 && /rate limit/i.test(e.message)) { rateLimited = true; errors.push(`github rate limit hit after ${repoStats.polled} repos: ${e.message}`); }
-    else if (e.status === 404) { /* repo moved or private: nothing to read */ }
-    else warnings.push(`repo advisories ${repo}: ${e.message}`);
+if (skipRepos) {
+  log('github: repository advisories not polled (--skip-repos); using the cached state');
+} else {
+  const unknownNames = [...names].filter((n) => !packages[n] || (packages[n].repo === null && olderThanWeek(packages[n].checkedAt) && !packages[n].missing));
+  log(`npm: ${names.size} packages, ${unknownNames.length} repo lookups`);
+  await pool(unknownNames, concurrency * 2, async (name) => {
+    try { packages[name] = await repoOf(name); } catch (e) { warnings.push(`npm ${name}: ${e.message}`); }
+  });
+
+  const repoToNames = new Map();
+  for (const n of names) {
+    const repo = packages[n]?.repo;
+    if (!repo) continue;
+    repoToNames.set(repo, [...(repoToNames.get(repo) ?? []), n]);
   }
-});
-log(`github: ${repoStats.polled} repos polled, ${repoStats.unchanged} unchanged, ${repoStats.updated} updated, ${repoStats.failed} failed, ${repoStats.deferred} deferred to the next run`);
-if (repoStats.deferred) warnings.push(`${repoStats.deferred} package repositories not polled this run (rate-limit budget); they are picked up on the next run`);
+  // Budget: never spend the last 150 requests of the hour. A 304 answer is free, so repos with a
+  // cached ETag go first; repos never polled before are spread over as many runs as the limit needs.
+  let budget = Infinity;
+  try {
+    const rl = await gh.rateLimit();
+    budget = rl.resources.core.remaining - 150;
+    log(`github: ${rl.resources.core.remaining}/${rl.resources.core.limit} requests left this hour, budget ${Math.max(0, budget)}`);
+  } catch { /* unknown limit: go ahead */ }
+  const repoQueue = [...repoToNames].sort(([a], [b]) => (state.etags[b] ? 1 : 0) - (state.etags[a] ? 1 : 0));
+  let rateLimited = false;
+  await pool(repoQueue, concurrency, async ([repo, pkgNames]) => {
+    if (rateLimited || budget <= 0) { repoStats.deferred += 1; return; }
+    repoStats.polled += 1;
+    budget -= 1;
+    try {
+      const res = await gh.repoAdvisories(repo, state.etags[repo]);
+      if (res.notModified) { repoStats.unchanged += 1; budget += 1; return; }
+      repoStats.updated += 1;
+      state.etags[repo] = res.etag;
+      const wanted = new Set(pkgNames);
+      for (const raw of res.data) {
+        const rec = normalise(raw, `repo:${repo}`, wanted);
+        const relevant = rec.packages.filter((p) => wanted.has(p.name));
+        if (!relevant.length) continue;
+        const prev = state.advisories[rec.id] ?? {};
+        state.advisories[rec.id] = {
+          ...prev,
+          id: rec.id,
+          cve: prev.cve ?? rec.cve,
+          summary: prev.summary ?? rec.summary,
+          severity: prev.severity && prev.severity !== 'unknown' ? prev.severity : rec.severity,
+          published_at: prev.published_at && prev.published_at < rec.published_at ? prev.published_at : rec.published_at,
+          updated_at: rec.updated_at,
+          url: prev.url ?? rec.url,
+          packages: prev.packages ?? [],
+          repoPackages: relevant,
+          repo,
+          sources: [...new Set([...(prev.sources ?? []), 'repo'])],
+          firstSeen: prev.firstSeen ?? (olderThanWeek(rec.published_at) ? rec.published_at : nowIso),
+        };
+      }
+    } catch (e) {
+      repoStats.failed += 1;
+      if (e.status === 403 && /rate limit/i.test(e.message)) { rateLimited = true; errors.push(`github rate limit hit after ${repoStats.polled} repos: ${e.message}`); }
+      else if (e.status === 404) { /* repo moved or private: nothing to read */ }
+      else warnings.push(`repo advisories ${repo}: ${e.message}`);
+    }
+  });
+  log(`github: ${repoStats.polled} repos polled, ${repoStats.unchanged} unchanged, ${repoStats.updated} updated, ${repoStats.failed} failed, ${repoStats.deferred} deferred to the next run`);
+  if (repoStats.deferred) warnings.push(`${repoStats.deferred} package repositories not polled this run (rate-limit budget); they are picked up on the next run`);
+}
 
 // ---------- 4. feeds ----------
 
@@ -225,12 +235,16 @@ const repoRanges = new Map();
 for (const [id, rec] of Object.entries(state.advisories)) {
   if (rec.repoPackages?.length) repoRanges.set(id, resolvePackages(rec.repoPackages, []));
 }
+// OSV already evaluated this (advisory, package): its reviewed ranges decide, hand-typed ones do not.
+const osvCovers = (rec, name) => Boolean(rec?.osv) && (rec.packages ?? []).some((p) => p.name === name);
 
+let repoRangeDropped = 0;
 for (const a of apps) {
   a.open = [];
   if (!a.ok) continue;
   const seen = new Set();
-  // OSV: exact hits per pair
+  // OSV: exact hits per pair. The fix comes from every range OSV lists for the package, so a
+  // 15.x install is told 15.5.28 and a 16.x install 16.4.1 from the same advisory.
   for (const [name, vs] of a.versions) {
     for (const v of vs) {
       for (const hit of osvHits.get(`${name}@${v}`) ?? []) {
@@ -239,21 +253,24 @@ for (const a of apps) {
         const key = `${hit.id}|${name}|${v}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        const pkg = (rec.packages ?? []).find((p) => p.name === name);
-        a.open.push({ id: hit.id, package: name, installed: v, fixed: pkg ? fixedFor(pkg, v) : null, early: false });
+        const fixes = (rec.packages ?? []).filter((p) => p.name === name).flatMap((p) => (Array.isArray(p.fixed) ? p.fixed : p.fixed ? [p.fixed] : []));
+        a.open.push({ id: hit.id, package: name, installed: v, fixed: lineFix(fixes, v), fixedAny: anyFix(fixes, v), early: false });
       }
     }
   }
   // Repository-level: range matching, for advisories OSV has not caught up with
   for (const [id, pkgs] of repoRanges) {
+    const rec = state.advisories[id];
     for (const h of matchInstalled(pkgs, a.versions)) {
       const key = `${id}|${h.pkg}|${h.installed}`;
       if (seen.has(key)) continue;
+      if (osvCovers(rec, h.pkg)) { repoRangeDropped += 1; continue; }
       seen.add(key);
-      a.open.push({ id, package: h.pkg, installed: h.installed, fixed: h.fixed ?? null, early: true });
+      a.open.push({ id, package: h.pkg, installed: h.installed, fixed: h.fixed ?? null, fixedAny: h.fixedAny ?? null, early: true });
     }
   }
 }
+if (repoRangeDropped) log(`match: ${repoRangeDropped} hand-typed repository ranges ignored where OSV already ruled the version clear`);
 
 // Is the named fixed version actually on npm? Checked once per package@fixed.
 const fixedKeys = new Set();
@@ -263,6 +280,23 @@ await pool([...fixedKeys], concurrency * 2, async (key) => {
   const i = key.lastIndexOf('@');
   publishedMap.set(key, await published(key.slice(0, i), key.slice(i + 1)));
 });
+
+// Parent manifests: when a transitive package has no fix on its line (sharp 0.34 -> 0.35.5) but the
+// package that pulls it in is itself being bumped (next -> 16.4.1), does the new parent already
+// require the fixed child? One registry read per parent@target, across every app.
+const manifestWanted = new Set();
+for (const a of apps) {
+  if (!a.ok || !a.graph) continue;
+  const rows = a.open.map((o) => ({ ...o, direct: a.direct ? a.direct.get(o.package)?.has(o.installed) ?? false : null, via: a.graph.via(o.package, o.installed) }));
+  for (const k of manifestKeys(rows)) manifestWanted.add(k);
+}
+const manifests = new Map();
+await pool([...manifestWanted], concurrency * 2, async (key) => {
+  const i = key.lastIndexOf('@');
+  const m = await manifest(key.slice(0, i), key.slice(i + 1));
+  if (m) manifests.set(key, m);
+});
+log(`npm: ${manifests.size}/${manifestWanted.size} parent manifests read for "closed by the parent bump" checks`);
 
 // ---------- 6. write ----------
 
@@ -281,6 +315,7 @@ const report = buildReport({
   apps,
   advisories: state.advisories,
   published: publishedMap,
+  manifests,
   feedAlerts,
   watchlist,
   counts: { packages: names.size, pairs: pairs.length, reposPolled: repoStats.polled, reposDeferred: repoStats.deferred, osvAdvisories: osvIds.size },
@@ -289,7 +324,7 @@ const report = buildReport({
 });
 // Compact on purpose: pretty-printing this file would double its size for nothing a reader needs.
 await writeFile(new URL('report.json', ROOT), JSON.stringify(report) + '\n');
-log(`report.json written: ${report.status}, ${report.summary.open} open (${report.summary.critical} critical, ${report.summary.high} high), ${report.summary.newOpen} new, ${report.summary.early} early, ${report.advisories.length} distinct advisories across ${report.projects.length} project-branches`);
+log(`report.json written: ${report.status}, ${report.summary.open} open (${report.summary.critical} critical, ${report.summary.high} high), ${report.summary.newOpen} new, ${report.summary.early} early, ${report.advisories.length} distinct advisories across ${report.projects.length} project-branches; units P0 ${report.summary.tiers.P0} · P1 ${report.summary.tiers.P1} · P2 ${report.summary.tiers.P2}`);
 if (warnings.length) { log(`warnings (${warnings.length}):`); for (const w of warnings.slice(0, 20)) log(`  ${w}`); }
 if (errors.length) { log('errors:'); for (const e of errors) log(`  ${e}`); }
 

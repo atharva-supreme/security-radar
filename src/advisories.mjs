@@ -4,7 +4,7 @@
 // Repository entries arrive first, carry the fixed version the maintainer typed, but their
 // ranges are hand-written and frequently open-ended, with placeholders like "16.3.?".
 
-import { compare, satisfies, hasUpperBound, upperBound, lowerBounds, normaliseRange, parseableVersion } from './semver.mjs';
+import { compare, satisfies, hasUpperBound, upperBound, lowerBounds, normaliseRange, parseableVersion, lineFix, anyFix, versionsIn } from './semver.mjs';
 
 const satisfiesLower = (version, range) =>
   lowerBounds(range).every((c) => (c.op === '>=' ? compare(version, c.version) >= 0 : compare(version, c.version) > 0));
@@ -40,18 +40,21 @@ export function resolvePackages(repoEntries = [], globalEntries = []) {
   });
 }
 
-// One hit per (package, installed version): the entry whose fixed version shares the installed major,
-// so a 16.x install is told "fixed in 16.3.8", not "fixed in 15.5.27".
+// One hit per (package, installed version) for the entries whose range matches it.
+//   fixed     the lowest stable fix above the install on its own version line, from every matching
+//             entry's fixed text (which may list several versions), or null when the line has none
+//   fixedAny  the lowest stable fix above the install on any line, or null
+// A 16.x install is told "fixed in 16.3.8", never "15.5.27" and never a downgrade.
 export function matchInstalled(packages, versionsByName) {
   const hits = new Map();
   for (const p of packages) {
     for (const v of versionsByName.get(p.name) ?? []) {
       if (!p.range || !satisfies(v, p.range)) continue;
       const key = `${p.name}@${v}`;
-      const prev = hits.get(key);
-      const sameLine = (f) => f && parseableVersion(f) && parseableVersion(f).split('.')[0] === v.split('.')[0];
-      if (!prev || (!sameLine(prev.fixed) && sameLine(p.fixed))) hits.set(key, { pkg: p.name, installed: v, fixed: p.fixed });
+      const h = hits.get(key) ?? { pkg: p.name, installed: v, fixes: [] };
+      h.fixes.push(...versionsIn(p.fixed));
+      hits.set(key, h);
     }
   }
-  return [...hits.values()];
+  return [...hits.values()].map(({ pkg, installed, fixes }) => ({ pkg, installed, fixed: lineFix(fixes, installed), fixedAny: anyFix(fixes, installed) }));
 }

@@ -2,7 +2,7 @@
   "name": "security-radar",
   "version": "1.0.0",
   "private": true,
-  "description": "Security Radar: automated dependency vulnerability monitoring. Reads maintainers' security advisories the minute they publish, checks every listed lockfile, writes report.json.",
+  "description": "Security Radar: automated dependency vulnerability monitoring. Reads maintainers' security advisories the minute they publish, checks every listed lockfile, tiers every finding, lets Claude decide per project what is worth fixing, and posts one Slack message per project.",
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -12,9 +12,12 @@
     "dry": "node watch.mjs --dry-run",
     "scan": "node watch.mjs",
     "discover": "node scripts/discover.mjs",
-    "test": "node --test test/semver.test.mjs test/advisories.test.mjs test/lockfile.test.mjs test/feeds.test.mjs test/report.test.mjs test/osv.test.mjs test/slack.test.mjs test/scope.test.mjs",
+    "test": "node --test test/semver.test.mjs test/advisories.test.mjs test/lockfile.test.mjs test/feeds.test.mjs test/report.test.mjs test/osv.test.mjs test/slack.test.mjs test/scope.test.mjs test/filter.test.mjs test/history.test.mjs",
     "store": "node scripts/store.mjs",
-    "slack": "node scripts/slack.mjs"
+    "store-tiers": "node scripts/store-tiers.mjs",
+    "slack": "node scripts/slack.mjs",
+    "usage": "node scripts/usage.mjs",
+    "filter": "node scripts/filter.mjs"
   },
   "dependencies": {
     "mysql2": "^3.11.0"

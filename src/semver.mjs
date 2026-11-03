@@ -70,3 +70,54 @@ export function parseableVersion(text) {
   const m = /\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/.exec(String(text ?? ''));
   return m ? m[0] : null;
 }
+
+// Every full version inside a "fixed" field, which may be a string ("15.5.28, 16.4.1", "16.3.?"),
+// an array (OSV events) or null. Deduplicated and sorted ascending.
+export function versionsIn(text) {
+  const items = Array.isArray(text) ? text : [text];
+  const out = new Set();
+  for (const item of items) {
+    for (const m of String(item ?? '').matchAll(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/g)) out.add(m[0]);
+  }
+  return [...out].sort(compare);
+}
+
+// The version line an install sits on: its major, or "0.minor" for 0.x packages, where every minor
+// is a breaking release by convention. "16.3.5" -> "16"; "0.35.4" -> "0.35".
+export function lineOf(version) {
+  const p = parse(version);
+  if (!p) return null;
+  return p.major === 0 ? `0.${p.minor}` : String(p.major);
+}
+export const sameLine = (a, b) => lineOf(a) !== null && lineOf(a) === lineOf(b);
+export const isPrerelease = (version) => Boolean(parse(version)?.pre);
+
+const stableAbove = (fixes, installed) =>
+  parse(installed) ? versionsIn(fixes).filter((f) => !isPrerelease(f) && compare(f, installed) > 0) : [];
+
+// The upgrade target for one installed version: the lowest stable fix above it on the same line.
+// Never a downgrade, never a pre-release, never another major. Null when the line has no fix.
+export function lineFix(fixes, installed) {
+  return stableAbove(fixes, installed).find((f) => sameLine(f, installed)) ?? null;
+}
+
+// The lowest stable fix above the installed version on any line (the cross-major fallback a
+// direct dependency can take by upgrading itself). Null when nothing above exists.
+export function anyFix(fixes, installed) {
+  return stableAbove(fixes, installed)[0] ?? null;
+}
+
+// The lowest version a package.json dependency range can resolve to: "^0.35.5" -> 0.35.5,
+// "~1.2.3" -> 1.2.3, ">=2.1.0 <3" -> 2.1.0, "^0.34.3 || ^0.35.5" -> 0.34.3 (the resolver may keep
+// the lower alternative). Null for "*", "latest", tags, URLs and anything without a version.
+export function minimumOf(range) {
+  const alternatives = String(range ?? '').split('||').map((s) => s.trim()).filter(Boolean);
+  const mins = alternatives.map((alt) => {
+    if (/^(\*|latest|x)$/i.test(alt) || /[/:]/.test(alt)) return null;
+    const lower = comparators(alt.replace(/[\^~]/g, '>=')).filter((c) => c.op === '>=' || c.op === '=' || c.op === '>');
+    if (!lower.length) return null;
+    return lower.map((c) => c.version).sort(compare)[0];
+  });
+  if (!mins.length || mins.some((m) => !m)) return null;
+  return mins.sort(compare)[0];
+}
