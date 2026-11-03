@@ -1,131 +1,37 @@
-// Slack messages built in code from report.json: one summary, one message per affected project
-// (one native table block per branch, then a four-line summary), one "clear" list. Nothing here is
-// free text from a model; the only model-written part is the optional narrative paragraph passed in
-// by the caller.
+// Slack messages built in code from report.json and the day's verdicts: one message per reported
+// project, nothing else. Each message is
 //
-// Slack limits that shape this file (docs.slack.dev/reference/block-kit/blocks/table-block):
-//   100 rows per table · 20 columns · 10,000 characters across all cells of a message
-//   section text 3,000 characters · 50 blocks per message
-// A project that does not fit in one message is split into "Name (1/2)", "Name (2/2)": rows are
-// never dropped and never wrapped (column_settings.is_wrapped = false on every column).
+//   :package: VectorLabs · Health Score · staging 79 · main 29 · overall 29 · :red_circle: RED
+//   *staging* · AMBER · Health Score 79 · 0 critical, 3 high · 3 packages to fix
+//   • web · nodemailer 7.0.13 → 10.1.4 · closes 20 · <url|HIGH> · open 220 days · direct
+//   *main* · RED · Health Score 29 · 5 critical, 4 high · 9 packages to fix  [· same as staging]
+//   • same fix as staging: nodemailer 7.0.12
+//   • web · next 16.2.12 → 16.4.1 · closes 11 · <url|CRITICAL> · open 68 days · direct · fixed on staging
+//   *Unused* and *Out of sync*                                            (only when there are any)
+//   *What to do*
+//   P1 · 8 packages for later · P2 · 4 packages, no action                (counts only, never names)
+//
+// Claude produces everything under the header and section titles from raw facts. The code calculates
+// the same body independently (composeInput) and validateBody rejects any difference, so versions and
+// counts stay exact and the format never changes. The code's version is sent, with a warning, only
+// when Claude's fails the check. Without a verdict every scanner P0 is listed and the message says so.
 
-import { severityRank, isUrgent } from './format.mjs';
+import { severityRank } from './format.mjs';
+import { compare } from './semver.mjs';
+import { healthScore, STATUS_EMOJI } from './tiers.mjs';
+import { applyVerdict, isUnused } from './filter.mjs';
+import { commandsFor } from './report.mjs';
 
-const MAX_ROWS = 90; // data rows per table, under Slack's 100 with the header row
-const MAX_CELL_CHARS = 9000; // under Slack's 10,000 per message
 const MAX_SECTION = 2900; // under Slack's 3,000 per section
-const TOP_ISSUES = 10;
-
-const STATUS_EMOJI = { RED: ':red_circle:', AMBER: ':large_yellow_circle:', GREEN: ':large_green_circle:', UNKNOWN: ':white_circle:' };
 const SEV_LABEL = { critical: 'CRITICAL', high: 'HIGH', moderate: 'MODERATE', medium: 'MODERATE', low: 'LOW' };
-const SEV_EMOJI = { critical: ':red_circle:', high: ':large_orange_circle:', moderate: ':large_yellow_circle:', medium: ':large_yellow_circle:', low: ':white_circle:' };
-const COLUMNS = ['App', 'Package', 'Installed', 'Upgrade to', 'Closes', 'Severity', 'Open', 'Direct'];
-const CLOSES_COL = COLUMNS.indexOf('Closes');
 
-// mrkdwn text fields need these three escaped; raw_text and rich_text cells do not.
+// mrkdwn text fields need these three escaped.
 export const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const sevLabel = (s) => SEV_LABEL[s] ?? String(s ?? 'unknown').toUpperCase();
-const raw = (text) => ({ type: 'raw_text', text: String(text) });
 const section = (text) => ({ type: 'section', text: { type: 'mrkdwn', text } });
 const divider = () => ({ type: 'divider' });
-// A header block renders as a large bold title; plain text only, 150 characters at most.
 const header = (text) => ({ type: 'header', text: { type: 'plain_text', text: String(text).slice(0, 150), emoji: true } });
-const dateLabel = (d) => d.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
-const timeIst = (iso) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }) + ' IST';
-
-function richCell(parts) {
-  // parts: [{ text, url?, bold? }]
-  const elements = parts.map((p) => {
-    const style = p.bold ? { style: { bold: true } } : {};
-    return p.url ? { type: 'link', url: p.url, text: p.text, ...style } : { type: 'text', text: p.text, ...style };
-  });
-  return { type: 'rich_text', elements: [{ type: 'rich_text_section', elements }] };
-}
-const cellChars = (cell) => (cell.type === 'rich_text' ? cell.elements[0].elements.reduce((n, e) => n + e.text.length, 0) : cell.text.length);
-const rowsChars = (rows) => rows.reduce((s, row) => s + row.reduce((t, c) => t + cellChars(c), 0), 0) + COLUMNS.join('').length;
-
-// The worst open advisory behind an upgrade row: severity first, then longest open.
-function worstBehind(app, upgrade) {
-  return app.open
-    .filter((o) => o.package === upgrade.package)
-    .sort((a, b) => severityRank(a.severity) - severityRank(b.severity) || (b.openDays ?? 0) - (a.openDays ?? 0))[0];
-}
-
-// Status of a branch from its deployed (kind "app") lockfiles only, matching report.projects[].appStatus.
-function branchStatus(apps) {
-  if (apps.some((a) => !a.ok)) return 'UNKNOWN';
-  const open = apps.flatMap((a) => a.open ?? []);
-  if (open.some((o) => isUrgent(o.severity))) return 'RED';
-  if (open.length) return 'AMBER';
-  return 'GREEN';
-}
-const count = (apps, sev) => apps.reduce((n, a) => n + (a.counts?.[sev] ?? 0), 0);
-
-// yes / no / partly: whether the app declares the package itself (the upgrade command moves it) or
-// another package pulls it in (an override is needed). "partly" = one installed copy of each.
-const directness = (up) => (!up.transitive?.length ? 'yes' : up.transitive.length >= up.from.length ? 'no' : 'partly');
-
-export function tableRows(apps, advisories) {
-  // apps: the kind "app" lockfile rows of ONE branch -> data rows (arrays of cells) for its table block
-  const rows = [];
-  for (const app of apps) {
-    if (!app.ok) {
-      rows.push([raw(app.label), raw('lockfile could not be read'), raw('—'), raw('—'), raw('—'), raw('—'), raw('—'), raw('—')]);
-      continue;
-    }
-    if (!app.upgrades?.length) {
-      rows.push([raw(app.label), raw('clear'), raw('—'), raw('—'), raw('—'), raw('—'), raw('—'), raw('—')]);
-      continue;
-    }
-    for (const up of app.upgrades) {
-      const worst = worstBehind(app, up);
-      const adv = worst ? advisories.get(worst.id) : null;
-      const label = sevLabel(up.worst);
-      const severity = adv?.url ? richCell([{ text: label, url: adv.url, bold: true }]) : richCell([{ text: label, bold: true }]);
-      const openParts = [{ text: worst?.openDays != null ? `${worst.openDays} days` : '—' }];
-      if (worst?.isNew) openParts.push({ text: ' · ' }, { text: 'NEW', bold: true });
-      if (worst?.early) openParts.push({ text: ' · ' }, { text: 'early', bold: true });
-      rows.push([
-        raw(app.label),
-        raw(up.package),
-        raw(up.from.join(', ')),
-        raw(up.to ?? 'none yet'),
-        raw(String(up.closes)),
-        severity,
-        richCell(openParts),
-        raw(directness(up)),
-      ]);
-    }
-  }
-  return rows;
-}
-
-function tableBlock(rows) {
-  return {
-    type: 'table',
-    column_settings: COLUMNS.map((_, i) => ({ align: i === CLOSES_COL ? 'right' : 'left', is_wrapped: false })),
-    rows: [COLUMNS.map(raw), ...rows],
-  };
-}
-
-// Split data rows into chunks that respect the row and character limits.
-export function chunkRows(rows) {
-  const chunks = [];
-  let current = [];
-  let chars = COLUMNS.join('').length;
-  for (const row of rows) {
-    const n = row.reduce((s, c) => s + cellChars(c), 0);
-    if (current.length && (current.length >= MAX_ROWS || chars + n > MAX_CELL_CHARS)) {
-      chunks.push(current);
-      current = [];
-      chars = COLUMNS.join('').length;
-    }
-    current.push(row);
-    chars += n;
-  }
-  if (current.length) chunks.push(current);
-  return chunks;
-}
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 // Split a list of lines into section blocks under the section size limit.
 function sectionsOf(lines, { prefix = '' } = {}) {
@@ -142,187 +48,317 @@ function sectionsOf(lines, { prefix = '' } = {}) {
   return blocks;
 }
 
-const nameList = (items, max = 6) => items.slice(0, max).join(', ') + (items.length > max ? ` and ${items.length - max} more` : '');
-function overridesWord(apps) {
-  const files = apps.map((a) => a.lockfile ?? '');
-  if (files.some((f) => f.endsWith('pnpm-lock.yaml'))) return ['pnpm up', 'pnpm overrides'];
-  if (files.some((f) => f.endsWith('yarn.lock'))) return ['yarn upgrade', 'yarn resolutions'];
-  return ['npm update', 'npm overrides'];
-}
-
-// Four lines per project, each from report fields: fix first, new since yesterday, transitive, no fix yet.
-export function projectSummary(perBranch) {
-  const lines = [];
-
-  // Fix first: the upgrades (package -> version) that close the most critical/high, across branches and apps.
-  const byUpgrade = new Map();
-  for (const b of perBranch) {
-    for (const app of b.apps) {
-      for (const up of app.upgrades ?? []) {
-        if (!up.to) continue;
-        const key = `${up.package}@${up.to}`;
-        const e = byUpgrade.get(key) ?? { package: up.package, to: up.to, from: new Set(), closes: 0, critical: 0, high: 0, branches: new Set() };
-        up.from.forEach((v) => e.from.add(v));
-        e.closes += up.closes;
-        for (const o of (app.open ?? []).filter((o) => o.package === up.package)) {
-          if (o.severity === 'critical') e.critical++;
-          else if (o.severity === 'high') e.high++;
-        }
-        e.branches.add(b.branch);
-        byUpgrade.set(key, e);
-      }
+// Units with action "now" across an branch's apps, merged per (package, line, target).
+export function mergeLines(unitsByApp) {
+  const byKey = new Map();
+  for (const { app, units } of unitsByApp) {
+    for (const u of units) {
+      if (u.action !== 'now') continue;
+      const target = u.lineComplete ? u.to : u.toMajor;
+      if (!target) continue;
+      const key = `${u.package}\u0000${u.line}\u0000${target}`;
+      const l = byKey.get(key) ?? { package: u.package, line: u.line, to: target, major: !u.lineComplete, apps: [], from: new Set(), closes: 0, worst: u.worst, worstId: u.worstId, openDays: 0, isNew: false, early: false, direct: false, reason: u.verdictReason };
+      l.apps.push(app);
+      u.from.forEach((v) => l.from.add(v));
+      l.closes = Math.max(l.closes, u.closes);
+      if (severityRank(u.worst) < severityRank(l.worst)) { l.worst = u.worst; l.worstId = u.worstId; }
+      l.openDays = Math.max(l.openDays, u.openDays ?? 0);
+      l.isNew = l.isNew || u.isNew;
+      l.early = l.early || u.early;
+      l.direct = l.direct || u.direct === true;
+      byKey.set(key, l);
     }
   }
-  const top = [...byUpgrade.values()].sort((a, b) => b.critical - a.critical || b.high - a.high || b.closes - a.closes).slice(0, 2);
-  if (top.length) {
-    const sev = (e) => [e.critical ? `${e.critical} critical` : '', e.high ? `${e.high} high` : ''].filter(Boolean).join(', ');
-    lines.push(`• *Fix first:* ${top.map((e) => `${esc(e.package)} ${[...e.from].join(', ')} → ${e.to} closes ${e.closes}${sev(e) ? ` (${sev(e)})` : ''} on ${[...e.branches].join(' and ')}`).join('; ')}.`);
-  }
-
-  // New since yesterday, per branch.
-  const parts = perBranch.map((b) => {
-    const open = b.apps.flatMap((a) => a.open ?? []);
-    const fresh = open.filter((o) => o.isNew);
-    if (!open.length) return `\`${b.branch}\` clear`;
-    if (!fresh.length) return `\`${b.branch}\` unchanged, ${open.length} open`;
-    return `${fresh.length} on \`${b.branch}\` (${esc(nameList([...new Set(fresh.map((o) => o.package))]))})`;
-  });
-  lines.push(`• *New since yesterday:* ${parts.join('; ')}.`);
-
-  // Transitive packages: the fact the old notes repeated per package, once, with the override targets.
-  const allApps = perBranch.flatMap((b) => b.apps);
-  const upgrades = allApps.flatMap((a) => a.upgrades ?? []);
-  const transitive = upgrades.filter((u) => u.transitive?.length);
-  if (transitive.length) {
-    const [upgradeCmd, overrides] = overridesWord(allApps);
-    const distinct = (list) => new Set(list.map((u) => u.package)).size; // a package on both branches counts once
-    const targets = [...new Set(transitive.filter((u) => u.to).map((u) => `${u.package}@${u.to}`))];
-    lines.push(`• *Transitive, ${upgradeCmd} will not move them:* ${distinct(transitive)} of ${distinct(upgrades)} packages${targets.length ? `. ${overrides}: ${esc(targets.join(', '))}` : ''}.`);
-  }
-
-  // No fix published yet.
-  const noFix = [];
-  for (const b of perBranch) for (const app of b.apps) for (const up of app.upgrades ?? []) if (!up.to) noFix.push(`${up.package} ${up.from.join(', ')} on ${b.branch}`);
-  if (noFix.length) lines.push(`• *No fix published yet:* ${esc([...new Set(noFix)].join('; '))}. Remove, replace, or wait.`);
-  return lines;
+  return [...byKey.values()]
+    .map((l) => ({ ...l, from: [...l.from].sort(compare) }))
+    .sort((a, b) => severityRank(a.worst) - severityRank(b.worst) || b.closes - a.closes || a.package.localeCompare(b.package));
 }
 
-function projectView(report, repo, name, advisories) {
+export function lineText(l, advisories) {
+  const url = advisories.get(l.worstId)?.url;
+  const sev = url ? `<${url}|${sevLabel(l.worst)}>` : sevLabel(l.worst);
+  const tags = [l.direct ? 'direct' : 'override', l.major ? ':arrow_up: major' : '', l.isNew ? ':new: NEW' : '', l.early ? ':zap: early' : ''].filter(Boolean);
+  return `• ${esc(l.apps.join(', '))} · ${esc(l.package)} ${l.from.join(', ')} → ${l.to} · closes ${l.closes} · ${sev} · open ${plural(l.openDays, 'day')} · ${tags.join(' · ')}`;
+}
+
+function branchView(apps, verdict, branch) {
+  // A verdict counts only when the filter succeeded; a failed one ({ ok: false }) must fall back
+  // to every P0, exactly like a missing file, or a broken filter would paint every project GREEN.
+  const decided = verdict?.ok === true;
+  const unitsByApp = apps.filter((a) => a.ok).map((a) => ({
+    app: a.label,
+    units: decided ? applyVerdict(a.upgrades ?? [], verdict, a.label, branch) : (a.upgrades ?? []).map((u) => ({ ...u, action: u.tier === 'P0' ? 'now' : null, verdictReason: null })),
+  }));
+  const lines = mergeLines(unitsByApp);
+  const units = unitsByApp.flatMap((x) => x.units.map((u) => ({ ...u, appLabel: x.app })));
+  const pkgs = (list) => new Set(list.map((u) => u.package)).size;
+  // P0 = what is listed. P1 = Claude's later. P2 leaves the score.
+  const p1 = pkgs(units.filter((u) => u.tier === 'P1'));
+  const health = { ...healthScore({ critical: lines.filter((l) => l.worst === 'critical').length, high: lines.filter((l) => l.worst !== 'critical').length, p1 }), p1 };
+  return { branch, apps, lines, units, health, broken: apps.some((a) => !a.ok) };
+}
+
+// Flagged packages the branch declares itself but never imports or references: upgrading them is
+// wasted work, removing them closes the advisories. One line per package, both branches merged.
+export function unusedLines(apps, usage, implicitUse = []) {
+  const scanOf = (branch) => (branch === 'main' ? usage : usage?.branches?.[branch]);
+  const scanned = (branch) => { const x = scanOf(branch); return Boolean(x && !x.error); };
+  const byPkg = new Map();
+  for (const a of apps) {
+    if (!a.ok || !scanned(a.branch)) continue;
+    const scan = scanOf(a.branch);
+    for (const u of a.upgrades ?? []) {
+      if (!isUnused(u, scan.packages?.[u.package], implicitUse)) continue;
+      const l = byPkg.get(u.package) ?? { package: u.package, apps: new Set(), branches: new Set(), from: new Set(), importers: new Set() };
+      l.apps.add(a.label);
+      l.branches.add(a.branch);
+      u.from.forEach((v) => l.from.add(v));
+      if (u.via?.importer) l.importers.add(u.via.importer);
+      byPkg.set(u.package, l);
+    }
+  }
+  const branchesScanned = new Set(apps.filter((a) => a.ok && scanned(a.branch)).map((a) => a.branch));
+  return [...byPkg.values()].sort((a, b) => a.package.localeCompare(b.package)).map((l) => {
+    const where = [...l.importers].filter((i) => i && i !== '.').map((i) => `${i}/package.json`);
+    const scope = branchesScanned.size > 1 && l.branches.size < branchesScanned.size ? ` · ${[...l.branches].join(', ')} only` : '';
+    return `• ${esc([...l.apps].join(', '))} · ${esc(l.package)} ${[...l.from].sort(compare).join(', ')} · declared in ${esc(where.length ? where.join(', ') : 'package.json')}, never imported or referenced${scope} · remove it instead of upgrading, no code change expected`;
+  });
+}
+
+function branchHead(view, tag = '') {
+  const status = view.broken && !view.lines.length ? 'UNKNOWN' : view.health.status;
+  const crit = view.lines.filter((l) => l.worst === 'critical').length;
+  const counts = view.lines.length
+    ? `${crit} critical, ${view.lines.length - crit} high · ${plural(view.lines.length, 'package')} to fix`
+    : `nothing to fix today${view.broken ? ' · :warning: a lockfile could not be read' : ''}`;
+  return `*${view.branch}* · ${STATUS_EMOJI[status]} *${status}* · Health Score ${view.health.score} · ${counts}${tag}`;
+}
+
+const fixKey = (l) => `${l.package}\u0000${l.line}\u0000${l.to}`;
+const lineKey = (l) => `${l.package}\u0000${l.line}`;
+
+// Owner rule (2026-11-02): staging comes first and is always listed in full, because staging is
+// updated first. main follows and may say "same as staging", but only for what is really the same:
+// the whole section only when every line matches on target and installed versions, otherwise one
+// "same fix" bullet that still names main's own versions, plus full lines for what only main has.
+// main and staging can diverge in either direction, so main's differences are always shown.
+const withHead = (head, lines) => (lines.length ? sectionsOf(lines, { prefix: head }) : [section(head)]);
+
+export function stagingBlocks(staging, advisories) {
+  return withHead(branchHead(staging), staging.lines.map((l) => lineText(l, advisories)));
+}
+
+// { same, lines }: whether main matches staging exactly, and what main's section lists.
+export function mainSection(main, staging, advisories) {
+  const fullLines = main.lines.map((l) => lineText(l, advisories));
+  if (!staging || staging.broken) return { same: false, lines: fullLines };
+  const exact = (l) => `${fixKey(l)}\u0000${l.from.join(',')}`;
+  const stagingExact = new Set(staging.lines.map(exact));
+  if (main.lines.length === staging.lines.length && main.lines.every((l) => stagingExact.has(exact(l)))) return { same: true, lines: [] };
+  const stagingFix = new Set(staging.lines.map(fixKey));
+  const stagingOpen = new Set(staging.units.map(lineKey));
+  const shared = main.lines.filter((l) => stagingFix.has(fixKey(l)));
+  const lines = shared.length ? [`• same fix as staging: ${esc(shared.map((l) => `${l.package} ${l.from.join(', ')}`).join(', '))}`] : [];
+  for (const l of main.lines.filter((x) => !stagingFix.has(fixKey(x)))) {
+    lines.push(`${lineText(l, advisories)}${stagingOpen.has(lineKey(l)) ? '' : ' · fixed on staging'}`);
+  }
+  return { same: false, lines };
+}
+
+export function mainBlocks(main, staging, advisories) {
+  const { same, lines } = mainSection(main, staging, advisories);
+  return withHead(branchHead(main, same ? ' · same as staging' : ''), lines);
+}
+
+export function tierLineText(main, staging, verdict) {
+  const allUnits = [...main.units, ...(staging?.units ?? [])];
+  const count = (tier) => new Set(allUnits.filter((u) => u.tier === tier).map((u) => u.package)).size;
+  const gap = verdict?.notAssessed ? ` · :warning: ${verdict.notAssessed} not assessed today` : '';
+  return `P1 · ${plural(count('P1'), 'package')} for later · P2 · ${plural(count('P2'), 'package')}, no action${gap}`;
+}
+
+// Claude's text is plain. Slack needs &, < and > escaped, except inside a <url|label> link.
+export const mrkdwn = (text) => String(text).split(/(<https?:[^|>\s]+\|[^>]+>)/).map((part, i) => (i % 2 ? part : esc(part))).join('');
+
+// package.json and lockfile disagreements found by the usage step, one line per pair of files.
+export function driftLines(usage, branches) {
+  const groups = new Map();
+  for (const branch of branches) {
+    const scan = branch === 'main' ? usage : usage?.branches?.[branch];
+    const byPair = new Map();
+    for (const d of scan?.drift ?? []) {
+      const key = `${d.lockfile}\u0000${d.manifest}`;
+      byPair.set(key, [...(byPair.get(key) ?? []), d]);
+    }
+    for (const [key, list] of byPair) {
+      const sig = `${key}\u0000${JSON.stringify(list.map((d) => [d.package, d.declared, d.locked]))}`;
+      const g = groups.get(sig) ?? { list, branches: [] };
+      g.branches.push(branch);
+      groups.set(sig, g);
+    }
+  }
+  return [...groups.values()].map(({ list, branches: on }) => {
+    const shown = list.slice(0, 3).map((d) => (d.locked === null ? `${d.package} missing from lockfile` : `${d.package} ${d.declared} vs ${d.locked}`)).join(', ');
+    const more = list.length > 3 ? `, +${list.length - 3} more` : '';
+    return `• ${esc(on.join(', '))} · ${esc(list[0].lockfile)} and ${esc(list[0].manifest)} · ${esc(shown)}${more} · run install and commit the lockfile`;
+  });
+}
+
+// The call to action, built in code so it is exact and the same every day: staging's commands
+// first, then what main needs. A main fix that staging also has, or no longer needs, is closed by
+// merging staging. Unused packages are never upgraded here; the Unused section says remove them.
+export function whatToDo(main, staging, { usage = null, implicitUse = [] } = {}) {
+  const bullets = [];
+  const usable = staging && !staging.broken ? staging : null;
+  const scanOf = (branch) => (branch === 'main' ? usage : usage?.branches?.[branch]);
+  const commandsOf = (view, keep = () => true) => {
+    const scan = scanOf(view.branch);
+    for (const app of view.apps.filter((a) => a.ok)) {
+      const units = (app.upgrades ?? []).map((u) => view.units.find((x) => x.appLabel === app.label && x.package === u.package && x.line === u.line) ?? u)
+        .filter((u) => u.action === 'now' && !isUnused(u, scan?.packages?.[u.package], implicitUse) && keep(u));
+      const { command, overrides, overridesKey } = commandsFor(app, units);
+      if (command) bullets.push(`• ${view.branch} · ${esc(app.label)}: \`${esc(command)}\``);
+      if (overrides) bullets.push(`• ${view.branch} · ${esc(app.label)}: add to ${esc(overridesKey)} \`${esc(Object.entries(overrides).map(([k, v]) => `"${k}": "${v}"`).join(', '))}\``);
+    }
+  };
+  if (usable) commandsOf(usable);
+  if (usable && main.lines.length) {
+    const fix = new Set(usable.lines.map(fixKey));
+    const open = new Set(usable.units.map(lineKey));
+    const closed = (l) => fix.has(fixKey(l)) || !open.has(lineKey(l));
+    const n = main.lines.filter(closed).length;
+    if (n) bullets.push(`• main: merge staging, that closes ${n === main.lines.length ? `all ${n}` : `${n} of ${main.lines.length}`} ${main.lines.length === 1 ? 'fix' : 'fixes'}`);
+    const rest = new Set(main.lines.filter((l) => !closed(l)).map(lineKey));
+    if (rest.size) commandsOf(main, (u) => rest.has(lineKey(u)));
+  } else if (!usable) {
+    commandsOf(main);
+  }
+  // A P0 with no listed fix version. If staging runs that line with nothing open, the advisory does
+  // not reach staging's version, so "no fix published" would be false for main: merging closes it.
+  const noFix = new Map();
+  const cleanOnStaging = new Set();
+  const stagingOpen = new Set((usable?.units ?? []).map(lineKey));
+  for (const view of [usable, main].filter(Boolean)) {
+    for (const u of view.units) {
+      if (u.action !== 'now' || (u.lineComplete ? u.to : u.toMajor)) continue;
+      if (usable && view === main && !stagingOpen.has(lineKey(u))) { cleanOnStaging.add(`${u.package} ${u.line}`); continue; }
+      if (!noFix.has(lineKey(u))) noFix.set(lineKey(u), `• ${esc(u.appLabel)} · ${esc(u.package)} ${esc(u.line)}: no fix published. ${esc(u.verdictReason ?? '')}`.trim());
+    }
+  }
+  if (cleanOnStaging.size) bullets.push(`• main: ${esc([...cleanOnStaging].join(', '))} also ${cleanOnStaging.size === 1 ? 'closes' : 'close'} on merge, staging's version has nothing open`);
+  bullets.push(...noFix.values());
+  return bullets.length ? bullets : ['• Nothing to fix today.'];
+}
+
+// One project's two branches and its overall score. Slack and MySQL both read this, so they agree.
+export function projectViews(report, repo, verdict) {
   const apps = report.apps.filter((a) => a.repo === repo && a.kind === 'app');
-  const branches = [...new Set(apps.map((a) => a.branch))];
-  const perBranch = branches.map((branch) => {
-    const list = apps.filter((a) => a.branch === branch);
-    return { branch, apps: list, status: branchStatus(list), critical: count(list, 'critical'), high: count(list, 'high'), rows: tableRows(list, advisories) };
-  });
-  const affected = perBranch.some((b) => b.status !== 'GREEN');
-  return { repo, name, apps, perBranch, affected, summary: projectSummary(perBranch) };
+  const main = branchView(apps.filter((a) => a.branch === 'main'), verdict, 'main');
+  const stagingApps = apps.filter((a) => a.branch === 'staging');
+  const staging = stagingApps.length ? branchView(stagingApps, verdict, 'staging') : null;
+  // Overall is the lower of the two scores: a project is as exposed as its weakest branch.
+  const worst = staging && staging.health.score < main.health.score ? staging : main;
+  return { apps, main, staging, worst, overall: worst.health.score, status: worst.broken && !worst.lines.length ? 'UNKNOWN' : worst.health.status };
 }
 
-export function projectMessages(view) {
-  // One table per branch. A branch's rows are chunked to the table limits, then the chunks are packed
-  // into messages in branch order while the message stays under the per-message character limit.
-  const units = view.perBranch.flatMap((b) => chunkRows(b.rows).map((rows, i) => ({ branch: b, rows, cont: i > 0, chars: rowsChars(rows) })));
-  const pages = [];
-  let page = [];
-  let chars = 0;
-  for (const u of units) {
-    if (page.length && chars + u.chars > MAX_CELL_CHARS) {
-      pages.push(page);
-      page = [];
-      chars = 0;
-    }
-    page.push(u);
-    chars += u.chars;
-  }
-  if (page.length) pages.push(page);
-
-  const statusLine = (b) => `\`${b.branch}\` · ${STATUS_EMOJI[b.status]} *${b.status}* · ${b.critical} critical, ${b.high} high`;
-  const fallback = `Security Radar · ${view.name} · ${view.perBranch.map((b) => `${b.branch} ${b.status} (${b.critical} critical, ${b.high} high)`).join(' · ')}`;
-  // Slack stacks consecutive posts from one app under a single name, so each message opens with a
-  // large header and closes with a divider to stay visibly separate in the channel.
-  return pages.map((units, i) => {
-    const part = pages.length > 1 ? ` (${i + 1}/${pages.length})` : '';
-    const blocks = [header(`:package: ${view.name}${part}`)];
-    for (const u of units) blocks.push(section(u.cont ? `\`${u.branch.branch}\` · continued` : statusLine(u.branch)), tableBlock(u.rows));
-    if (i === pages.length - 1 && view.summary.length) blocks.push(...sectionsOf(view.summary, { prefix: ':memo: *Summary*' }));
-    blocks.push(divider());
-    return { text: fallback + part, blocks };
-  });
+// Claude produces the message body from these facts. `expected` is the code's own calculation of the
+// same body, never shown to Claude up front: validateBody compares the two before anything is sent.
+export function composeInput(report, repo, name, verdict, { usage = null, implicitUse = [] } = {}) {
+  const advisories = new Map(report.advisories.map((a) => [a.id, a]));
+  const { apps, main, staging } = projectViews(report, repo, verdict);
+  const scanOf = (branch) => (branch === 'main' ? usage : usage?.branches?.[branch]);
+  const target = (u) => (u.lineComplete ? u.to : u.toMajor) ?? null;
+  const branchFacts = (view) => {
+    const scan = scanOf(view.branch);
+    const searched = scan && !scan.error;
+    return {
+      broken: view.broken,
+      apps: view.apps.filter((a) => a.ok).map((a) => ({ label: a.label, lockfile: a.lockfile, importers: a.importers?.length ?? 1 })),
+      p0: view.units.filter((u) => u.action === 'now' && target(u)).map((u) => ({ app: u.appLabel, package: u.package, line: u.line, from: u.from, target: target(u), major: !u.lineComplete, lineFix: Boolean(u.to && u.lineComplete), closes: u.closes, worst: u.worst, url: advisories.get(u.worstId)?.url ?? null, openDays: u.openDays ?? 0, direct: u.direct === true, isNew: Boolean(u.isNew), early: Boolean(u.early), reason: u.verdictReason })),
+      p0NoFix: view.units.filter((u) => u.action === 'now' && !target(u)).map((u) => ({ app: u.appLabel, package: u.package, line: u.line, reason: u.verdictReason })),
+      open: [...new Set(view.units.map((u) => `${u.package} ${u.line}`))],
+      declared: searched ? view.units.filter((u) => u.direct === true && u.prod !== false && !u.tooling).map((u) => ({ app: u.appLabel, package: u.package, from: u.from, importer: u.via?.importer ?? '.', imports: scan.packages?.[u.package]?.count ?? null, mentions: scan.packages?.[u.package]?.mentions ?? 0 })) : [],
+      drift: (scan?.drift ?? []).map((d) => ({ lockfile: d.lockfile, manifest: d.manifest, package: d.package, declared: d.declared, locked: d.locked })),
+    };
+  };
+  const units = [...main.units, ...(staging?.units ?? [])];
+  const names = (tier) => [...new Set(units.filter((u) => u.tier === tier).map((u) => u.package))].sort();
+  const facts = {
+    project: name,
+    hasStaging: Boolean(staging),
+    notAssessed: verdict?.notAssessed ?? 0,
+    implicitUse,
+    branches: { staging: staging ? branchFacts(staging) : null, main: branchFacts(main) },
+    tiers: { P1: names('P1'), P2: names('P2') },
+  };
+  const plain = (x) => x.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  const mainPart = mainSection(main, staging, advisories);
+  const steps = whatToDo(main, staging, { usage, implicitUse }).map(plain).join('\n');
+  const usable = staging && !staging.broken ? staging : null;
+  return {
+    facts,
+    expected: {
+      stagingLines: staging ? staging.lines.map((l) => plain(lineText(l, advisories))) : [],
+      mainSameAsStaging: mainPart.same,
+      mainLines: mainPart.lines.map(plain),
+      unused: unusedLines(apps, usage, implicitUse).map(plain),
+      outOfSync: driftLines(usage, staging ? ['staging', 'main'] : ['main']).map(plain),
+      tierLine: tierLineText(main, staging, verdict),
+      // What "What to do" must contain. Its wording is Claude's; its commands are checked.
+      required: {
+        tokens: steps.match(/(?:@[\w.-]+\/)?[\w.-]+@[\w.-]+/g) ?? [],
+        packages: [...new Set([usable, main].filter(Boolean).flatMap((v) => v.units.filter((u) => u.action === 'now' && !target(u)).map((u) => u.package)))],
+        merge: /merge staging, that closes/.test(steps),
+      },
+    },
+  };
 }
 
-function summaryMessage(report, views, advisories, { narrative, now }) {
-  const reportedProjects = new Set(views.map((v) => v.apps[0]?.project).filter(Boolean));
-  const apps = views.flatMap((v) => v.apps);
-  const open = apps.flatMap((a) => a.open ?? []);
-  const distinct = new Set(open.map((o) => o.id));
-  const critical = open.filter((o) => o.severity === 'critical').length;
-  const high = open.filter((o) => o.severity === 'high').length;
-  const affected = views.filter((v) => v.affected);
-  const status = apps.some((a) => !a.ok) ? 'UNKNOWN' : critical + high ? 'RED' : open.length ? 'AMBER' : 'GREEN';
-  const oldestCritical = Math.max(0, ...open.filter((o) => o.severity === 'critical').map((o) => o.openDays ?? 0));
-  const newOpen = new Set(open.filter((o) => o.isNew).map((o) => o.id)).size;
-  const early = new Set(open.filter((o) => o.early).map((o) => o.id)).size;
-  const malicious = report.advisories.filter((a) => a.malicious && distinct.has(a.id)).length;
-  const date = dateLabel(now);
+function projectMessage(report, repo, name, { verdict, advisories, usage = null, implicitUse = [] }) {
+  const { apps, main, staging, worst, overall, status } = projectViews(report, repo, verdict);
+  const scores = [staging ? `staging ${staging.health.score}` : '', `main ${main.health.score}`, `overall ${overall}`].filter(Boolean).join(' · ');
 
-  if (status === 'GREEN') {
-    const text = `:large_green_circle: *Security Radar · ${date}* · ${views.length} projects clear, no action needed.`;
-    return { text: `Security Radar · ${date} · all clear`, blocks: [section(text)] };
-  }
-
-  const statusLines = [
-    `_${affected.length} of ${views.length} projects affected · ${critical + high} critical/high open across ${distinct.size} advisories · oldest critical open ${oldestCritical} days · ${newOpen} new since yesterday${early ? `, ${early} early` : ''}${malicious ? `, ${malicious} MALICIOUS` : ''}_`,
-  ];
-  if (status === 'UNKNOWN') {
-    const broken = apps.filter((a) => !a.ok);
-    statusLines.push(`:warning: ${broken.length} lockfile(s) could not be read: ${esc(broken[0].error ?? 'unknown error')}`);
-  }
-  const blocks = [header(`${STATUS_EMOJI[status]} Security Radar · ${date}`), section(statusLines.join('\n'))];
-  if (narrative) blocks.push(section(esc(narrative.trim())));
+  const blocks = [header(`:package: ${name} · Health Score · ${scores} · ${STATUS_EMOJI[status]} ${status}`)];
+  // Claude produces the body. It reached this point only after matching the code's own calculation.
+  // With no such answer the code's version is sent and says so, and the format is the same either way.
+  const body = verdict?.ok === true ? verdict.body ?? null : null;
+  const part = body
+    ? { stagingLines: body.stagingLines.map(mrkdwn), same: body.mainSameAsStaging, mainLines: body.mainLines.map(mrkdwn), unused: body.unused.map(mrkdwn), drift: body.outOfSync.map(mrkdwn), todo: body.todo.map((b) => `• ${mrkdwn(b)}`), tierLine: mrkdwn(body.tierLine) }
+    : (() => {
+      const m = mainSection(main, staging, advisories);
+      const todo = whatToDo(main, staging, { usage, implicitUse });
+      if (verdict?.ok === true) todo.unshift('• _:warning: Claude could not produce this message today, so the code built it._');
+      else {
+        const why = verdict && verdict.ok === false ? ` (${esc(String(verdict.error ?? 'error').slice(0, 120))})` : '';
+        todo.unshift(`• _Unfiltered: the daily filter did not run${why}, so every P0 from the scan is listed._`);
+      }
+      return { stagingLines: staging ? staging.lines.map((l) => lineText(l, advisories)) : [], same: m.same, mainLines: m.lines, unused: unusedLines(apps, usage, implicitUse), drift: driftLines(usage, staging ? ['staging', 'main'] : ['main']), todo, tierLine: tierLineText(main, staging, verdict) };
+    })();
+  if (staging) blocks.push(...withHead(branchHead(staging), part.stagingLines));
+  blocks.push(...withHead(branchHead(main, part.same ? ' · same as staging' : ''), part.mainLines));
+  if (part.unused.length) blocks.push(...sectionsOf(part.unused, { prefix: '*Unused* · declared but never used in the code' }));
+  if (part.drift.length) blocks.push(...sectionsOf(part.drift, { prefix: '*Out of sync* · package.json and lockfile disagree, versions for these packages may be wrong' }));
+  blocks.push(...sectionsOf(part.todo, { prefix: '*What to do*' }));
+  blocks.push(section(part.tierLine));
   blocks.push(divider());
-
-  // Top open issues: distinct critical/high advisories that hit a reported project's deployed lockfile.
-  const urgent = report.advisories.filter((a) => isUrgent(a.severity) && distinct.has(a.id));
-  const lines = urgent.slice(0, TOP_ISSUES).map((a) => {
-    const hits = (a.hits ?? []).filter((h) => h.kind === 'app' && reportedProjects.has(h.project));
-    const projects = new Set(hits.map((h) => h.project)).size;
-    const tags = [a.early ? ':zap: *early*' : '', a.isNew ? '*NEW*' : '', a.malicious ? ':skull: *MALICIOUS*' : ''].filter(Boolean);
-    return `• ${SEV_EMOJI[a.severity]} *${sevLabel(a.severity)}* · <${a.url}|${a.id}> · ${esc(a.summary)} · _${esc(a.package)} · open ${a.openDays} days · hits ${hits.length} apps in ${projects} projects_${tags.length ? ' · ' + tags.join(' · ') : ''}`;
-  });
-  if (lines.length) {
-    blocks.push(section('*:rotating_light: Open issues · critical and high*'));
-    blocks.push(...sectionsOf(lines));
-    if (urgent.length > TOP_ISSUES) blocks.push(section(`_… and ${urgent.length - TOP_ISSUES} more critical/high; every project's message below lists its own_`));
-    blocks.push(divider());
-  }
-  const packages = apps.reduce((n, a) => n + (a.packages ?? 0), 0);
-  blocks.push(section(`_${packages.toLocaleString('en-US')} packages in ${apps.length} lockfiles across ${views.length} projects · scan ${timeIst(report.generatedAt)}_`), divider());
-  return { text: `Security Radar · ${date} · ${status} · ${affected.length} of ${views.length} projects affected`, blocks };
+  const text = `Security Radar · ${name} · Health Score ${scores} · ${status}`;
+  return { text, blocks, health: worst.health, status };
 }
 
 /**
- * buildMessages(report, { projects: { 'Org/repo': 'Display name' }, narrative?, now?, only? })
- * -> [{ text, blocks }] in posting order: summary, one or more per affected project (worst first), clear list.
- * With `only` (a repo or display name) only that project's messages are returned.
+ * buildMessages(report, { projects: { 'Org/repo': 'Display name' }, verdicts?, now?, only?, usage?, implicitUse? })
+ * -> [{ text, blocks }] one per reported project, worst Health Score first.
+ * With `only` (a repo or display name) only that project's message is returned.
  */
-export function buildMessages(report, { projects, narrative = '', now = new Date(), only = null } = {}) {
+export function buildMessages(report, { projects, verdicts = null, now = new Date(), only = null, usage = null, implicitUse = [] } = {}) {
   const advisories = new Map(report.advisories.map((a) => [a.id, a]));
-  const order = []; // repos worst first, from report.projects[] (already sorted worst first)
-  for (const p of report.projects) if (projects[p.repo] && !order.includes(p.repo)) order.push(p.repo);
-  for (const repo of Object.keys(projects)) if (!order.includes(repo)) order.push(repo);
-  const views = order.map((repo) => projectView(report, repo, projects[repo], advisories)).filter((v) => v.apps.length);
-
+  const repos = Object.keys(projects).filter((repo) => report.apps.some((a) => a.repo === repo && a.kind === 'app'));
+  const messages = repos.map((repo) => ({ repo, ...projectMessage(report, repo, projects[repo], { verdict: verdicts?.projects?.[repo] ?? null, advisories, now, usage: usage?.repos?.[repo] ?? null, implicitUse }) }));
+  messages.sort((a, b) => a.health.score - b.health.score || a.repo.localeCompare(b.repo));
   if (only) {
-    const v = views.find((x) => x.repo === only || x.repo.split('/')[1] === only || x.name.toLowerCase() === only.toLowerCase());
-    if (!v) throw new Error(`no reported project matches "${only}"`);
-    return projectMessages(v);
+    const m = messages.find((x) => x.repo === only || x.repo.split('/')[1] === only || projects[x.repo].toLowerCase() === only.toLowerCase());
+    if (!m) throw new Error(`no reported project matches "${only}"`);
+    return [m].map(({ text, blocks }) => ({ text, blocks }));
   }
-
-  const messages = [summaryMessage(report, views, advisories, { narrative, now })];
-  for (const v of views.filter((x) => x.affected)) messages.push(...projectMessages(v));
-  const clear = views.filter((v) => !v.affected);
-  if (clear.length && views.some((v) => v.affected)) {
-    messages.push({ text: `Security Radar · clear: ${clear.map((v) => v.name).join(', ')}`, blocks: [section(`:large_green_circle: *Clear:* ${clear.map((v) => esc(v.name)).join(', ')}`)] });
-  }
-  return messages;
+  return messages.map(({ text, blocks }) => ({ text, blocks }));
 }

@@ -27,40 +27,46 @@ Run `npm run discover` after adding a repository to the organisation or moving a
 
 ## How a scan works
 
-Once a day at 08:00 IST, `server/daily.sh` runs `node watch.mjs`, which:
-
-1. Reads every lockfile on every listed branch: all installed versions, which of them the app declares directly, and the Node.js version it declares.
-2. Queries OSV.dev in batches for every distinct package@version (reviewed advisories plus malicious-package records). New or changed advisories are fetched once and cached in `state.json`.
-3. Looks up each package's GitHub repository on the npm registry (cached in `packages.json`) and reads that repository's own security advisories. Requests are conditional, so a repository with no new advisory costs nothing against the rate limit.
-4. Fetches the Node.js vulnerability feed.
-5. Matches: OSV answers per exact version; repository advisories are matched by range. An advisory the maintainers have published that OSV does not yet return is marked **early**, the window in which every other scanner says "clean".
-6. Confirms each fixed version is on npm, and writes `report.json`, `state.json` and `packages.json`.
-
-Then `daily.sh` copies the report to `data/reports/YYYY-MM-DD.json`, loads it into MySQL (`scripts/store.mjs`), asks Claude Code for the opening paragraph (`server/narrative.prompt.md`, optional: a failure there still sends the messages), and posts to Slack (`scripts/slack.mjs`).
+1. **Read** every deployed lockfile of every reported project on `main` and `staging` (GitHub Contents API). From each lockfile: installed versions, what the app declares itself, and the dependency graph (which declared dependency pulls a package in, and whether it is reachable from `dependencies` or only from `devDependencies`).
+2. **Match** every package@version against OSV.dev (batch) and the maintainers' own repository advisories. Where OSV knows a package, its reviewed ranges decide; a hand-typed repository range never adds a hit OSV has ruled out.
+3. **Fix versions** come from the advisory data only: the lowest stable fix above the installed version on the same version line (major, or 0.minor). Never a downgrade, a pre-release or another major. A direct dependency with no fix in its line is offered the major bump, labelled as such.
+4. **Tier** every (package, version line) per app: **P0** deployed graph, critical/high, fix available · **P1** production but moderate/low, no fix the app can take, or not reachable · **P2** dev-only, or in the owner-editable build-tooling list `watchlist.json → report.toolingPackages`. P2 never reaches Slack, not even by name.
+5. **Usage** (`scripts/usage.mjs`): each repository's source tarball is grepped, on every scanned branch separately (main and staging can be hundreds of commits apart), for imports of the flagged packages, for the package named as a string in configs and package.json scripts (`mentions`), and for framework signals (dangerouslySetInnerHTML, "use cache", ImageResponse…). Documentation, built bundles under `public/` and agent tooling folders are skipped. Nothing is cloned or written.
+6. **Filter** (`scripts/filter.mjs` + `server/filter.prompt.md`): Claude receives the critical/high candidates of one project with every fact above and decides `now` / `later` / `skip` with a one-sentence reason, plus the summary bullets. It may never change a version or add a package; every line is validated against the report, a critical it did not mention is kept.
+7. **Tell** (`scripts/slack.mjs`): one Slack message per project.
 
 ## The Slack messages
 
-Posted in this order, one webhook call each, a second apart:
+One message per reported project, lowest overall Health Score first, built in code from report.json and the day's verdicts:
 
-1. **Summary**: status line (projects affected, critical/high open, oldest critical, new since yesterday, early), Claude's paragraph, the top 10 open critical/high advisories with links and how many apps and projects each hits, "... and N more", and a footer with the scan size and time.
-2. **One message per affected project**, worst first, display name as the heading, then per branch a status line and a native Slack table: App, Package, Installed, Upgrade to, Closes, Severity (linked to the advisory), Open (days, NEW, early), Direct (yes / no / partly: whether the app declares the package itself). One row per upgrade; a `clear` row for an app with nothing open. Below the tables, a four-line summary built from the report: fix first (the upgrades that close the most critical/high), new since yesterday per branch, the transitive packages with their override targets, and packages with no fix published yet. Columns never wrap. A project with more rows than one message allows is split into `Name (1/2)`, `Name (2/2)`; rows are never dropped.
-3. **Clear**: the reported projects with nothing open on any branch, in one line.
+```
+📦 VectorLabs · Health Score · staging 79 · main 29 · overall 29 · 🔴 RED
+staging · 🟠 AMBER · Health Score 79 · 0 critical, 1 high · 1 package to fix
+• web · nodemailer 7.0.13 → 10.1.4 · closes 20 · HIGH · open 220 days · direct · ⬆ major
+main · 🔴 RED · Health Score 29 · 1 critical, 1 high · 2 packages to fix
+• same fix as staging: nodemailer 7.0.12
+• web · next 16.2.12 → 16.4.1 · closes 11 · CRITICAL · open 68 days · direct · fixed on staging
+Unused · declared but never used in the code
+Out of sync · package.json and lockfile disagree, versions for these packages may be wrong
+What to do
+• staging · web: cd web && pnpm up -r nodemailer@10.1.4
+• main: merge staging, that closes all 2 fixes
+P1 · 8 packages for later · P2 · 4 packages, no action
+```
 
-Slack caps a table at 100 rows and 10,000 characters of cell text per message; the splitting respects both.
+**Tiers come from Claude.** Every package with an open advisory goes to the filter, including dev-only and tooling packages. Claude assigns P0 (used by this project and necessary), P1 (later) or P2 (not used, no action); moderate and low can never be P0. The scanner's own tier is only the fallback when Claude could not decide.
+
+**Tiers are stable.** `data/decisions.json` keeps each answer under a hash of its facts (package, line, target, direct, chain, severity, advisory ids, whether the code uses it). The answer is reused until one of those changes, so only new or changed packages cost a Claude call. Editing `server/filter.prompt.md` makes every decision again.
+
+**Staging first.** Staging is always listed in full. main says "same as staging" only when every line matches on target and installed versions; otherwise it names the shared fixes in one bullet with main's own versions and lists what only main has. **Health Score**: RED while a critical P0 is open (at most 59), AMBER while any P0 is open (at most 89), GREEN once P0s are fixed; the P1 backlog costs at most 10 points. Overall is the lower of staging and main.
+
+**Unused** lists flagged packages the app declares whose name never appears in that branch's code; packages a framework loads by name (`report.implicitUse`) are exempt. **Out of sync** lists package.json dependencies the lockfile records differently or not at all, skipping packages a pnpm override rewrites. Versions always come from the lockfile; package.json is only this check. **Who writes what.** Claude produces everything under the header and section titles (`server/message.prompt.md`): package lines, the same-fix comparison, Unused, Out of sync, What to do with its commands, and the P1 and P2 counts. The code calculates the same body independently and rejects any difference, up to three attempts, naming each one. What to do may be worded freely, but its package@version set must match exactly. If Claude still fails, the code's version goes out with a warning. A project with packages to fix normally costs one Claude call a day, because open days change daily.
+
+**History.** `scripts/store-tiers.mjs` runs after the filter and stores `project_health` (scores per branch and overall, same numbers as the Slack header) and `package_tiers` (tier, scanner tier, reason, decision date per package) in MySQL.
 
 ## report.json
 
-| Field | Meaning |
-| --- | --- |
-| `status` | `RED` (an open critical or high anywhere), `AMBER` (moderate or low only), `GREEN`, `UNKNOWN` (a lockfile or a source could not be read; see `errors`, `warnings`) |
-| `summary` | totals: open, distinct, by severity, malicious, newOpen, early, oldestCriticalOpenDays, newNotAffecting |
-| `projects[]` | one row per repo and branch, worst first: `status`, `appStatus` (apps only, tooling ignored), counts, `apps`, `affectedApps` |
-| `advisories[]` | one row per distinct open advisory, worst first: severity, summary, url, fixed, `early`, `isNew`, and `hits[]` (every app it affects with the installed version), `apps`, `projectBranches`, `projects` |
-| `apps[]` | one row per lockfile per branch: `project`, `branch`, `label`, `kind`, `open[]` (each with `direct`, `early`, `openDays`, `fixedOnNpm`), `upgrades[]` (with `transitive` versions and `worst`), `notes[]` (what `pnpm up` cannot move and why), `command` |
-| `newNotAffecting[]` | advisories first seen in the last 26 hours that hit nothing installed |
-| `checked` | packages, pairs, reposPolled, projects, apps, appKinds, sources |
-
-`isNew` means first seen within the last 26 hours. An advisory met for the first time more than a week after publication is dated by publication, so adding a repository does not flag its history as new.
+Schema 4. `apps[]` carries, per deployed lockfile, `open[]` (one row per advisory × package × installed version with `fixed`, `fixedAny`, `direct`, `prod`, `via`) and `upgrades[]` (one unit per package and version line with `to`, `toMajor`, `closes`, `tier`, `reason`). `projects[]` carries the deterministic `health` per branch. The day's verdicts live in `data/verdicts/YYYY-MM-DD.json`, the usage facts in `data/usage/YYYY-MM-DD.json`.
 
 ## Setup (server)
 
